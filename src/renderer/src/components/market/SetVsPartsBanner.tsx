@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Calculator, ExternalLink } from 'lucide-react'
+import { pickMarketText } from '@shared/data/languages'
 import { toWfAssetUrl, type SetVsPartsAnalysis } from '@shared/schemas/market.schema'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -18,7 +19,7 @@ export function SetVsPartsBanner({ analysis }: { analysis: SetVsPartsAnalysis })
   if (!analysis.hasSetComparison) return null
 
   const delta = analysis.deltaPlatinum
-  const setLabel = lang === 'fr' ? analysis.setNameFr : analysis.setNameEn
+  const setLabel = pickMarketText(lang, analysis.setNameFr, analysis.setNameEn)
 
   let verdictText = 'Certaines pièces n’ont aucun vendeur en ligne actuellement.'
   let verdictVariant: 'default' | 'success' | 'secondary' = 'secondary'
@@ -63,7 +64,7 @@ export function SetVsPartsBanner({ analysis }: { analysis: SetVsPartsAnalysis })
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
           {analysis.parts.map((part) => {
-            const pName = lang === 'fr' ? part.nameFr : part.nameEn
+            const pName = pickMarketText(lang, part.nameFr, part.nameEn)
             const thumb = toWfAssetUrl(part.thumb)
             return (
               <div

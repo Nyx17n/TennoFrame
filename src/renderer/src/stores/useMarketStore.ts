@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { pickMarketText } from '@shared/data/languages'
 import type { PriceSniperRule, TriggeredAlertEvent } from '@shared/schemas/alerts.schema'
 import {
   buildWhisperCommand,
@@ -23,11 +24,12 @@ function resolveSlugLabel(catalog: readonly MarketCatalogItem[], slug: string): 
   const match = catalog.find((i) => i.slug === slug)
   if (!match) return slug.replace(/_/g, ' ')
   const lang = useAppStore.getState().settings.market.language
-  return lang === 'fr' ? match.nameFr : match.nameEn
+  return pickMarketText(lang, match.nameFr, match.nameEn)
 }
 
 interface MarketStoreState {
   catalog: MarketCatalogItem[]
+  catalogSignature: string | null
   isCatalogLoading: boolean
   catalogError: string | null
   activeWhisper: WhisperDraft | null
@@ -51,6 +53,7 @@ interface MarketStoreState {
 
 export const useMarketStore = create<MarketStoreState>((set, get) => ({
   catalog: [],
+  catalogSignature: null,
   isCatalogLoading: false,
   catalogError: null,
   activeWhisper: null,
@@ -58,11 +61,14 @@ export const useMarketStore = create<MarketStoreState>((set, get) => ({
   latestAlertToast: null,
 
   ensureCatalogLoaded: async (forceRefresh = false) => {
-    if (!forceRefresh && (get().catalog.length > 0 || get().isCatalogLoading)) return
+    const { language, platform, crossplay } = useAppStore.getState().settings.market
+    const nextSig = `${language}:${platform}:${String(crossplay)}`
+    const sigChanged = get().catalogSignature !== null && get().catalogSignature !== nextSig
+    if (!forceRefresh && !sigChanged && (get().catalog.length > 0 || get().isCatalogLoading)) return
     set({ isCatalogLoading: true, catalogError: null })
     try {
-      const catalog = await ipcClient.market.getCatalog(forceRefresh)
-      set({ catalog, isCatalogLoading: false })
+      const catalog = await ipcClient.market.getCatalog(forceRefresh || sigChanged)
+      set({ catalog, catalogSignature: nextSig, isCatalogLoading: false })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Échec chargement catalogue Market'
       set({ catalogError: message, isCatalogLoading: false })
@@ -239,7 +245,7 @@ export const useMarketStore = create<MarketStoreState>((set, get) => ({
       enabled: true
     }
     const lang = useAppStore.getState().settings.market.language
-    const ruleLabel = lang === 'fr' ? ruleInput.nameFr : ruleInput.nameEn
+    const ruleLabel = pickMarketText(lang, ruleInput.nameFr, ruleInput.nameEn)
     await useAppStore.getState().updateSettings({ priceAlerts: [newRule, ...current] })
     notify({
       kind: 'success',
@@ -270,7 +276,7 @@ export const useMarketStore = create<MarketStoreState>((set, get) => ({
     notify({
       kind: 'info',
       title: 'Règle Price Sniper supprimée',
-      ...(target ? { message: lang === 'fr' ? target.nameFr : target.nameEn } : {})
+      ...(target ? { message: pickMarketText(lang, target.nameFr, target.nameEn) } : {})
     })
   }
 }))

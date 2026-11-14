@@ -1,12 +1,12 @@
-# Inventaire Métier & Vues de Référence (Extrait de WireFrame v1.6.2)
+# Inventaire Métier & Vues de Référence (Extrait de TennoFrame v1.6.2)
 
-> **Note** : L'intégralité du code et des ressources graphiques/audio de la `v1` est conservée intacte sur la branche d'archive **`old-main`**. Ce document sert de base fonctionnelle pour concevoir le **Cahier des Charges (`01-cahier-des-charges.md`)** et les **Wireframes (`02-wireframes/`)** de la `v2` (Electron + React + TypeScript).
+> **Note** : L'intégralité du code et des ressources graphiques/audio de la `v1` est conservée intacte sur la branche d'archive **`old-main`**. Ce document sert de base fonctionnelle pour concevoir le **Cahier des Charges (`01-cahier-des-charges.md`)** et les **Maquettes Excalidraw (`02-tennoframe/`)** de la `v2` (Electron + React + TypeScript).
 
 ---
 
 ## 1. Besoin Métier Global
 
-**WireFrame** est une application compagnon de bureau pour les joueurs de **Warframe**, réunissant en une seule interface rapide et superposable au jeu (*Overlay*) :
+**TennoFrame** est une application compagnon de bureau pour les joueurs de **Warframe**, réunissant en une seule interface rapide et superposable au jeu (*Overlay*) :
 1. **Le trading optimisé sur Warframe Market** (consultation multi-items, comparaison Set vs Pièces, panier multi-achats avec regroupement de vendeurs, surveillance de prix en arrière-plan, génération de messages `/w`).
 2. **Le suivi en temps réel de l'état du monde Warframe (*Worldstate*)** croisé avec la valeur en Platinum des récompenses (Baro Ki'Teer, Invasions, Arbitrage, Duviri, Fissures, Cycles planétaires).
 3. **Une encyclopédie de Farm (*Codex*)** indiquant où obtenir chaque ressource, Warframe, arme, mod ou relique, leurs taux de drop et l'utilité Helminth.

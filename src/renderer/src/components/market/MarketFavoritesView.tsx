@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Package, Plus, RefreshCw, Star, Trash2 } from 'lucide-react'
+import { pickMarketText } from '@shared/data/languages'
 import { toWfAssetUrl } from '@shared/schemas/market.schema'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -91,7 +92,7 @@ export function MarketFavoritesView(): React.JSX.Element {
             const cat = catalogBySlug.get(slug)
             const nameFr = cat?.nameFr ?? slug
             const nameEn = cat?.nameEn ?? slug
-            const label = lang === 'fr' ? nameFr : nameEn
+            const label = pickMarketText(lang, nameFr, nameEn)
             const thumbUrl = toWfAssetUrl(cat?.thumb)
             const summary = summaries[slug]
 
@@ -187,7 +188,7 @@ export function MarketFavoritesView(): React.JSX.Element {
             const cat = catalogBySlug.get(slug)
             const nameFr = cat?.nameFr ?? slug
             const nameEn = cat?.nameEn ?? slug
-            const label = lang === 'fr' ? nameFr : nameEn
+            const label = pickMarketText(lang, nameFr, nameEn)
             const thumbUrl = toWfAssetUrl(cat?.thumb)
             const summary = summaries[slug]
 

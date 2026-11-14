@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { AlertTriangle, PackageOpen, RefreshCw, Search, ShoppingCart } from 'lucide-react'
+import { pickMarketText } from '@shared/data/languages'
 import { createMarketChipId } from '@shared/schemas/market-search.schema'
 import { toWfAssetUrl, type MarketOrder, type MarketUserProfile } from '@shared/schemas/market.schema'
 import { formatWfmSubtypeLabel } from '@shared/schemas/wfm-account.schema'
@@ -219,7 +220,7 @@ export function MarketUserProfileView({ userSlug }: { userSlug: string }): React
               {filteredOrders.map((ord) => {
                 const titleFr = ord.itemNameFr ?? ord.itemSlug ?? 'Item'
                 const titleEn = ord.itemNameEn ?? titleFr
-                const primaryLabel = lang === 'fr' ? titleFr : titleEn
+                const primaryLabel = pickMarketText(lang, titleFr, titleEn)
                 const thumbUrl = toWfAssetUrl(ord.itemThumb)
 
                 return (

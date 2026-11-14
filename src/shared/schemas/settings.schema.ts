@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { APP_LANGUAGE_IDS } from '../data/languages'
 import { WORLD_RULES_MAX } from '../data/world-rule-options'
 import { PriceSniperRuleSchema, WorldAlertTogglesSchema } from './alerts.schema'
 import {
@@ -44,7 +45,7 @@ export type ThemePresetId = z.infer<typeof ThemePresetIdSchema>
 export const PlatformSchema = z.enum(['pc', 'ps4', 'xbox', 'switch', 'mobile'])
 export type MarketPlatform = z.infer<typeof PlatformSchema>
 
-export const AppLanguageSchema = z.enum(['fr', 'en'])
+export const AppLanguageSchema = z.enum(APP_LANGUAGE_IDS)
 export type AppLanguage = z.infer<typeof AppLanguageSchema>
 
 export const SoundChoiceSchema = z.enum(['classic', 'bell'])

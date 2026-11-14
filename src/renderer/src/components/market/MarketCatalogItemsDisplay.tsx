@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Package, Plus, Star } from 'lucide-react'
+import { pickMarketAltText, pickMarketText } from '@shared/data/languages'
 import { toWfAssetUrl, type MarketCatalogItem } from '@shared/schemas/market.schema'
 import type {
   AppLanguage,
@@ -16,6 +17,7 @@ import {
   type MarketContextMenuState
 } from '@/components/market/MarketItemContextMenu'
 import { getCardImageClass, getCatalogGridClass } from '@/lib/catalog-layout'
+import { getUiTranslations } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
 export function MarketCatalogItemsDisplay({
@@ -79,10 +81,11 @@ export function MarketCatalogItemsDisplay({
   }
 
   if (items.length === 0) {
+    const t = getUiTranslations(lang)
     return (
       <Card>
         <CardContent className="p-8 text-center text-xs text-muted-foreground">
-          Aucun item ne correspond à « {query} » dans cette catégorie.
+          {t.market.noResults} {query ? `« ${query} »` : ''}
         </CardContent>
       </Card>
     )
@@ -93,8 +96,8 @@ export function MarketCatalogItemsDisplay({
       <>
         <div className={gridClass}>
           {items.map((item) => {
-            const primaryName = lang === 'fr' ? item.nameFr : item.nameEn
-            const subName = lang === 'fr' ? item.nameEn : item.nameFr
+            const primaryName = pickMarketText(lang, item.nameFr, item.nameEn)
+            const subName = pickMarketAltText(lang, item.nameFr, item.nameEn)
             const thumbUrl = toWfAssetUrl(item.thumb)
             const isFav = favorites.includes(item.slug)
 
@@ -186,8 +189,8 @@ export function MarketCatalogItemsDisplay({
       <>
         <div className={gridClass}>
           {items.map((item) => {
-            const primaryName = lang === 'fr' ? item.nameFr : item.nameEn
-            const subName = lang === 'fr' ? item.nameEn : item.nameFr
+            const primaryName = pickMarketText(lang, item.nameFr, item.nameEn)
+            const subName = pickMarketAltText(lang, item.nameFr, item.nameEn)
             const thumbUrl = toWfAssetUrl(item.thumb)
             const isFav = favorites.includes(item.slug)
 
@@ -286,8 +289,8 @@ export function MarketCatalogItemsDisplay({
     <>
       <div className={gridClass}>
         {items.map((item) => {
-          const primaryName = lang === 'fr' ? item.nameFr : item.nameEn
-          const subName = lang === 'fr' ? item.nameEn : item.nameFr
+          const primaryName = pickMarketText(lang, item.nameFr, item.nameEn)
+          const subName = pickMarketAltText(lang, item.nameFr, item.nameEn)
           const thumbUrl = toWfAssetUrl(item.thumb)
           const isFav = favorites.includes(item.slug)
 

@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { ChevronDown, Flame, RefreshCw, Search } from 'lucide-react'
+import { pickMarketText } from '@shared/data/languages'
 import { toWfAssetUrl } from '@shared/schemas/market.schema'
 import type { RivenAuctionCard, RivenWeaponSummary } from '@shared/schemas/tools.schema'
 import { Button } from '@/components/ui/button'
@@ -105,7 +106,7 @@ export function MarketRivensView(): React.JSX.Element {
           {weaponSuggestions.length > 0 && (
             <div className="mt-1 grid grid-cols-2 gap-1 rounded-md border border-border bg-popover p-1.5 shadow-lg">
               {weaponSuggestions.map((w) => {
-                const name = lang === 'fr' ? w.nameFr : w.nameEn
+                const name = pickMarketText(lang, w.nameFr, w.nameEn)
                 const thumb = toWfAssetUrl(w.thumb)
                 return (
                   <button

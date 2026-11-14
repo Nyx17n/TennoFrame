@@ -1,8 +1,11 @@
 import * as React from 'react'
 import { Activity, Database, Keyboard, ShieldCheck, Sparkles } from 'lucide-react'
+import { CommunityCounterPill } from '@/components/shell/CommunityCounterPill'
+import { useUiTranslations } from '@/lib/i18n'
 import { useAppStore } from '@/stores/useAppStore'
 
 export function StatusBar(): React.JSX.Element {
+  const { t } = useUiTranslations()
   const systemStatus = useAppStore((s) => s.systemStatus)
   const updaterStatus = useAppStore((s) => s.updaterStatus)
   const settings = useAppStore((s) => s.settings)
@@ -36,7 +39,7 @@ export function StatusBar(): React.JSX.Element {
         )}
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5">
         {updaterStatus?.state === 'downloaded' && (
           <button
             type="button"
@@ -47,6 +50,8 @@ export function StatusBar(): React.JSX.Element {
             <span>MAJ v{updaterStatus.availableVersion} prête</span>
           </button>
         )}
+
+        <CommunityCounterPill variant="statusbar" isCompact={windowState.isCompactMode} />
 
         {!windowState.isCompactMode && (
           <span className="inline-flex items-center gap-1">
@@ -59,7 +64,7 @@ export function StatusBar(): React.JSX.Element {
         )}
         <button
           type="button"
-          title="Voir les Notes de Patch TennoFrame"
+          title={t.shell.patchNotes}
           onClick={() => setChangelogOpen(true)}
           className="font-mono text-[10px] text-foreground/80 transition-colors hover:text-primary"
         >

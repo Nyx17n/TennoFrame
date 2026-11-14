@@ -80,7 +80,7 @@ function buildReleaseContent(version) {
     '',
     bullets,
     '',
-    '> *Si TennoFrame (ou WireFrame) est déjà installé sur ton PC, la mise à jour te sera proposée automatiquement au lancement.*'
+    '> *Si TennoFrame est déjà installé sur ton PC, la mise à jour te sera proposée automatiquement au lancement.*'
   ]
     .join('\n')
     .slice(0, 4000)

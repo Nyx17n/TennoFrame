@@ -29,6 +29,7 @@ export function CodexItemContextMenu({
   readonly state: CodexContextMenuState | null
   readonly onClose: () => void
 }): React.JSX.Element | null {
+  const lang = useAppStore((s) => s.settings.market.language)
   const overlayEnabled = useAppStore((s) => s.settings.extensions.codexFarmOverlay)
   const pinnedEntries = useFarmOverlayStore((s) => s.liveState.pinnedEntries)
   const pinQuickItem = useFarmOverlayStore((s) => s.pinQuickItem)
@@ -38,13 +39,14 @@ export function CodexItemContextMenu({
   if (!state) return null
 
   const { card, position } = state
+  const primaryTitle = lang === 'fr' ? card.nameFr : card.nameEn || card.nameFr
   const isPinned = pinnedEntries.some((e) => e.itemKey === buildItemKey(card.category, card.id))
   const marketSlug = card.isTradable ? resolveCodexMarketSlug(card, catalog) : null
   const wikiTitle = (card.nameEn || card.nameFr).trim().replace(/\s+/g, '_')
 
   return (
     <ContextMenuPortal position={position} onClose={onClose}>
-      <ContextMenuLabel>{card.nameFr}</ContextMenuLabel>
+      <ContextMenuLabel>{primaryTitle}</ContextMenuLabel>
       <ContextMenuSeparator />
 
       {overlayEnabled && (
@@ -65,7 +67,7 @@ export function CodexItemContextMenu({
         onSelect={() =>
           openTab(
             { kind: 'codex-detail', category: card.category, slug: card.id },
-            { title: `Codex : ${card.nameFr}` }
+            { title: `Codex : ${primaryTitle}` }
           )
         }
       >
@@ -76,7 +78,7 @@ export function CodexItemContextMenu({
       {card.isTradable && marketSlug && (
         <ContextMenuItem
           onSelect={() =>
-            openTab({ kind: 'market-item', slug: marketSlug }, { title: card.nameFr })
+            openTab({ kind: 'market-item', slug: marketSlug }, { title: primaryTitle })
           }
         >
           <Store className="h-3.5 w-3.5 text-primary" />

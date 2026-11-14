@@ -13,6 +13,7 @@ import type { HubSectionId, WorldstateHubPayload } from '@shared/schemas/worldst
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useUiTranslations } from '@/lib/i18n'
 import { ipcClient } from '@/services/ipc-client'
 import { useHubNavStore } from '@/stores/useHubNavStore'
 import { useTabsStore } from '@/stores/useTabsStore'
@@ -32,9 +33,11 @@ function formatIpcErrorMessage(err: unknown): string {
 }
 
 export function HubRootView(): React.JSX.Element {
+  const { lang, t } = useUiTranslations()
   const nowMs = useNowTick(1000)
   const refreshRevision = useTabsStore((s) => s.refreshRevision)
   const lastRefreshRef = React.useRef(refreshRevision)
+  const lastLangRef = React.useRef(lang)
 
   const section = useHubNavStore((s) => s.section)
   const setSection = useHubNavStore((s) => s.setSection)
@@ -75,6 +78,13 @@ export function HubRootView(): React.JSX.Element {
     }
   }, [fetchWorldstate, refreshRevision])
 
+  React.useEffect(() => {
+    if (lang !== lastLangRef.current) {
+      lastLangRef.current = lang
+      void fetchWorldstate(false, true)
+    }
+  }, [fetchWorldstate, lang])
+
   if (loading && !data) {
     return (
       <div className="mx-auto max-w-6xl space-y-4 p-4">
@@ -93,11 +103,11 @@ export function HubRootView(): React.JSX.Element {
     return (
       <div className="mx-auto flex max-w-md flex-col items-center gap-3 p-8 text-center">
         <AlertTriangle className="h-8 w-8 text-destructive" />
-        <h2 className="text-sm font-bold">Hub Worldstate indisponible</h2>
+        <h2 className="text-sm font-bold">{t.hub.unavailableTitle}</h2>
         <p className="text-xs text-muted-foreground">{error}</p>
         <Button onClick={() => void fetchWorldstate(true, false)}>
           <RefreshCw className="h-3.5 w-3.5" />
-          <span>Réessayer</span>
+          <span>{t.shell.retry}</span>
         </Button>
       </div>
     )
@@ -111,27 +121,27 @@ export function HubRootView(): React.JSX.Element {
     icon: React.ComponentType<{ className?: string }>
     badge?: string
   }> = [
-    { id: 'planets', label: 'Planètes & Mises à prix', icon: Globe },
+    { id: 'planets', label: t.hub.planets, icon: Globe },
     {
       id: 'fissures',
-      label: 'Fissures & Archonte',
+      label: t.hub.fissures,
       icon: Flame,
       badge: String(data.fissures.length)
     },
     {
       id: 'invasions',
-      label: 'Invasions, Acier & Arbitrage',
+      label: t.hub.invasions,
       icon: Swords,
       badge: String(data.invasions.length)
     },
-    { id: 'duviri', label: 'Circuit Duviri', icon: Sparkles },
+    { id: 'duviri', label: t.hub.duviri, icon: Sparkles },
     {
       id: 'baro',
-      label: "Baro Ki'Teer",
+      label: t.hub.baro,
       icon: Compass,
-      ...(data.voidTrader.active ? { badge: 'ACTIF' } : {})
+      ...(data.voidTrader.active ? { badge: t.hub.activeBadge } : {})
     },
-    { id: 'news', label: 'News & Darvo', icon: Newspaper }
+    { id: 'news', label: t.hub.news, icon: Newspaper }
   ]
 
   return (
@@ -171,7 +181,7 @@ export function HubRootView(): React.JSX.Element {
           title="Resynchroniser le Worldstate"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-          <span>Actualiser</span>
+          <span>{t.shell.refresh}</span>
         </Button>
       </div>
 

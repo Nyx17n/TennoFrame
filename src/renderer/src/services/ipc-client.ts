@@ -44,7 +44,12 @@ import {
   type UserSettings,
   type UserSettingsPatch
 } from '@shared/schemas/settings.schema'
-import { SystemStatusSchema, type SystemStatus } from '@shared/schemas/system.schema'
+import {
+  CommunityStatsSnapshotSchema,
+  SystemStatusSchema,
+  type CommunityStatsSnapshot,
+  type SystemStatus
+} from '@shared/schemas/system.schema'
 import {
   CartBundleAnalysisSchema,
   DucatItemEntrySchema,
@@ -105,6 +110,15 @@ export const ipcClient = {
     },
     async clearCache(): Promise<SystemStatus> {
       return SystemStatusSchema.parse(await getBridge().system.clearCache())
+    },
+    async getCommunityStats(forceRefresh?: boolean): Promise<CommunityStatsSnapshot> {
+      const bridge = getBridge()
+      if (typeof bridge.system?.getCommunityStats !== 'function') {
+        throw new Error(
+          'Pont Electron mis à jour : ferme TennoFrame (Ctrl+C) et relance "npm run dev" pour activer le compteur communautaire.'
+        )
+      }
+      return CommunityStatsSnapshotSchema.parse(await bridge.system.getCommunityStats(forceRefresh))
     }
   },
   settings: {

@@ -3,7 +3,7 @@
 - **Projet** : TennoFrame v2 — Companion, Trading Browser & Codex pour Warframe
 - **Auteur** : Maxime (`Nyxo_17`)
 - **Stack Cible** : Electron · Node.js · React · `shadcn/ui` (Tailwind CSS + Radix UI) · TypeScript (`strict: true`) · Validation `zod`
-- **Statut du document** : `VALIDÉ DÉFINITIF (CDC + 7 Planches Wireframes Excalidraw approuvés)`
+- **Statut du document** : `VALIDÉ DÉFINITIF (CDC + Planches Excalidraw docs/02-tennoframe/ approuvés)`
 
 ---
 
@@ -722,6 +722,63 @@ Pour épurer l'interface tout en accélérant les actions fréquentes à la sour
      - **Condition stricte sur l'extension Overlay** : l'action **`🎯 Afficher dans l’Overlay Farm` / `Retirer de l’Overlay Farm`** n'est proposée dans le menu clic droit **que si et seulement si** l'extension **`Codex Farm Overlay` est activée dans `Paramètres → 🧩 Extensions`** (`settings.extensions.codexFarmOverlay === true`). Lorsqu'elle est désactivée, l'option n'apparaît pas.
      - Actions complémentaires : `➕ Ouvrir dans un nouvel onglet`, `💎 Voir sur Warframe Market` *(si échangeable)* et `🌐 Voir sur le Wiki Officiel`.
 
+### 3.15. Module 15 — Compteur Permanent d'Utilisateurs & d'Installations (`CommunityCounterPill`)
+
+1. **Objectif Métier & Visibilité Permanente Garantie** :
+   - Offrir à la communauté Tenno un **compteur d'utilisateurs installés et de membres en ligne visible en permanence à l'écran**, quelle que soit la vue active (`Hub`, `Marché`, `Catalogue`, `Favoris`, `Panier`, `Codex`, `Profil WFM`), l'onglet ouvert ou la position de défilement, sans nécessiter aucun clic préalable.
+   - **Double ancrage dans l'App Shell** :
+     - **Ancrage primaire (`TitleTabsBar`, coin supérieur droit)** : pilule permanente placée immédiatement à gauche des boutons système `— ▢ ✕` (`👥 X installés · 🟢 Y en ligne` en Desktop `1440×900`, condensée en `👥 X · 🟢 Y` en Mode Compact `460×660`).
+     - **Ancrage secondaire (`StatusBar`, coin inférieur droit)** : rappel discret permanent à gauche des raccourcis et du numéro de version `vX.Y.Z`.
+2. **Sources de Données Publiques Vérifiées, Règles de Calcul & Cache Hors-Ligne** :
+   - **GitHub Releases API (`GET https://api.github.com/repos/Nyx17n/TennoFrame/releases?per_page=100`)** :
+     - Extraction stricte et validation `zod` des assets d'installation Windows (`TennoFrame-Setup-*.exe` et `WireFrame-Setup-*.exe` historiques).
+     - `installedUsersCount` : base active estimée (`max(1, maxDownloadsSingleRelease, discordMemberCount)` afin de ne pas confondre mises à jour successives et utilisateurs distincts, avec plancher à `1` pour compter l'instance locale).
+   - **Discord Public Invite Counts API (`GET https://discord.com/api/v10/invites/DhGwHPf82n?with_counts=true`)** :
+     - Extraction de `onlineCount` (`approximate_presence_count`) et `discordMemberCount` (`approximate_member_count`).
+   - **Politique de Cache & Résilience Hors-Ligne (`CommunityStatsService`)** :
+     - Cache mémoire côté Main Process de **15 minutes** (rafraîchissement périodique silencieux + bouton `⟳ Actualiser` avec `forceRefresh`), exécuté via `RateLimitedHttpClient` en HTTPS strict (`net.fetch`) sans consommer le quota `3 req/s` de `api.warframe.market`.
+     - Persistance atomique du dernier cliché valide dans `%APPDATA%/TennoFrame/community-stats-cache.json` : démarrage instantané sans saut de mise en page et bascule transparente `fromOfflineCache: true` en cas de coupure réseau ou de limite GitHub.
+3. **Popover Détail Optionnel au Clic & 4 États UI Obligatoires** :
+   - Un clic optionnel sur la pilule permanente ouvre un `Popover` épuré présentant uniquement les **2 compteurs essentiels** (*Utilisateurs installés* et *En ligne*), l'horodatage, le bouton `⟳ Actualiser` et le lien `💬 Rejoindre Discord` (sans encombrer l'interface avec le cumul des `.exe` ni le détail par version).
+   - **4 États UI** : *Skeleton* (premier lancement sans cache disque), *1re installation / Amorçage (`≥ 1`)*, *Nominal temps réel*, et *Hors-ligne / Cache de secours (`fromOfflineCache`)*.
+
+### 3.16. Module 16 — Internationalisation Complète Multi-Langues (15 Langues Officielles Warframe)
+
+1. **Objectif Métier & Catalogue des 15 Langues Officielles Warframe** :
+   - Ouvrir **TennoFrame** à l'ensemble de la communauté mondiale de **Warframe** en prenant en charge les **15 langues officielles du client de jeu Digital Extremes** :
+     1. **`fr`** — Français (`FR`)
+     2. **`en`** — English (`EN`)
+     3. **`de`** — Deutsch (`DE`)
+     4. **`es`** — Español (`ES`)
+     5. **`it`** — Italiano (`IT`)
+     6. **`pt`** — Português (`PT`)
+     7. **`ru`** — Русский (`RU`)
+     8. **`pl`** — Polski (`PL`)
+     9. **`uk`** — Українська (`UK`)
+     10. **`tr`** — Türkçe (`TR`)
+     11. **`ja`** — 日本語 (`JA`)
+     12. **`ko`** — 한국어 (`KO`)
+     13. **`zh-hans`** — 简体中文 (`ZH`)
+     14. **`zh-hant`** — 繁體中文 (`TC`)
+     15. **`th`** — ไทย (`TH`)
+2. **Périmètre Fonctionnel & Règles de Repli (`Fallback`)** :
+   - **Interface complète de TennoFrame (`i18n` typé sans `any`)** : dictionnaires structurés couvrant l'App Shell (`TitleTabsBar`, `CommandNavBar`, `BookmarksBar`, `StatusBar`, `Omnibox`, compteur communautaire), les vues **Marché**, **Outils Trading** (*Panier*, *Ducats*, *Rivens*), **Hub Worldstate**, **Codex & Helminth**, **Alertes** et **Paramètres**.
+   - **Données Warframe Market (`MarketApiService`)** :
+     - Envoi dynamique de l'en-tête officiel `Language` correspondant à la langue choisie (avec table de correspondance WFM v2 et repli automatique sur `en` lorsqu'une langue du jeu comme `tr`, `ja` ou `th` n'est pas encore traduite sur `warframe.market`).
+     - Clé de cache préfixée par la langue (`wfm:catalog:v2:<lang>`, `wfm:item-set:<lang>:<slug>`) pour permettre un changement de langue à chaud immédiat sans redémarrer l'application.
+     - Conservation simultanée du nom localisé (`nameLocal` / `nameFr`) et du nom anglais canonique (`nameEn`) afin que la recherche bilingue (langue active + anglais) fonctionne dans les 15 langues.
+   - **Messages d'échange `/w` (`market.whisperLanguage` & `buildWhisperCommand`)** :
+     - Indépendant de la langue d'affichage (`market.language`) : un joueur allemand, japonais ou français peut afficher TennoFrame dans sa langue natale tout en gardant ses messages `/w` en `EN` pour le Crossplay international — ou générer des messages `/w` idiomatiques dans chacune des **15 langues** en 1 clic depuis `WhisperBar`, `QuickMarketPopover` ou `Paramètres → Marché & Échanges`.
+   - **Hub Worldstate (`WorldstateService`)** :
+     - Appel dynamique de `api.warframestat.us/pc?language=<wfstatCode>` selon la langue active avec repli résilient vers `en`.
+   - **Codex Hors-Ligne (`CodexRepository`)** :
+     - Affiche le français (`nameFr` / descriptions FR) lorsque `language === 'fr'` et bascule proprement en anglais (`nameEn` / descriptions EN) pour les 14 autres langues sans alourdir l'installateur de plusieurs centaines de Mo.
+3. **Ergonomie UX (Desktop `1440×900`, Mode Compact `460×660` & 4 États UI)** :
+   - **`QuickMarketPopover` (`CommandNavBar` : `PC · Cross · FR ▾`)** : grille compacte à 3 colonnes des 15 langues (`FR Français`, `EN English`, `DE Deutsch`…) permettant de basculer la langue en 2 clics même en Mode Compact `460×660`.
+   - **`SettingsModal` → `Marché & Échanges`** : grille complète des 15 langues pour **Langue de l'interface & du Marché** + sélecteur dédié des 15 langues pour **Langue des messages `/w`** avec **aperçu en direct** de la commande `/w` générée.
+   - **`WhisperBar`** : menu déroulant compact des 15 langues remplaçant l'ancien bouton binaire `FR ↔ EN`.
+   - **4 États UI** : *Skeleton* lors du rechargement du catalogue dans une nouvelle langue, *Badge de repli EN discret* quand une entrée n'est disponible qu'en anglais, *État Nominal multilingue (latin, cyrillique, CJK, thaï)*, et *Erreur réseau avec bouton Réessayer*.
+
 ---
 
 ## 4. Architecture Technique, Contrats IPC & Sécurité
@@ -792,6 +849,7 @@ Tous les paramètres d'entrée et toutes les réponses API passent par une valid
 | **`window`** | `window:minimize`, `window:toggleMaximize`, `window:close`, `window:setAlwaysOnTop`, `window:setCompactMode`, `window:setZoom`, `window:openExternalUrl`, `window:onStateChanged` *(event)* | Pilotage natif de la fenêtre, du mode Overlay et ouverture sécurisée de liens externes |
 | **`overlay`** | `overlay:getState`, `overlay:setEnabled`, `overlay:updateState`, `overlay:setClickThrough`, `overlay:onStateChanged` *(event)* | Pilotage temps réel de la fenêtre secondaire *Codex Farm Overlay* en jeu et synchronisation de la sélection d'objets/pièces |
 | **`updater`** | `updater:check`, `updater:downloadAndInstall`, `updater:getChangelog`, `updater:onStatus` *(event)* | Cycle de mise à jour `electron-updater` |
+| **`system`** | `system:getStatus`, `system:clearCache`, `system:getCommunityStats` | Diagnostic technique du client, purge du cache et compteur communautaire permanent (utilisateurs installés & présence en ligne) |
 
 ### 4.4. Exigences Non-Fonctionnelles & Sécurité Intransigeante
 
@@ -809,9 +867,9 @@ Tous les paramètres d'entrée et toutes les réponses API passent par une valid
 
 ---
 
-## 5. Plan des Maquettes Wireframes Excalidraw (`docs/02-wireframes/` — Synchronisées `v2.9+`)
+## 5. Plan des Maquettes Excalidraw (`docs/02-tennoframe/` — Synchronisées `v2.10+`)
 
-L'ensemble des **15 planches Excalidraw** dans `docs/02-wireframes/` documente fidèlement l'architecture de **TennoFrame**, chacune présentant côte à côte la version **Desktop (`1440×900`)**, son adaptation **Compact Overlay (`460×660`)**, et **les 4 états UI obligatoires** (*Chargement / Skeleton*, *Vide*, *Nominal*, *Erreur*) :
+L'ensemble des **17 planches Excalidraw** dans `docs/02-tennoframe/` documente fidèlement l'architecture de **TennoFrame**, chacune présentant côte à côte la version **Desktop (`1440×900`)**, son adaptation **Compact Overlay (`460×660`)**, et **les 4 états UI obligatoires** (*Chargement / Skeleton*, *Vide*, *Nominal*, *Erreur*) :
 
 1. `01-app-shell-navigation.excalidraw` : Fenêtre *Frameless* `v2.6.0`, `TitleTabsBar` (défilement molette + chevrons `‹ / ›` + fermeture clic molette), `ClickThroughBanner` (`👻` `Alt+G` + maintien `0.5s`), `CommandNavBar` (`Ctrl+K`, cloche `🔔`, `PC · Cross · FR ▾`, Zoom, `📌`, `👻`, `🗖`, `⚙`), `BookmarksBar` centrée + `Historique` (`Ctrl+H`), Omnibox, Organisateur d'onglets, bandeau `/w`, `CompactTimersBar`, bouton Discord et `StatusBar v2.6.0`.
 2. `02-market-home-catalog-item.excalidraw` : Accueil Marché (flux d'annonces récentes en direct, `ViewModeToggle` `[⊞|▭|☰] + [S|M|L]`, badges `Min · Moy · Max` Platinum), Catalogue, Favoris, Profil joueur, et **Fiche Item complète** (Ordres Vente/Achat, Comparateur *Set vs Pièces*, Pont bidirectionnel *Codex*, Statistiques 48h/90j + pagination *Afficher plus*).
@@ -828,6 +886,8 @@ L'ensemble des **15 planches Excalidraw** dans `docs/02-wireframes/` documente f
 13. `13-codex-mobs-vendors.excalidraw` *(Module 11 — Bestiaire Complet des Mobs & Répertoire des Marchands dans le Codex)* : barre Codex à **8 onglets** (`Ressources · Warframes · Armes · Mods · Reliques · 👾 Mobs · 🏪 Marchands · Helminth`), **Vue Desktop `1440×900` de l'onglet `👾 Mobs`** (filtres Factions & Rang d'unité, recherche par mob/planète/drop, cartes Bestiaire + Fiche Détail Mob avec planètes/missions d'apparition, défenses/faiblesses élémentaires et table de drop `%` avec barre colorée sous le `%`), **Vue Desktop `1440×900` de l'onglet `🏪 Marchands`** (recherche transversale par nom de marchand OU nom d'article vendu, filtres Hubs/Planètes, cartes Marchands + Fiche Détail Marchand avec localisation exacte Planète/Hub/Salle/Quête requise, devises acceptées et catalogue filtrable « Ce qu'il vend » avec coûts exacts, rang requis, pont Codex/Plat et épinglage `🎯`), **Adaptation Mode Compact `460×660` + Aperçu `Codex Farm Overlay` en jeu** (cartes Mob & Offre Marchand épinglées) et **les 4 états UI obligatoires**.
 14. `14-wfm-account-profile-listings.excalidraw` *(Module 12 — Connexion Optionnelle Warframe Market, Profil Complet & Mise en Vente d'Items)* : **Puce d'en-tête `CommandNavBar`** (`👤 Connexion WFM` vs `🟢 Nyxo17 ▾` avec statut temps réel `En jeu / En ligne / Invisible`), **Vue Desktop `1440×900` « Mon Profil Warframe Market » (`wf://wfm-account`)** (bannière identité complète + 4 KPIs Réputation / Valeur Stock Plat / Annonces / Ventes session, onglets `💰 Mes Ventes` / `🛒 Mes Achats` / `⭐ Profil Complet & Avis`, édition rapide prix/quantité/visibilité et bouton `✓ Vendu -1`), **Vue Desktop `1440×900` Fiche Item + Modale intelligente « Mettre un item en vente »** (champs dynamiques Rang/Raffinement/Ayatan, panneau **📊 Aide au Prix en Direct** avec Top 5 `En jeu` et boutons `[S'aligner] [-1p] [Moyenne]`, détection de doublon), **Modale de Connexion Sécurisée Optionnelle** (`Email/Mot de passe` + `Fenêtre Web WFM Auto` + `Jeton secours` chiffré via `safeStorage` DPAPI), **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
 15. `15-progressive-tokenized-search.excalidraw` *(Module 13 — Barre de Recherche Cumulative à Pastilles `Tokenized Filter Bar`)* : **Schéma du parcours en 3 étapes** (`[📦 volt ×]` → saisie `TennoTrader42` → intersection `[📦 volt ×] + [👤 TennoTrader42 ×]`), **Vue Desktop `1440×900` de `MarketCatalogView`** (barre `MarketTokenFilterBar` avec pastilles typées, menu d'autocomplétion contextuel Item vs Vendeur vs Prix, carte vendeur ciblé et résultats d'offres croisées avec `/w` et `+ Panier`), **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
+16. `16-user-install-counter.excalidraw` *(Module 15 — Compteur Permanent d'Utilisateurs & d'Installations — validé)* : **Pilule permanente dans `TitleTabsBar` (haut-droite avant `— ▢ ✕`) et rappel dans `StatusBar` (bas-droite)** garantissant une visibilité `100 %` permanente sur tous les onglets et vues, **Popover épuré au clic** (*Utilisateurs installés* & *En ligne*), **Adaptation Mode Compact `460×660` (`👥 X · 🟢 Y`)** et **les 4 états UI obligatoires**.
+17. `17-multilang-15-warframe-languages.excalidraw` *(Module 16 — Internationalisation Complète 15 Langues Officielles Warframe)* : **Grille des 15 langues Warframe (`FR, EN, DE, ES, IT, PT, RU, PL, UK, TR, JA, KO, ZH, TC, TH`)** dans `QuickMarketPopover` (`CommandNavBar`) et `SettingsModal → Marché & Échanges`, **dissociation Langue d'affichage vs Langue `/w`** avec aperçu en direct dans `WhisperBar`, **repli intelligent `EN` sur Codex/WFM**, **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
 
 ---
 

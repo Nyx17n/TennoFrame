@@ -26,7 +26,9 @@ import type { WorldAlertRuleInput } from '@shared/schemas/world-rules.schema'
 const tennoframeApi: TennoFrameBridgeApi = Object.freeze({
   system: Object.freeze({
     getStatus: () => ipcRenderer.invoke(IPC_CHANNELS.SYSTEM_GET_STATUS),
-    clearCache: () => ipcRenderer.invoke(IPC_CHANNELS.SYSTEM_CLEAR_CACHE)
+    clearCache: () => ipcRenderer.invoke(IPC_CHANNELS.SYSTEM_CLEAR_CACHE),
+    getCommunityStats: (forceRefresh?: boolean) =>
+      ipcRenderer.invoke(IPC_CHANNELS.SYSTEM_GET_COMMUNITY_STATS, { forceRefresh })
   }),
   settings: Object.freeze({
     get: () => ipcRenderer.invoke(IPC_CHANNELS.SETTINGS_GET),

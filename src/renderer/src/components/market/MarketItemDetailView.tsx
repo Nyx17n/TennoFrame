@@ -13,6 +13,7 @@ import {
   Star
 } from 'lucide-react'
 import type { CodexSummaryCard } from '@shared/schemas/codex.schema'
+import { pickMarketAltText, pickMarketText } from '@shared/data/languages'
 import {
   toWfAssetUrl,
   type MarketItemDetail,
@@ -177,9 +178,9 @@ export function MarketItemDetailView({ slug }: { slug: string }): React.JSX.Elem
     )
   }
 
-  const primaryName = lang === 'fr' ? detail.nameFr : detail.nameEn
-  const secondaryName = lang === 'fr' ? detail.nameEn : detail.nameFr
-  const desc = lang === 'fr' ? detail.descriptionFr : detail.descriptionEn
+  const primaryName = pickMarketText(lang, detail.nameFr, detail.nameEn)
+  const secondaryName = pickMarketAltText(lang, detail.nameFr, detail.nameEn)
+  const desc = pickMarketText(lang, detail.descriptionFr, detail.descriptionEn)
   const iconUrl = toWfAssetUrl(detail.icon ?? detail.thumb)
   const isFav = favorites.includes(detail.slug)
   const inCart = cart.some((c) => c.slug === detail.slug)

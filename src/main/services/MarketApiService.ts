@@ -1,4 +1,5 @@
 import type { z } from 'zod'
+import { getLanguageMeta } from '@shared/data/languages'
 import type {
   MarketCatalogItem,
   MarketItemDetail,
@@ -8,7 +9,7 @@ import type {
   MarketProfileReview,
   MarketUserProfile
 } from '@shared/schemas/market.schema'
-import type { RateLimitedHttpClient } from '../infrastructure/http/RateLimitedHttpClient'
+import { HttpStatusError, type RateLimitedHttpClient } from '../infrastructure/http/RateLimitedHttpClient'
 import type { CacheService } from './CacheService'
 import type { StorageService } from './StorageService'
 import { RawWfmV1ReviewsResponseSchema } from './wfm-account-raw.schemas'
@@ -25,6 +26,7 @@ const WFM_API_BASE = 'https://api.warframe.market'
 
 export class MarketApiService {
   private itemById = new Map<string, MarketCatalogItem>()
+  private itemByIdLang = ''
 
   constructor(
     private readonly http: RateLimitedHttpClient,
@@ -32,12 +34,39 @@ export class MarketApiService {
     private readonly storage: StorageService
   ) {}
 
-  private async buildHeaders(): Promise<Record<string, string>> {
+  private async resolveWfmLanguage(): Promise<string> {
     const { market } = await this.storage.getSettings()
+    return getLanguageMeta(market.language).wfmHeader
+  }
+
+  private async buildHeaders(overrideLanguage?: string): Promise<Record<string, string>> {
+    const { market } = await this.storage.getSettings()
+    const wfmLang = overrideLanguage ?? getLanguageMeta(market.language).wfmHeader
     return {
-      Language: 'fr',
+      Language: wfmLang,
       Platform: market.platform,
       Crossplay: market.crossplay ? 'true' : 'false'
+    }
+  }
+
+  private async getJsonWithLangFallback<T>(
+    url: string,
+    schema: z.ZodType<T, z.ZodTypeDef, unknown>,
+    wfmLang: string
+  ): Promise<T> {
+    const headers = await this.buildHeaders(wfmLang)
+    try {
+      return await this.http.getJson(url, schema, { headers })
+    } catch (err) {
+      if (
+        wfmLang !== 'en' &&
+        err instanceof HttpStatusError &&
+        (err.status === 400 || err.status === 422)
+      ) {
+        const fallbackHeaders = await this.buildHeaders('en')
+        return this.http.getJson(url, schema, { headers: fallbackHeaders })
+      }
+      throw err
     }
   }
 
@@ -47,28 +76,33 @@ export class MarketApiService {
   }
 
   public async getCatalog(forceRefresh = false): Promise<MarketCatalogItem[]> {
-    const cacheKey = 'wfm:catalog:v2'
+    const wfmLang = await this.resolveWfmLanguage()
+    const cacheKey = `wfm:catalog:v2:${wfmLang}`
     if (!forceRefresh) {
       const cached = this.cache.get<MarketCatalogItem[]>(cacheKey)
-      if (cached) return cached
+      if (cached) {
+        if (this.itemByIdLang !== wfmLang || this.itemById.size === 0) {
+          this.rebuildCatalogIndex(cached, wfmLang)
+        }
+        return cached
+      }
     }
 
-    const headers = await this.buildHeaders()
-    const raw = await this.http.getJson(
+    const raw = await this.getJsonWithLangFallback(
       `${WFM_API_BASE}/v2/items`,
       RawWfmCatalogResponseSchema,
-      { headers }
+      wfmLang
     )
 
     const items: MarketCatalogItem[] = raw.data.map((entry) => {
       const en = entry.i18n?.['en']
-      const fr = entry.i18n?.['fr']
+      const loc = entry.i18n?.[wfmLang] ?? en
       return {
         id: entry.id,
         slug: entry.slug,
         nameEn: en?.name ?? entry.slug,
-        nameFr: fr?.name ?? en?.name ?? entry.slug,
-        thumb: fr?.thumb ?? en?.thumb ?? fr?.icon ?? en?.icon ?? null,
+        nameFr: loc?.name ?? en?.name ?? entry.slug,
+        thumb: loc?.thumb ?? en?.thumb ?? loc?.icon ?? en?.icon ?? null,
         tags: entry.tags,
         ...(entry.maxRank !== undefined ? { maxRank: entry.maxRank } : {}),
         ...(entry.ducats !== undefined ? { ducats: entry.ducats } : {}),
@@ -79,17 +113,23 @@ export class MarketApiService {
       }
     })
 
+    this.rebuildCatalogIndex(items, wfmLang)
+    this.cache.set(cacheKey, items, 3600)
+    return items
+  }
+
+  private rebuildCatalogIndex(items: readonly MarketCatalogItem[], wfmLang: string): void {
     const nextMap = new Map<string, MarketCatalogItem>()
     for (const item of items) {
       nextMap.set(item.id, item)
     }
     this.itemById = nextMap
-    this.cache.set(cacheKey, items, 3600)
-    return items
+    this.itemByIdLang = wfmLang
   }
 
   private async ensureCatalogIndex(): Promise<Map<string, MarketCatalogItem>> {
-    if (this.itemById.size === 0) {
+    const wfmLang = await this.resolveWfmLanguage()
+    if (this.itemById.size === 0 || this.itemByIdLang !== wfmLang) {
       await this.getCatalog(false)
     }
     return this.itemById
@@ -97,15 +137,15 @@ export class MarketApiService {
 
   public async getItemDetail(slug: string): Promise<MarketItemDetail> {
     const safeSlug = encodeURIComponent(slug.trim().toLowerCase())
-    const cacheKey = `wfm:item-set:${safeSlug}`
+    const wfmLang = await this.resolveWfmLanguage()
+    const cacheKey = `wfm:item-set:${wfmLang}:${safeSlug}`
     const cached = this.cache.get<MarketItemDetail>(cacheKey)
     if (cached) return cached
 
-    const headers = await this.buildHeaders()
-    const raw = await this.http.getJson(
+    const raw = await this.getJsonWithLangFallback(
       `${WFM_API_BASE}/v2/item/${safeSlug}/set`,
       RawWfmSetResponseSchema,
-      { headers }
+      wfmLang
     )
 
     const target = raw.data.items.find((i) => i.slug === slug) ?? raw.data.items[0]
@@ -114,18 +154,18 @@ export class MarketApiService {
     }
 
     const en = target.i18n?.['en']
-    const fr = target.i18n?.['fr']
+    const loc = target.i18n?.[wfmLang] ?? en
 
     const detail: MarketItemDetail = {
       id: target.id,
       slug: target.slug,
       nameEn: en?.name ?? target.slug,
-      nameFr: fr?.name ?? en?.name ?? target.slug,
+      nameFr: loc?.name ?? en?.name ?? target.slug,
       descriptionEn: en?.description ?? '',
-      descriptionFr: fr?.description ?? en?.description ?? '',
+      descriptionFr: loc?.description ?? en?.description ?? '',
       wikiLink: en?.wikiLink ?? null,
-      icon: fr?.icon ?? en?.icon ?? null,
-      thumb: fr?.thumb ?? en?.thumb ?? null,
+      icon: loc?.icon ?? en?.icon ?? null,
+      thumb: loc?.thumb ?? en?.thumb ?? null,
       tags: target.tags,
       ...(target.ducats !== undefined ? { ducats: target.ducats } : {}),
       ...(target.tradingTax !== undefined ? { tradingTax: target.tradingTax } : {}),
@@ -138,13 +178,13 @@ export class MarketApiService {
       setRoot: Boolean(target.setRoot),
       setItems: raw.data.items.map((part) => {
         const pEn = part.i18n?.['en']
-        const pFr = part.i18n?.['fr']
+        const pLoc = part.i18n?.[wfmLang] ?? pEn
         return {
           id: part.id,
           slug: part.slug,
           nameEn: pEn?.name ?? part.slug,
-          nameFr: pFr?.name ?? pEn?.name ?? part.slug,
-          thumb: pFr?.thumb ?? pEn?.thumb ?? null,
+          nameFr: pLoc?.name ?? pEn?.name ?? part.slug,
+          thumb: pLoc?.thumb ?? pEn?.thumb ?? null,
           setRoot: Boolean(part.setRoot),
           quantityInSet: part.quantityInSet ?? 1,
           ...(part.ducats !== undefined ? { ducats: part.ducats } : {})
@@ -217,7 +257,8 @@ export class MarketApiService {
 
   public async getRecentOrders(forceRefresh = false): Promise<MarketOrder[]> {
     const prefix = await this.getCacheKeyPrefix()
-    const cacheKey = `wfm:recent:${prefix}`
+    const wfmLang = await this.resolveWfmLanguage()
+    const cacheKey = `wfm:recent:${prefix}:${wfmLang}`
     if (!forceRefresh) {
       const cached = this.cache.get<MarketOrder[]>(cacheKey)
       if (cached) return cached
@@ -241,7 +282,8 @@ export class MarketApiService {
 
   public async getUserProfile(userSlug: string, forceRefresh = false): Promise<MarketUserProfile> {
     const safeSlug = encodeURIComponent(userSlug.trim())
-    const cacheKey = `wfm:user:${safeSlug}`
+    const wfmLang = await this.resolveWfmLanguage()
+    const cacheKey = `wfm:user:${wfmLang}:${safeSlug}`
     if (!forceRefresh) {
       const cached = this.cache.get<MarketUserProfile>(cacheKey)
       if (cached) return cached

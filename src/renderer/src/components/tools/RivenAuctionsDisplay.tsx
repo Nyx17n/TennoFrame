@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Flame } from 'lucide-react'
+import { pickMarketText } from '@shared/data/languages'
 import type { WhisperDraft } from '@shared/schemas/market.schema'
 import type {
   AppLanguage,
@@ -36,7 +37,7 @@ export function RivenAuctionsDisplay({
     return (
       <div className={gridClass}>
         {auctions.map((auc) => {
-          const wName = lang === 'fr' ? auc.weaponNameFr : auc.weaponNameEn
+          const wName = pickMarketText(lang, auc.weaponNameFr, auc.weaponNameEn)
           const fullTitle = `${wName} ${auc.rivenName}`
           const price = auc.buyoutPrice ?? auc.startingPrice
 
@@ -94,7 +95,7 @@ export function RivenAuctionsDisplay({
                         attr.positive ? 'text-emerald-400' : 'text-red-400'
                       )}
                     >
-                      <span className="truncate">{lang === 'fr' ? attr.labelFr : attr.labelEn}</span>
+                      <span className="truncate">{pickMarketText(lang, attr.labelFr, attr.labelEn)}</span>
                       <span className="shrink-0 font-mono">
                         {attr.value > 0 ? `+${attr.value}` : attr.value}%
                       </span>
@@ -112,7 +113,7 @@ export function RivenAuctionsDisplay({
   return (
     <div className={gridClass}>
       {auctions.map((auc) => {
-        const wName = lang === 'fr' ? auc.weaponNameFr : auc.weaponNameEn
+        const wName = pickMarketText(lang, auc.weaponNameFr, auc.weaponNameEn)
         const fullTitle = `${wName} ${auc.rivenName}`
         const price = auc.buyoutPrice ?? auc.startingPrice
 
@@ -175,7 +176,7 @@ export function RivenAuctionsDisplay({
                       attr.positive ? 'text-emerald-400' : 'text-red-400'
                     )}
                   >
-                    <span>{lang === 'fr' ? attr.labelFr : attr.labelEn}</span>
+                    <span>{pickMarketText(lang, attr.labelFr, attr.labelEn)}</span>
                     <span className="font-mono">
                       {attr.value > 0 ? `+${attr.value}` : attr.value}%
                     </span>

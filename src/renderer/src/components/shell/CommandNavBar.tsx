@@ -15,6 +15,7 @@ import {
 import { formatRouteUri } from '@shared/schemas/navigation.schema'
 import { Button } from '@/components/ui/button'
 import { NavQuickMenus } from '@/components/shell/NavQuickMenus'
+import { useUiTranslations } from '@/lib/i18n'
 import { getTabCurrentRoute } from '@/lib/tab-helpers'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/stores/useAppStore'
@@ -22,6 +23,7 @@ import { useTabsStore } from '@/stores/useTabsStore'
 
 export function CommandNavBar(): React.JSX.Element {
   const windowState = useAppStore((s) => s.windowState)
+  const { t } = useUiTranslations()
   const clickThroughWhenPinned = useAppStore((s) => s.settings.window.clickThroughWhenPinned)
   const clickThroughShortcut = useAppStore((s) => s.settings.window.shortcuts.toggleClickThrough)
   const updateSettings = useAppStore((s) => s.updateSettings)
@@ -58,10 +60,10 @@ export function CommandNavBar(): React.JSX.Element {
       aria-label="Barre Omnibox et actions rapides"
     >
       <div className="flex shrink-0 items-center gap-0.5">
-        <Button variant="ghost" size="icon" disabled={!canGoBack} onClick={goBack} title="Précédent">
+        <Button variant="ghost" size="icon" disabled={!canGoBack} onClick={goBack} title={t.shell.back}>
           <ArrowLeft className="h-3.5 w-3.5" />
         </Button>
-        <Button variant="ghost" size="icon" disabled={!canGoForward} onClick={goForward} title="Suivant">
+        <Button variant="ghost" size="icon" disabled={!canGoForward} onClick={goForward} title={t.shell.forward}>
           <ArrowRight className="h-3.5 w-3.5" />
         </Button>
         <Button
@@ -71,7 +73,7 @@ export function CommandNavBar(): React.JSX.Element {
             reloadActive()
             void refreshSystemStatus()
           }}
-          title="Actualiser l'onglet actif (Ctrl+R)"
+          title={t.shell.reload}
         >
           <RefreshCw
             className={cn('h-3.5 w-3.5 transition-colors', isPageTransitioning && 'animate-spin text-primary')}
@@ -89,7 +91,7 @@ export function CommandNavBar(): React.JSX.Element {
           <span className="truncate font-mono text-[11px] text-foreground/90">{currentUri}</span>
           {!windowState.isCompactMode && (
             <span className="truncate text-muted-foreground">
-              — Rechercher un item, Codex ou coller une URL...
+              {t.shell.omniboxHint}
             </span>
           )}
         </span>
@@ -139,7 +141,7 @@ export function CommandNavBar(): React.JSX.Element {
           variant={windowState.isAlwaysOnTop ? 'default' : 'outline'}
           size="icon"
           onClick={() => void toggleAlwaysOnTop()}
-          title="Épingler au-dessus de Warframe (Alt+P)"
+          title={t.shell.pinOverlay}
         >
           <Pin className="h-3.5 w-3.5" />
         </Button>
@@ -167,7 +169,7 @@ export function CommandNavBar(): React.JSX.Element {
           variant={windowState.isCompactMode ? 'default' : 'outline'}
           size="icon"
           onClick={() => void toggleCompactMode()}
-          title="Mode Compact 460×660 (Alt+M)"
+          title={t.shell.compactMode}
         >
           {windowState.isCompactMode ? (
             <Maximize2 className="h-3.5 w-3.5" />
@@ -186,7 +188,7 @@ export function CommandNavBar(): React.JSX.Element {
           title={
             updaterStatus?.state === 'downloaded'
               ? `Mise à jour v${updaterStatus.availableVersion} prête à installer`
-              : 'Paramètres TennoFrame (Ctrl+,)'
+              : t.shell.settings
           }
         >
           <Settings className="h-3.5 w-3.5" />

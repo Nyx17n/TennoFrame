@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Award, Layers, Sparkles } from 'lucide-react'
+import { pickMarketText } from '@shared/data/languages'
 import type { BundledSellerMatch } from '@shared/schemas/tools.schema'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -91,7 +92,7 @@ export function BundledSellersSection({
                 {b.matchedItems.map((m) => (
                   <Badge key={m.slug} variant="secondary">
                     {m.quantity > 1 ? `${m.quantity}× ` : ''}
-                    {lang === 'fr' ? m.nameFr : m.nameEn} · {m.unitPrice}p
+                    {pickMarketText(lang, m.nameFr, m.nameEn)} · {m.unitPrice}p
                   </Badge>
                 ))}
               </div>

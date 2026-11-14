@@ -1,7 +1,9 @@
 import * as React from 'react'
 import { ChevronLeft, ChevronRight, Copy, Globe, Loader2, Minus, Plus, Square, X } from 'lucide-react'
 import { BrowserTabPill } from '@/components/shell/BrowserTabPill'
+import { CommunityCounterPill } from '@/components/shell/CommunityCounterPill'
 import { TabOrganizerPopover } from '@/components/shell/TabOrganizerPopover'
+import { useUiTranslations } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { ipcClient } from '@/services/ipc-client'
 import { useAppStore } from '@/stores/useAppStore'
@@ -9,6 +11,7 @@ import { useTabsStore } from '@/stores/useTabsStore'
 
 export function TitleTabsBar(): React.JSX.Element {
   const windowState = useAppStore((s) => s.windowState)
+  const { t } = useUiTranslations()
   const hubActive = useTabsStore((s) => s.hubActive)
   const tabs = useTabsStore((s) => s.tabs)
   const activeTabId = useTabsStore((s) => s.activeTabId)
@@ -98,7 +101,7 @@ export function TitleTabsBar(): React.JSX.Element {
           ) : (
             <Globe className="h-3.5 w-3.5 text-primary" />
           )}
-          {!windowState.isCompactMode && <span>Hub</span>}
+          {!windowState.isCompactMode && <span>{t.shell.hub}</span>}
         </button>
 
         <div className="mx-0.5 h-4 w-px shrink-0 bg-border" />
@@ -157,7 +160,7 @@ export function TitleTabsBar(): React.JSX.Element {
           <button
             type="button"
             onClick={() => openTab({ kind: 'market-home' })}
-            title="Nouvel onglet (Ctrl+T)"
+            title={t.shell.newTab}
             className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
           >
             <Plus className="h-3.5 w-3.5" />
@@ -167,33 +170,39 @@ export function TitleTabsBar(): React.JSX.Element {
         </div>
       </div>
 
-      <div className="app-drag-region h-full min-w-[36px] flex-1" />
+      <div className="app-drag-region h-full min-w-[24px] flex-1" />
 
-      <div className="app-no-drag flex h-full shrink-0 items-stretch">
-        <button
-          type="button"
-          onClick={() => void ipcClient.window.minimize()}
-          aria-label="Réduire la fenêtre"
-          className="inline-flex w-10 items-center justify-center text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-        >
-          <Minus className="h-3.5 w-3.5" />
-        </button>
-        <button
-          type="button"
-          onClick={() => void ipcClient.window.toggleMaximize()}
-          aria-label={windowState.isMaximized ? 'Restaurer la fenêtre' : 'Agrandir la fenêtre'}
-          className="inline-flex w-10 items-center justify-center text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-        >
-          {windowState.isMaximized ? <Copy className="h-3 w-3" /> : <Square className="h-3 w-3" />}
-        </button>
-        <button
-          type="button"
-          onClick={() => void ipcClient.window.close()}
-          aria-label="Fermer la fenêtre"
-          className="inline-flex w-11 items-center justify-center text-muted-foreground transition-colors hover:bg-destructive hover:text-destructive-foreground"
-        >
-          <X className="h-4 w-4" />
-        </button>
+      <div className="app-no-drag flex h-full shrink-0 items-center">
+        <div className="pr-1.5">
+          <CommunityCounterPill variant="titlebar" isCompact={windowState.isCompactMode} />
+        </div>
+        <div className="h-4 w-px bg-border/70" />
+        <div className="flex h-full items-stretch">
+          <button
+            type="button"
+            onClick={() => void ipcClient.window.minimize()}
+            aria-label="Réduire la fenêtre"
+            className="inline-flex w-10 items-center justify-center text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+          >
+            <Minus className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => void ipcClient.window.toggleMaximize()}
+            aria-label={windowState.isMaximized ? 'Restaurer la fenêtre' : 'Agrandir la fenêtre'}
+            className="inline-flex w-10 items-center justify-center text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+          >
+            {windowState.isMaximized ? <Copy className="h-3 w-3" /> : <Square className="h-3 w-3" />}
+          </button>
+          <button
+            type="button"
+            onClick={() => void ipcClient.window.close()}
+            aria-label="Fermer la fenêtre"
+            className="inline-flex w-11 items-center justify-center text-muted-foreground transition-colors hover:bg-destructive hover:text-destructive-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     </header>
   )

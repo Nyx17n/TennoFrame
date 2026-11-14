@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Plus, RefreshCw, Search, ShoppingCart, Trash2 } from 'lucide-react'
+import { pickMarketText } from '@shared/data/languages'
 import type { CartBundleAnalysis } from '@shared/schemas/tools.schema'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -108,7 +109,7 @@ export function MarketCartView(): React.JSX.Element {
         {quickSuggestions.length > 0 && (
           <div className="mt-1 grid grid-cols-1 gap-1 rounded-md border border-border bg-popover p-1.5 shadow-lg sm:grid-cols-2">
             {quickSuggestions.map((item) => {
-              const label = lang === 'fr' ? item.nameFr : item.nameEn
+              const label = pickMarketText(lang, item.nameFr, item.nameEn)
               return (
                 <button
                   key={item.id}

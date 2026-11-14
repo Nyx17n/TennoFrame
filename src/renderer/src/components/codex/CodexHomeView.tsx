@@ -6,6 +6,7 @@ import type {
   CodexVariantFilter,
   MobUnitTierFilter
 } from '@shared/schemas/codex.schema'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -14,6 +15,7 @@ import { CodexItemsDisplay } from '@/components/codex/CodexItemsDisplay'
 import { CodexOverlayToolbar } from '@/components/codex/CodexOverlayToolbar'
 import { HelminthInfirmarySection } from '@/components/codex/HelminthInfirmarySection'
 import { useCatalogDisplayPreferences } from '@/lib/catalog-layout'
+import { useUiTranslations } from '@/lib/i18n'
 import { ipcClient } from '@/services/ipc-client'
 import { useTabsStore } from '@/stores/useTabsStore'
 
@@ -21,14 +23,14 @@ type CodexTabMode = CodexCategory | 'helminth'
 
 const PAGE_SIZE = 36
 
-const CATEGORY_TABS: ReadonlyArray<{ id: CodexCategory; label: string }> = [
-  { id: 'resources', label: 'Ressources' },
-  { id: 'warframes', label: 'Warframes' },
-  { id: 'weapons', label: 'Armes' },
-  { id: 'mods', label: 'Mods' },
-  { id: 'relics', label: 'Reliques' },
-  { id: 'mobs', label: '👾 Mobs' },
-  { id: 'vendors', label: '🏪 Marchands' }
+const CATEGORY_IDS: readonly CodexCategory[] = [
+  'resources',
+  'warframes',
+  'weapons',
+  'mods',
+  'relics',
+  'mobs',
+  'vendors'
 ]
 
 const RELIC_ERAS = ['all', 'Lith', 'Meso', 'Neo', 'Axi', 'Requiem', 'Vanguard'] as const
@@ -81,12 +83,26 @@ export function CodexHomeView({
 }): React.JSX.Element {
   const navigateActive = useTabsStore((s) => s.navigateActive)
   const openTab = useTabsStore((s) => s.openTab)
+  const { lang, t } = useUiTranslations()
   const { layoutMode, cardSize, setLayoutMode, setCardSize } = useCatalogDisplayPreferences()
+
+  const categoryTabs = React.useMemo(
+    () => [
+      { id: 'resources' as const, label: t.codex.resources },
+      { id: 'warframes' as const, label: t.codex.warframes },
+      { id: 'weapons' as const, label: t.codex.weapons },
+      { id: 'mods' as const, label: t.codex.mods },
+      { id: 'relics' as const, label: t.codex.relics },
+      { id: 'mobs' as const, label: `👾 ${t.codex.mobs}` },
+      { id: 'vendors' as const, label: `🏪 ${t.codex.vendors}` }
+    ],
+    [t]
+  )
 
   const [activeTab, setActiveTab] = React.useState<CodexTabMode>(() =>
     initialCategory === 'helminth'
       ? 'helminth'
-      : CATEGORY_TABS.some((t) => t.id === initialCategory)
+      : CATEGORY_IDS.includes(initialCategory as CodexCategory)
         ? (initialCategory as CodexCategory)
         : 'resources'
   )
@@ -203,9 +219,14 @@ export function CodexHomeView({
     <main className="mx-auto max-w-6xl space-y-4 p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="flex items-center gap-2 text-lg font-bold">
+          <h1 className="flex flex-wrap items-center gap-2 text-lg font-bold">
             <BookOpen className="h-5 w-5 text-primary" />
-            <span>Codex, Tables de Farm % & Infirmerie Helminth</span>
+            <span>{t.bookmarks.codex}</span>
+            {lang !== 'fr' && (
+              <Badge variant="outline" className="border-primary/40 text-[10px] font-medium text-primary">
+                {t.codex.englishFallbackBadge}
+              </Badge>
+            )}
           </h1>
           <p className="text-xs text-muted-foreground">
             Encyclopédie complète FR/EN hors-ligne : drops triés par probabilité, recettes Fonderie et subsomptions.
@@ -213,7 +234,7 @@ export function CodexHomeView({
         </div>
 
         <div className="flex flex-wrap items-center gap-1.5">
-          {CATEGORY_TABS.map((tab) => {
+          {categoryTabs.map((tab) => {
             const count = result?.categoryCounts[tab.id]
             return (
               <Button
@@ -235,7 +256,7 @@ export function CodexHomeView({
             onClick={() => selectCategory('helminth')}
           >
             <Dna className="h-3.5 w-3.5 text-emerald-400" />
-            <span>Helminth</span>
+            <span>{t.codex.helminth}</span>
           </Button>
         </div>
       </div>

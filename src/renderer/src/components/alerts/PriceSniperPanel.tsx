@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Crosshair, Plus, Search, Trash2 } from 'lucide-react'
+import { pickMarketText } from '@shared/data/languages'
 import { toWfAssetUrl, type MarketCatalogItem } from '@shared/schemas/market.schema'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -80,7 +81,7 @@ export function PriceSniperPanel(): React.JSX.Element {
             {suggestions.length > 0 && (
               <div className="mt-1 grid grid-cols-1 gap-1 rounded-md border border-border bg-popover p-1.5 shadow-lg sm:grid-cols-2">
                 {suggestions.map((c) => {
-                  const label = lang === 'fr' ? c.nameFr : c.nameEn
+                  const label = pickMarketText(lang, c.nameFr, c.nameEn)
                   return (
                     <button
                       key={c.id}
@@ -123,7 +124,7 @@ export function PriceSniperPanel(): React.JSX.Element {
             </p>
           ) : (
             rules.map((r) => {
-              const label = lang === 'fr' ? r.nameFr : r.nameEn
+              const label = pickMarketText(lang, r.nameFr, r.nameEn)
               const thumb = toWfAssetUrl(r.thumb)
               return (
                 <div

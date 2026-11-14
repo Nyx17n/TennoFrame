@@ -7,7 +7,7 @@
 
 > Conçu par **Maxime (`Nyxo17`)** — Architecture **Electron 35 · Node.js · React 19 · `shadcn/ui` · TypeScript strict (`strict: true`) · Validation `zod`**.
 
-**TennoFrame v2** (`v2.10.0`) est un compagnon bureau tout-en-un pour **Warframe** combinant un navigateur de trading multi-onglets connecté à **Warframe Market** (avec connexion compte optionnelle, mise en vente & recherche cumulative à pastilles), un **Hub Worldstate temps réel** (avec règles d’alertes sur mesure et minuteurs épinglés), une **Encyclopédie de Farm, Bestiaire des Mobs, Annuaire des Marchands & Helminth** hors-ligne complète en FR/EN et un **Système d’Extensions modulaires** incluant le **Codex Farm Overlay en jeu (`Alt+O`)**.
+**TennoFrame v2** (`v2.11.0`) est un compagnon bureau tout-en-un pour **Warframe** traduit dans les **15 langues officielles de Warframe**, combinant un navigateur de trading multi-onglets connecté à **Warframe Market** (avec connexion compte optionnelle, mise en vente, recherche cumulative à pastilles & messages `/w` multilingues), un **Hub Worldstate temps réel** (avec règles d’alertes sur mesure et minuteurs épinglés), une **Encyclopédie de Farm, Bestiaire des Mobs, Annuaire des Marchands & Helminth** hors-ligne complète en FR/EN et un **Système d’Extensions modulaires** incluant le **Codex Farm Overlay en jeu (`Alt+O`)**.
 
 ---
 
@@ -30,7 +30,7 @@
    - **Compte Warframe Market optionnel & Mise en vente (`wf://wfm-account`)** : connexion sécurisée chiffrée via DPAPI Windows (`safeStorage`) avec statut temps réel (*En jeu · En ligne · Invisible*), gestion complète de tes ventes/achats, bouton `✓ Vendu -1` et modale intelligente « Mettre un item en vente » avec aide au prix en direct.
    - **Barre de recherche cumulative à pastilles (`Tokenized Filter Bar`)** : croise librement plusieurs pastilles (`[📦 Item] + [👤 Vendeur] + [💎 ≤ Xp]`) et consulte des **profils joueurs publics enrichis** (KPIs, ventes, achats et avis vérifiés).
    - **Menus contextuels rapides au clic droit** : sur les onglets, sur tous les items du Marché (*Favoris, Nouvel onglet, Panier, Snipe, Codex, Wiki Officiel*) et sur les entrées du Codex (*Afficher en Overlay Farm* lorsque l’extension est activée).
-   - Ordres d’achat/vente en direct, filtres statut/rang/réputation, flux complet des **annonces les plus récentes** dès l’accueil Marché et barre **`/w` Whisper** copiée en 1 clic en **EN ou FR**.
+   - Ordres d’achat/vente en direct, filtres statut/rang/réputation, flux complet des **annonces les plus récentes** dès l’accueil Marché et barre **`/w` Whisper** copiée en 1 clic dans les **15 langues de Warframe (`★ EN` recommandé)**.
    - **Badges de prix temps réel (`Min · Moy · Max` Platines)** avec filtrage anti-outliers affichés automatiquement sur les cartes du Marché, Favoris, Panier, Ordres récents et les items échangeables du Codex.
    - **Comparateur automatique Set Complet vs Pièces Détachées** calculé en arrière-plan sans bloquer l’affichage.
    - **Panier & Trade Bundler** (détection des vendeurs possédant plusieurs pièces de ta liste), **Ducanator** (meilleurs ratios Ducats / Platinum), **Contrats Mod Riven**, **Favoris** et **Price Sniper** (surveillance sonore & notifications en arrière-plan dans le *System Tray*).

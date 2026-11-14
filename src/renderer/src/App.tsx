@@ -31,14 +31,34 @@ import { useWfmAccountStore } from '@/stores/useWfmAccountStore'
 export function App(): React.JSX.Element {
   const initialize = useAppStore((s) => s.initialize)
   const initWfmAccount = useWfmAccountStore((s) => s.initialize)
+  const isAppLoading = useAppStore((s) => s.isLoading)
+  const marketLang = useAppStore((s) => s.settings.market.language)
+  const marketPlatform = useAppStore((s) => s.settings.market.platform)
+  const marketCrossplay = useAppStore((s) => s.settings.market.crossplay)
   const isCompactMode = useAppStore((s) => s.windowState.isCompactMode)
   const hydrateFromSession = useTabsStore((s) => s.hydrateFromSession)
   const transitionRevision = useTabsStore((s) => s.transitionRevision)
   const setLatestAlertToast = useMarketStore((s) => s.setLatestAlertToast)
 
   const viewportScrollRef = React.useRef<HTMLDivElement | null>(null)
+  const prevMarketSigRef = React.useRef<string | null>(null)
 
   useLocalShortcuts()
+
+  React.useEffect(() => {
+    if (isAppLoading) return
+    const nextSig = `${marketLang}:${marketPlatform}:${String(marketCrossplay)}`
+    if (prevMarketSigRef.current === null) {
+      prevMarketSigRef.current = nextSig
+      return
+    }
+    if (prevMarketSigRef.current !== nextSig) {
+      prevMarketSigRef.current = nextSig
+      if (useMarketStore.getState().catalog.length > 0) {
+        void useMarketStore.getState().ensureCatalogLoaded(true)
+      }
+    }
+  }, [isAppLoading, marketLang, marketPlatform, marketCrossplay])
 
   React.useEffect(() => {
     if (transitionRevision > 0) {

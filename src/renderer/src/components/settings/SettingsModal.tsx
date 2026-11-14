@@ -13,24 +13,24 @@ import { ExtensionsSettingsTab } from '@/components/settings/ExtensionsSettingsT
 import { WindowShortcutsSettingsTab } from '@/components/settings/WindowShortcutsSettingsTab'
 import { MarketTradingSettingsTab } from '@/components/settings/MarketTradingSettingsTab'
 import { SystemDataSettingsTab } from '@/components/settings/SystemDataSettingsTab'
+import { useUiTranslations } from '@/lib/i18n'
 import { useAppStore, type SettingsTabId } from '@/stores/useAppStore'
 import { cn } from '@/lib/utils'
 
 const SETTINGS_NAV: readonly {
   id: SettingsTabId
-  label: string
-  shortLabel: string
   Icon: React.ComponentType<{ className?: string }>
 }[] = [
-  { id: 'appearance', label: 'Apparence & Thèmes', shortLabel: 'Thèmes', Icon: Palette },
-  { id: 'audio', label: 'Audio & Alertes', shortLabel: 'Audio', Icon: Volume2 },
-  { id: 'window', label: 'Fenêtre & Raccourcis', shortLabel: 'Fenêtre', Icon: Monitor },
-  { id: 'market', label: 'Marché & Échanges', shortLabel: 'Marché', Icon: Store },
-  { id: 'extensions', label: 'Extensions', shortLabel: 'Extensions', Icon: Blocks },
-  { id: 'system', label: 'Système & Données', shortLabel: 'Système', Icon: Database }
+  { id: 'appearance', Icon: Palette },
+  { id: 'audio', Icon: Volume2 },
+  { id: 'window', Icon: Monitor },
+  { id: 'market', Icon: Store },
+  { id: 'extensions', Icon: Blocks },
+  { id: 'system', Icon: Database }
 ]
 
 export function SettingsModal(): React.JSX.Element {
+  const { t } = useUiTranslations()
   const isOpen = useAppStore((s) => s.isSettingsOpen)
   const setSettingsOpen = useAppStore((s) => s.setSettingsOpen)
   const activeTab = useAppStore((s) => s.activeSettingsTab)
@@ -46,10 +46,8 @@ export function SettingsModal(): React.JSX.Element {
         )}
       >
         <DialogHeader className="shrink-0 border-b border-border bg-background/70 px-4 py-3 pr-10">
-          <DialogTitle>Paramètres TennoFrame v2</DialogTitle>
-          <DialogDescription>
-            Tous les changements sont validés par Zod et enregistrés automatiquement.
-          </DialogDescription>
+          <DialogTitle>{t.settingsModal.title}</DialogTitle>
+          <DialogDescription>{t.settingsModal.desc}</DialogDescription>
         </DialogHeader>
 
         <div className={cn('flex min-h-0 flex-1', isCompact ? 'flex-col' : 'flex-row')}>
@@ -61,8 +59,9 @@ export function SettingsModal(): React.JSX.Element {
                 : 'flex w-52 flex-col gap-1 border-r'
             )}
           >
-            {SETTINGS_NAV.map(({ id, label, shortLabel, Icon }) => {
+            {SETTINGS_NAV.map(({ id, Icon }) => {
               const selected = activeTab === id
+              const label = t.settingsModal[id]
               return (
                 <button
                   key={id}
@@ -76,7 +75,7 @@ export function SettingsModal(): React.JSX.Element {
                   )}
                 >
                   <Icon className="h-3.5 w-3.5 shrink-0" />
-                  <span className="truncate">{isCompact ? shortLabel : label}</span>
+                  <span className="truncate">{label}</span>
                 </button>
               )
             })}
