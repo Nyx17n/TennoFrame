@@ -49,6 +49,38 @@ const LANGUAGE_BY_ID = new Map<WarframeLanguageId, WarframeLanguageMeta>(
   WARFRAME_LANGUAGES.map((item) => [item.id, item])
 )
 
+export const RECOMMENDED_WHISPER_LANGUAGE: WarframeLanguageId = 'en'
+
+/**
+ * `/w` whisper languages ordered with `en` (Recommended for universal WFM trading) first.
+ */
+export const WHISPER_LANGUAGES: readonly WarframeLanguageMeta[] = [
+  ...WARFRAME_LANGUAGES.filter((l) => l.id === RECOMMENDED_WHISPER_LANGUAGE),
+  ...WARFRAME_LANGUAGES.filter((l) => l.id !== RECOMMENDED_WHISPER_LANGUAGE)
+]
+
+const RECOMMENDED_LABELS: Record<WarframeLanguageId, string> = {
+  fr: 'Recommandé',
+  en: 'Recommended',
+  de: 'Empfohlen',
+  es: 'Recomendado',
+  it: 'Consigliato',
+  pt: 'Recomendado',
+  ru: 'Рекомендуется',
+  pl: 'Zalecane',
+  uk: 'Рекомендовано',
+  tr: 'Önerilen',
+  ja: '推奨',
+  ko: '권장',
+  'zh-hans': '推荐',
+  'zh-hant': '推薦',
+  th: 'แนะนำ'
+}
+
+export function getRecommendedLabel(lang: WarframeLanguageId): string {
+  return RECOMMENDED_LABELS[lang]
+}
+
 export function getLanguageMeta(lang: WarframeLanguageId): WarframeLanguageMeta {
   return LANGUAGE_BY_ID.get(lang) ?? WARFRAME_LANGUAGES[0]!
 }

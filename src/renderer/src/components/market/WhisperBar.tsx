@@ -1,6 +1,11 @@
 import * as React from 'react'
-import { Check, ChevronDown, Copy, Languages, MessageSquare, User, X } from 'lucide-react'
-import { getLanguageMeta, WARFRAME_LANGUAGES } from '@shared/data/languages'
+import { Check, ChevronDown, Copy, Languages, MessageSquare, Star, User, X } from 'lucide-react'
+import {
+  getLanguageMeta,
+  getRecommendedLabel,
+  RECOMMENDED_WHISPER_LANGUAGE,
+  WHISPER_LANGUAGES
+} from '@shared/data/languages'
 import { buildWhisperCommand } from '@shared/schemas/market.schema'
 import type { AppLanguage } from '@shared/schemas/settings.schema'
 import { Badge } from '@/components/ui/badge'
@@ -22,7 +27,7 @@ export function WhisperBar(): React.JSX.Element | null {
   const whisperExtensionEnabled = useAppStore((s) => s.settings.extensions.whisperBarPersistent)
   const updateSettings = useAppStore((s) => s.updateSettings)
   const openTab = useTabsStore((s) => s.openTab)
-  const { t } = useUiTranslations()
+  const { lang: appLang, t } = useUiTranslations()
 
   const [justCopied, setJustCopied] = React.useState(true)
 
@@ -76,26 +81,45 @@ export function WhisperBar(): React.JSX.Element | null {
             </Button>
           </PopoverTrigger>
           <PopoverContent align="end" side="top" className="w-72 p-2.5">
-            <div className="mb-1.5 text-[10px] font-semibold text-muted-foreground">
-              {t.market.whisperLanguageLabel}
+            <div className="mb-1.5 flex items-center justify-between gap-1 text-[10px]">
+              <span className="font-semibold text-muted-foreground">
+                {t.market.whisperLanguageLabel}
+              </span>
+              <span className="inline-flex items-center gap-0.5 font-medium text-emerald-400">
+                <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
+                <span>EN · {getRecommendedLabel(appLang)}</span>
+              </span>
             </div>
             <div className="grid grid-cols-3 gap-1">
-              {WARFRAME_LANGUAGES.map((entry) => {
+              {WHISPER_LANGUAGES.map((entry) => {
                 const active = whisperLanguage === entry.id
+                const isRec = entry.id === RECOMMENDED_WHISPER_LANGUAGE
                 return (
                   <button
                     key={entry.id}
                     type="button"
+                    title={
+                      isRec
+                        ? `${entry.nativeLabel} — ${getRecommendedLabel(appLang)}`
+                        : entry.nativeLabel
+                    }
                     onClick={() => void handleSelectWhisperLanguage(entry.id)}
                     className={cn(
-                      'flex items-center gap-1 rounded border px-1.5 py-1 text-left text-[10px] transition-colors',
+                      'flex items-center justify-between gap-1 rounded border px-1.5 py-1 text-left text-[10px] transition-colors',
                       active
                         ? 'border-primary bg-primary/15 font-semibold text-primary'
-                        : 'border-border bg-secondary/40 text-muted-foreground hover:text-foreground'
+                        : isRec
+                          ? 'border-emerald-500/40 bg-secondary/50 text-foreground hover:bg-secondary'
+                          : 'border-border bg-secondary/40 text-muted-foreground hover:text-foreground'
                     )}
                   >
-                    <span className="font-mono font-bold">{entry.shortCode}</span>
-                    <span className="truncate">{entry.nativeLabel}</span>
+                    <span className="flex min-w-0 items-center gap-1">
+                      <span className="font-mono font-bold">{entry.shortCode}</span>
+                      <span className="truncate">{entry.nativeLabel}</span>
+                    </span>
+                    {isRec && (
+                      <Star className="h-2.5 w-2.5 shrink-0 fill-amber-400 text-amber-400" />
+                    )}
                   </button>
                 )
               })}

@@ -1,7 +1,14 @@
 import * as React from 'react'
-import { Globe, MessageSquare } from 'lucide-react'
-import { formatWhisperMessage, WARFRAME_LANGUAGES } from '@shared/data/languages'
+import { Globe, MessageSquare, Star } from 'lucide-react'
+import {
+  formatWhisperMessage,
+  getRecommendedLabel,
+  RECOMMENDED_WHISPER_LANGUAGE,
+  WARFRAME_LANGUAGES,
+  WHISPER_LANGUAGES
+} from '@shared/data/languages'
 import type { MarketPlatform } from '@shared/schemas/settings.schema'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { useUiTranslations } from '@/lib/i18n'
@@ -113,27 +120,49 @@ export function MarketTradingSettingsTab(): React.JSX.Element {
         </div>
 
         <div className="space-y-2 border-t border-border/60 pt-3">
-          <div className="flex items-center gap-1.5 text-xs font-medium">
-            <MessageSquare className="h-3.5 w-3.5 text-primary" />
-            <span>{t.market.whisperLanguageLabel}</span>
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-medium">
+            <div className="flex items-center gap-1.5">
+              <MessageSquare className="h-3.5 w-3.5 text-primary" />
+              <span>{t.market.whisperLanguageLabel}</span>
+            </div>
+            <Badge
+              variant="outline"
+              className="gap-1 border-emerald-500/50 bg-emerald-500/10 text-[10px] text-emerald-300"
+            >
+              <Star className="h-2.5 w-2.5 fill-emerald-400 text-emerald-400" />
+              <span>EN · {getRecommendedLabel(market.language)}</span>
+            </Badge>
           </div>
           <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 md:grid-cols-5">
-            {WARFRAME_LANGUAGES.map((entry) => {
+            {WHISPER_LANGUAGES.map((entry) => {
               const active = market.whisperLanguage === entry.id
+              const isRec = entry.id === RECOMMENDED_WHISPER_LANGUAGE
               return (
                 <button
                   key={entry.id}
                   type="button"
+                  title={
+                    isRec
+                      ? `${entry.nativeLabel} — ${getRecommendedLabel(market.language)}`
+                      : entry.nativeLabel
+                  }
                   onClick={() => void updateSettings({ market: { whisperLanguage: entry.id } })}
                   className={cn(
-                    'flex items-center gap-1.5 rounded-md border px-2 py-1 text-left text-[11px] transition-colors',
+                    'flex items-center justify-between gap-1 rounded-md border px-2 py-1 text-left text-[11px] transition-colors',
                     active
                       ? 'border-emerald-500/70 bg-emerald-500/15 font-semibold text-emerald-300'
-                      : 'border-border bg-card/40 text-muted-foreground hover:bg-secondary hover:text-foreground'
+                      : isRec
+                        ? 'border-emerald-500/40 bg-card/60 text-foreground hover:bg-secondary'
+                        : 'border-border bg-card/40 text-muted-foreground hover:bg-secondary hover:text-foreground'
                   )}
                 >
-                  <span className="font-mono text-[10px] font-bold">{entry.shortCode}</span>
-                  <span className="truncate">{entry.nativeLabel}</span>
+                  <span className="flex min-w-0 items-center gap-1.5">
+                    <span className="font-mono text-[10px] font-bold">{entry.shortCode}</span>
+                    <span className="truncate">{entry.nativeLabel}</span>
+                  </span>
+                  {isRec && (
+                    <Star className="h-3 w-3 shrink-0 fill-amber-400 text-amber-400" />
+                  )}
                 </button>
               )
             })}

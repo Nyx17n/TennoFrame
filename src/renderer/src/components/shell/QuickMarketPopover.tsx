@@ -1,6 +1,12 @@
 import * as React from 'react'
 import { ChevronDown, MessageSquare } from 'lucide-react'
-import { getLanguageMeta, WARFRAME_LANGUAGES } from '@shared/data/languages'
+import {
+  getLanguageMeta,
+  getRecommendedLabel,
+  RECOMMENDED_WHISPER_LANGUAGE,
+  WARFRAME_LANGUAGES,
+  WHISPER_LANGUAGES
+} from '@shared/data/languages'
 import type { MarketPlatform } from '@shared/schemas/settings.schema'
 import { Badge } from '@/components/ui/badge'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -110,13 +116,18 @@ export function QuickMarketPopover(): React.JSX.Element {
                 market: { whisperLanguage: e.target.value as typeof market.whisperLanguage }
               })
             }
-            className="h-6 rounded border border-border bg-background px-1.5 text-[11px] font-medium text-foreground outline-none focus:border-primary"
+            className="h-6 max-w-[195px] rounded border border-border bg-background px-1.5 text-[11px] font-medium text-foreground outline-none focus:border-primary"
           >
-            {WARFRAME_LANGUAGES.map((entry) => (
-              <option key={entry.id} value={entry.id}>
-                {entry.shortCode} — {entry.nativeLabel}
-              </option>
-            ))}
+            {WHISPER_LANGUAGES.map((entry) => {
+              const isRec = entry.id === RECOMMENDED_WHISPER_LANGUAGE
+              return (
+                <option key={entry.id} value={entry.id}>
+                  {isRec ? '★ ' : ''}
+                  {entry.shortCode} — {entry.nativeLabel}
+                  {isRec ? ` (${getRecommendedLabel(market.language)})` : ''}
+                </option>
+              )
+            })}
           </select>
         </div>
 
