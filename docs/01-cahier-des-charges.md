@@ -722,6 +722,27 @@ Pour épurer l'interface tout en accélérant les actions fréquentes à la sour
      - **Condition stricte sur l'extension Overlay** : l'action **`🎯 Afficher dans l’Overlay Farm` / `Retirer de l’Overlay Farm`** n'est proposée dans le menu clic droit **que si et seulement si** l'extension **`Codex Farm Overlay` est activée dans `Paramètres → 🧩 Extensions`** (`settings.extensions.codexFarmOverlay === true`). Lorsqu'elle est désactivée, l'option n'apparaît pas.
      - Actions complémentaires : `➕ Ouvrir dans un nouvel onglet`, `💎 Voir sur Warframe Market` *(si échangeable)* et `🌐 Voir sur le Wiki Officiel`.
 
+### 3.15. Module 15 — Compteur Permanent d'Utilisateurs & d'Installations (`CommunityCounterPill`)
+
+1. **Objectif Métier & Visibilité Permanente Garantie** :
+   - Offrir à la communauté Tenno un **compteur d'utilisateurs installés et de membres en ligne visible en permanence à l'écran**, quelle que soit la vue active (`Hub`, `Marché`, `Catalogue`, `Favoris`, `Panier`, `Codex`, `Profil WFM`), l'onglet ouvert ou la position de défilement, sans nécessiter aucun clic préalable.
+   - **Double ancrage dans l'App Shell** :
+     - **Ancrage primaire (`TitleTabsBar`, coin supérieur droit)** : pilule permanente placée immédiatement à gauche des boutons système `— ▢ ✕` (`👥 X installés · 🟢 Y en ligne` en Desktop `1440×900`, condensée en `👥 X · 🟢 Y` en Mode Compact `460×660`).
+     - **Ancrage secondaire (`StatusBar`, coin inférieur droit)** : rappel discret permanent à gauche des raccourcis et du numéro de version `vX.Y.Z`.
+2. **Sources de Données Publiques Vérifiées, Règles de Calcul & Cache Hors-Ligne** :
+   - **GitHub Releases API (`GET https://api.github.com/repos/Nyx17n/TennoFrame/releases?per_page=100`)** :
+     - Extraction stricte et validation `zod` des assets d'installation Windows (`TennoFrame-Setup-*.exe` et `WireFrame-Setup-*.exe` historiques).
+     - `installedUsersCount` : base active estimée (`max(1, maxDownloadsSingleRelease)` afin de ne pas confondre mises à jour successives et utilisateurs distincts, avec plancher à `1` pour compter l'instance locale).
+     - `totalDownloadsCount` : cumul total de tous les téléchargements d'installateurs `.exe` toutes versions confondues + répartition par version (`releases` Top 5 avec part `%`).
+   - **Discord Public Invite Counts API (`GET https://discord.com/api/v10/invites/DhGwHPf82n?with_counts=true`)** :
+     - Extraction de `onlineCount` (`approximate_presence_count`) et `discordMemberCount` (`approximate_member_count`).
+   - **Politique de Cache & Résilience Hors-Ligne (`CommunityStatsService`)** :
+     - Cache mémoire côté Main Process de **15 minutes** (rafraîchissement périodique silencieux + bouton `⟳ Actualiser` avec `forceRefresh`), exécuté via `RateLimitedHttpClient` en HTTPS strict (`net.fetch`) sans consommer le quota `3 req/s` de `api.warframe.market`.
+     - Persistance atomique du dernier cliché valide dans `%APPDATA%/TennoFrame/community-stats-cache.json` : démarrage instantané sans saut de mise en page et bascule transparente `fromOfflineCache: true` en cas de coupure réseau ou de limite GitHub.
+3. **Popover Détail Optionnel au Clic & 4 États UI Obligatoires** :
+   - Un clic optionnel sur la pilule permanente ouvre un `Popover` détaillant : *Utilisateurs installés*, *Téléchargements cumulés (.exe)*, *Membres en ligne / Discord*, l'histogramme d'adoption des 5 dernières versions, l'horodatage et les boutons `⟳ Actualiser`, `↗ Releases GitHub` et `💬 Rejoindre Discord`.
+   - **4 États UI** : *Skeleton* (premier lancement sans cache disque), *1re installation / Amorçage (`≥ 1`)*, *Nominal temps réel*, et *Hors-ligne / Cache de secours (`fromOfflineCache`)*.
+
 ---
 
 ## 4. Architecture Technique, Contrats IPC & Sécurité
@@ -792,6 +813,7 @@ Tous les paramètres d'entrée et toutes les réponses API passent par une valid
 | **`window`** | `window:minimize`, `window:toggleMaximize`, `window:close`, `window:setAlwaysOnTop`, `window:setCompactMode`, `window:setZoom`, `window:openExternalUrl`, `window:onStateChanged` *(event)* | Pilotage natif de la fenêtre, du mode Overlay et ouverture sécurisée de liens externes |
 | **`overlay`** | `overlay:getState`, `overlay:setEnabled`, `overlay:updateState`, `overlay:setClickThrough`, `overlay:onStateChanged` *(event)* | Pilotage temps réel de la fenêtre secondaire *Codex Farm Overlay* en jeu et synchronisation de la sélection d'objets/pièces |
 | **`updater`** | `updater:check`, `updater:downloadAndInstall`, `updater:getChangelog`, `updater:onStatus` *(event)* | Cycle de mise à jour `electron-updater` |
+| **`system`** | `system:getStatus`, `system:clearCache`, `system:getCommunityStats` | Diagnostic technique du client, purge du cache et compteur communautaire permanent (utilisateurs installés, téléchargements `.exe` & présence en ligne) |
 
 ### 4.4. Exigences Non-Fonctionnelles & Sécurité Intransigeante
 
@@ -809,9 +831,9 @@ Tous les paramètres d'entrée et toutes les réponses API passent par une valid
 
 ---
 
-## 5. Plan des Maquettes Wireframes Excalidraw (`docs/02-wireframes/` — Synchronisées `v2.9+`)
+## 5. Plan des Maquettes Wireframes Excalidraw (`docs/02-wireframes/` — Synchronisées `v2.10+`)
 
-L'ensemble des **15 planches Excalidraw** dans `docs/02-wireframes/` documente fidèlement l'architecture de **TennoFrame**, chacune présentant côte à côte la version **Desktop (`1440×900`)**, son adaptation **Compact Overlay (`460×660`)**, et **les 4 états UI obligatoires** (*Chargement / Skeleton*, *Vide*, *Nominal*, *Erreur*) :
+L'ensemble des **16 planches Excalidraw** dans `docs/02-wireframes/` documente fidèlement l'architecture de **TennoFrame**, chacune présentant côte à côte la version **Desktop (`1440×900`)**, son adaptation **Compact Overlay (`460×660`)**, et **les 4 états UI obligatoires** (*Chargement / Skeleton*, *Vide*, *Nominal*, *Erreur*) :
 
 1. `01-app-shell-navigation.excalidraw` : Fenêtre *Frameless* `v2.6.0`, `TitleTabsBar` (défilement molette + chevrons `‹ / ›` + fermeture clic molette), `ClickThroughBanner` (`👻` `Alt+G` + maintien `0.5s`), `CommandNavBar` (`Ctrl+K`, cloche `🔔`, `PC · Cross · FR ▾`, Zoom, `📌`, `👻`, `🗖`, `⚙`), `BookmarksBar` centrée + `Historique` (`Ctrl+H`), Omnibox, Organisateur d'onglets, bandeau `/w`, `CompactTimersBar`, bouton Discord et `StatusBar v2.6.0`.
 2. `02-market-home-catalog-item.excalidraw` : Accueil Marché (flux d'annonces récentes en direct, `ViewModeToggle` `[⊞|▭|☰] + [S|M|L]`, badges `Min · Moy · Max` Platinum), Catalogue, Favoris, Profil joueur, et **Fiche Item complète** (Ordres Vente/Achat, Comparateur *Set vs Pièces*, Pont bidirectionnel *Codex*, Statistiques 48h/90j + pagination *Afficher plus*).
@@ -828,6 +850,7 @@ L'ensemble des **15 planches Excalidraw** dans `docs/02-wireframes/` documente f
 13. `13-codex-mobs-vendors.excalidraw` *(Module 11 — Bestiaire Complet des Mobs & Répertoire des Marchands dans le Codex)* : barre Codex à **8 onglets** (`Ressources · Warframes · Armes · Mods · Reliques · 👾 Mobs · 🏪 Marchands · Helminth`), **Vue Desktop `1440×900` de l'onglet `👾 Mobs`** (filtres Factions & Rang d'unité, recherche par mob/planète/drop, cartes Bestiaire + Fiche Détail Mob avec planètes/missions d'apparition, défenses/faiblesses élémentaires et table de drop `%` avec barre colorée sous le `%`), **Vue Desktop `1440×900` de l'onglet `🏪 Marchands`** (recherche transversale par nom de marchand OU nom d'article vendu, filtres Hubs/Planètes, cartes Marchands + Fiche Détail Marchand avec localisation exacte Planète/Hub/Salle/Quête requise, devises acceptées et catalogue filtrable « Ce qu'il vend » avec coûts exacts, rang requis, pont Codex/Plat et épinglage `🎯`), **Adaptation Mode Compact `460×660` + Aperçu `Codex Farm Overlay` en jeu** (cartes Mob & Offre Marchand épinglées) et **les 4 états UI obligatoires**.
 14. `14-wfm-account-profile-listings.excalidraw` *(Module 12 — Connexion Optionnelle Warframe Market, Profil Complet & Mise en Vente d'Items)* : **Puce d'en-tête `CommandNavBar`** (`👤 Connexion WFM` vs `🟢 Nyxo17 ▾` avec statut temps réel `En jeu / En ligne / Invisible`), **Vue Desktop `1440×900` « Mon Profil Warframe Market » (`wf://wfm-account`)** (bannière identité complète + 4 KPIs Réputation / Valeur Stock Plat / Annonces / Ventes session, onglets `💰 Mes Ventes` / `🛒 Mes Achats` / `⭐ Profil Complet & Avis`, édition rapide prix/quantité/visibilité et bouton `✓ Vendu -1`), **Vue Desktop `1440×900` Fiche Item + Modale intelligente « Mettre un item en vente »** (champs dynamiques Rang/Raffinement/Ayatan, panneau **📊 Aide au Prix en Direct** avec Top 5 `En jeu` et boutons `[S'aligner] [-1p] [Moyenne]`, détection de doublon), **Modale de Connexion Sécurisée Optionnelle** (`Email/Mot de passe` + `Fenêtre Web WFM Auto` + `Jeton secours` chiffré via `safeStorage` DPAPI), **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
 15. `15-progressive-tokenized-search.excalidraw` *(Module 13 — Barre de Recherche Cumulative à Pastilles `Tokenized Filter Bar`)* : **Schéma du parcours en 3 étapes** (`[📦 volt ×]` → saisie `TennoTrader42` → intersection `[📦 volt ×] + [👤 TennoTrader42 ×]`), **Vue Desktop `1440×900` de `MarketCatalogView`** (barre `MarketTokenFilterBar` avec pastilles typées, menu d'autocomplétion contextuel Item vs Vendeur vs Prix, carte vendeur ciblé et résultats d'offres croisées avec `/w` et `+ Panier`), **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
+16. `16-user-install-counter.excalidraw` *(Module 15 — Compteur Permanent d'Utilisateurs & d'Installations — validé)* : **Pilule permanente dans `TitleTabsBar` (haut-droite avant `— ▢ ✕`) et rappel dans `StatusBar` (bas-droite)** garantissant une visibilité `100 %` permanente sur tous les onglets et vues, **Popover détail optionnel au clic** (utilisateurs installés, téléchargements `.exe` cumulés, membres en ligne Discord, répartition par version), **Adaptation Mode Compact `460×660` (`👥 X · 🟢 Y`)** et **les 4 états UI obligatoires**.
 
 ---
 
