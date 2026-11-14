@@ -13,6 +13,7 @@ import { AlertSchedulerService } from './services/AlertSchedulerService'
 import { CacheService } from './services/CacheService'
 import { CartBundlerService } from './services/CartBundlerService'
 import { CodexRepository } from './services/CodexRepository'
+import { CommunityStatsService } from './services/CommunityStatsService'
 import { FarmOverlayWindowService } from './services/FarmOverlayWindowService'
 import { MarketApiService } from './services/MarketApiService'
 import { MarketFacetedSearchService } from './services/MarketFacetedSearchService'
@@ -69,6 +70,7 @@ async function bootstrap(): Promise<void> {
 
   const httpClient = new RateLimitedHttpClient(3)
   const cacheService = new CacheService(app.getPath('sessionData'), httpClient)
+  const communityStatsService = new CommunityStatsService(httpClient, userDataPath)
   const storageService = new StorageService(userDataPath)
   await storageService.load()
 
@@ -160,6 +162,7 @@ async function bootstrap(): Promise<void> {
   registerIpcHandlers({
     httpClient,
     cacheService,
+    communityStatsService,
     storageService,
     windowService,
     farmOverlayService,

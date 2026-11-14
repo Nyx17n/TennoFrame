@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Activity, Database, Keyboard, ShieldCheck, Sparkles } from 'lucide-react'
+import { CommunityCounterPill } from '@/components/shell/CommunityCounterPill'
 import { useAppStore } from '@/stores/useAppStore'
 
 export function StatusBar(): React.JSX.Element {
@@ -36,7 +37,7 @@ export function StatusBar(): React.JSX.Element {
         )}
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5">
         {updaterStatus?.state === 'downloaded' && (
           <button
             type="button"
@@ -47,6 +48,8 @@ export function StatusBar(): React.JSX.Element {
             <span>MAJ v{updaterStatus.availableVersion} prête</span>
           </button>
         )}
+
+        <CommunityCounterPill variant="statusbar" isCompact={windowState.isCompactMode} />
 
         {!windowState.isCompactMode && (
           <span className="inline-flex items-center gap-1">

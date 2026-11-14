@@ -24,7 +24,7 @@ import type {
   MarketFacetedSearchResult
 } from './schemas/market-search.schema'
 import type { UserSettings, UserSettingsPatch } from './schemas/settings.schema'
-import type { SystemStatus } from './schemas/system.schema'
+import type { CommunityStatsSnapshot, SystemStatus } from './schemas/system.schema'
 import type {
   CartBundleAnalysis,
   DucatItemEntry,
@@ -56,6 +56,7 @@ import type {
 export const IPC_CHANNELS = {
   SYSTEM_GET_STATUS: 'system:getStatus',
   SYSTEM_CLEAR_CACHE: 'system:clearCache',
+  SYSTEM_GET_COMMUNITY_STATS: 'system:getCommunityStats',
   SETTINGS_GET: 'settings:get',
   SETTINGS_UPDATE: 'settings:update',
   SETTINGS_RESET: 'settings:reset',
@@ -123,6 +124,7 @@ export interface TennoFrameBridgeApi {
   readonly system: {
     getStatus: () => Promise<SystemStatus>
     clearCache: () => Promise<SystemStatus>
+    getCommunityStats: (forceRefresh?: boolean) => Promise<CommunityStatsSnapshot>
   }
   readonly settings: {
     get: () => Promise<UserSettings>

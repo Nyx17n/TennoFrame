@@ -2,6 +2,7 @@ import { app, clipboard, dialog, ipcMain } from 'electron'
 import { z } from 'zod'
 import { IPC_CHANNELS } from '@shared/ipc-channels'
 import { UserSettingsPatchSchema } from '@shared/schemas/settings.schema'
+import { CommunityStatsQuerySchema } from '@shared/schemas/system.schema'
 import {
   BooleanTogglePayloadSchema,
   ExternalUrlPayloadSchema,
@@ -9,6 +10,7 @@ import {
 } from '@shared/schemas/window.schema'
 import type { RateLimitedHttpClient } from '../infrastructure/http/RateLimitedHttpClient'
 import type { CacheService } from '../services/CacheService'
+import type { CommunityStatsService } from '../services/CommunityStatsService'
 import type { FarmOverlayWindowService } from '../services/FarmOverlayWindowService'
 import type { StorageService } from '../services/StorageService'
 import type { WindowOverlayService } from '../services/WindowOverlayService'
@@ -21,6 +23,7 @@ const ClipboardTextSchema = z.object({
 export interface MainServicesContainer {
   httpClient: RateLimitedHttpClient
   cacheService: CacheService
+  communityStatsService: CommunityStatsService
   storageService: StorageService
   windowService: WindowOverlayService
   farmOverlayService: FarmOverlayWindowService
@@ -32,6 +35,7 @@ export function registerIpcHandlers(services: MainServicesContainer): void {
   const {
     httpClient,
     cacheService,
+    communityStatsService,
     storageService,
     windowService,
     farmOverlayService,
@@ -57,6 +61,12 @@ export function registerIpcHandlers(services: MainServicesContainer): void {
     assertTrustedSender(event, windowService.getMainWindow())
     await cacheService.clearAll()
     return buildSystemStatus()
+  })
+
+  ipcMain.handle(IPC_CHANNELS.SYSTEM_GET_COMMUNITY_STATS, async (event, rawPayload: unknown) => {
+    assertTrustedSender(event, windowService.getMainWindow())
+    const { forceRefresh } = CommunityStatsQuerySchema.parse(rawPayload ?? {})
+    return communityStatsService.getStats(Boolean(forceRefresh))
   })
 
   ipcMain.handle(IPC_CHANNELS.SETTINGS_GET, async (event) => {
