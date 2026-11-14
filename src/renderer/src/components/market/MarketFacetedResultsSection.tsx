@@ -9,11 +9,13 @@ import {
   User,
   X
 } from 'lucide-react'
+import { pickMarketText } from '@shared/data/languages'
 import type {
   MarketFacetedSearchResult,
   MarketFilterChip
 } from '@shared/schemas/market-search.schema'
 import { toWfAssetUrl, type MarketOrder } from '@shared/schemas/market.schema'
+import type { AppLanguage } from '@shared/schemas/settings.schema'
 import { Button } from '@/components/ui/button'
 import { SafeAssetImage } from '@/components/ui/safe-asset-image'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -34,7 +36,7 @@ interface MarketFacetedResultsSectionProps {
   readonly isLoading: boolean
   readonly error: string | null
   readonly isCompact: boolean
-  readonly lang: 'fr' | 'en'
+  readonly lang: AppLanguage
   readonly onRetry: () => void
   readonly onRemoveChip: (chipId: string) => void
   readonly onShowFullSellerShop: () => void
@@ -178,9 +180,7 @@ export function MarketFacetedResultsSection({
         <div className="space-y-2">
           {result.orders.slice(0, visibleCount).map((ord) => {
             const label =
-              lang === 'fr'
-                ? (ord.itemNameFr ?? ord.itemSlug ?? 'Item')
-                : (ord.itemNameEn ?? ord.itemSlug ?? 'Item')
+              pickMarketText(lang, ord.itemNameFr, ord.itemNameEn) || ord.itemSlug || 'Item'
             const thumb = toWfAssetUrl(ord.itemThumb)
             const seller = ord.user
 

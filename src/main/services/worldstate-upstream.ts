@@ -13,12 +13,21 @@ interface UpstreamCandidate {
   retryDelayMs?: number
 }
 
-const WFSTAT_CANDIDATES: readonly UpstreamCandidate[] = [
-  { url: 'https://api.warframestat.us/pc?language=fr', acceptLanguage: 'fr' },
-  { url: 'https://api.warframestat.us/pc/?language=fr', acceptLanguage: 'fr', retryDelayMs: 450 },
-  { url: 'https://api.warframestat.us/pc?language=en', acceptLanguage: 'en' },
-  { url: 'https://api.warframestat.us/pc', acceptLanguage: 'en' }
-]
+function buildWfStatCandidates(langCode: string): readonly UpstreamCandidate[] {
+  const safe = encodeURIComponent(langCode || 'fr')
+  if (safe === 'en') {
+    return [
+      { url: 'https://api.warframestat.us/pc?language=en', acceptLanguage: 'en' },
+      { url: 'https://api.warframestat.us/pc', acceptLanguage: 'en', retryDelayMs: 350 }
+    ]
+  }
+  return [
+    { url: `https://api.warframestat.us/pc?language=${safe}`, acceptLanguage: safe },
+    { url: `https://api.warframestat.us/pc/?language=${safe}`, acceptLanguage: safe, retryDelayMs: 400 },
+    { url: 'https://api.warframestat.us/pc?language=en', acceptLanguage: 'en' },
+    { url: 'https://api.warframestat.us/pc', acceptLanguage: 'en' }
+  ]
+}
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -26,15 +35,16 @@ function delay(ms: number): Promise<void> {
 
 /**
  * Resilient upstream fetcher for `api.warframestat.us`.
- * Handles cold locale cache `404` responses on `/pc/?language=fr` by retrying
- * canonical `/pc?language=fr` and seamlessly falling back to `/pc?language=en`.
+ * Handles cold locale cache `404` responses by retrying canonical paths
+ * and seamlessly falling back to `/pc?language=en`.
  */
 export async function fetchResilientWfStatRaw(
-  http: RateLimitedHttpClient
+  http: RateLimitedHttpClient,
+  wfstatLangCode = 'fr'
 ): Promise<RawWfStatResponse> {
   let lastError: unknown = null
 
-  for (const candidate of WFSTAT_CANDIDATES) {
+  for (const candidate of buildWfStatCandidates(wfstatLangCode)) {
     if (candidate.retryDelayMs) {
       await delay(candidate.retryDelayMs)
     }

@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { CornerDownLeft, ExternalLink, Plus, Search } from 'lucide-react'
+import { pickMarketAltText, pickMarketText } from '@shared/data/languages'
 import type { CodexSummaryCard } from '@shared/schemas/codex.schema'
 import { toWfAssetUrl } from '@shared/schemas/market.schema'
 import {
@@ -109,8 +110,8 @@ export function OmniboxDialog(): React.JSX.Element {
         normalizeSearchText(item.nameEn).includes(q) ||
         item.slug.includes(q)
       ) {
-        const primaryName = lang === 'fr' ? item.nameFr : item.nameEn
-        const altName = lang === 'fr' ? item.nameEn : item.nameFr
+        const primaryName = pickMarketText(lang, item.nameFr, item.nameEn)
+        const altName = pickMarketAltText(lang, item.nameFr, item.nameEn)
         itemMatches.push({
           label: primaryName,
           subtitle:
@@ -126,7 +127,7 @@ export function OmniboxDialog(): React.JSX.Element {
     }
 
     const codexEntries: QuickEntry[] = codexHits.map((c) => ({
-      label: c.nameFr,
+      label: lang === 'fr' ? c.nameFr : c.nameEn || c.nameFr,
       subtitle: `Codex (${c.category}) · ${c.subtitle}`,
       keywords: `codex-${c.category}-${c.id}`,
       imageUrl: c.imageUrl,

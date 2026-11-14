@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Copy, Globe, Loader2, Minus, Plus, Square, X
 import { BrowserTabPill } from '@/components/shell/BrowserTabPill'
 import { CommunityCounterPill } from '@/components/shell/CommunityCounterPill'
 import { TabOrganizerPopover } from '@/components/shell/TabOrganizerPopover'
+import { useUiTranslations } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { ipcClient } from '@/services/ipc-client'
 import { useAppStore } from '@/stores/useAppStore'
@@ -10,6 +11,7 @@ import { useTabsStore } from '@/stores/useTabsStore'
 
 export function TitleTabsBar(): React.JSX.Element {
   const windowState = useAppStore((s) => s.windowState)
+  const { t } = useUiTranslations()
   const hubActive = useTabsStore((s) => s.hubActive)
   const tabs = useTabsStore((s) => s.tabs)
   const activeTabId = useTabsStore((s) => s.activeTabId)
@@ -99,7 +101,7 @@ export function TitleTabsBar(): React.JSX.Element {
           ) : (
             <Globe className="h-3.5 w-3.5 text-primary" />
           )}
-          {!windowState.isCompactMode && <span>Hub</span>}
+          {!windowState.isCompactMode && <span>{t.shell.hub}</span>}
         </button>
 
         <div className="mx-0.5 h-4 w-px shrink-0 bg-border" />
@@ -158,7 +160,7 @@ export function TitleTabsBar(): React.JSX.Element {
           <button
             type="button"
             onClick={() => openTab({ kind: 'market-home' })}
-            title="Nouvel onglet (Ctrl+T)"
+            title={t.shell.newTab}
             className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
           >
             <Plus className="h-3.5 w-3.5" />

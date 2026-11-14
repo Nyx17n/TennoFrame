@@ -11,6 +11,7 @@ import { CodexMobDetailSection } from '@/components/codex/CodexMobDetailSection'
 import { CodexOverlayToolbar } from '@/components/codex/CodexOverlayToolbar'
 import { CodexVendorDetailSection } from '@/components/codex/CodexVendorDetailSection'
 import { ipcClient } from '@/services/ipc-client'
+import { useAppStore } from '@/stores/useAppStore'
 import { useTabsStore } from '@/stores/useTabsStore'
 import { useWfmAccountStore } from '@/stores/useWfmAccountStore'
 
@@ -21,6 +22,7 @@ export function CodexDetailView({
   categoryRaw?: string
   id: string
 }): React.JSX.Element {
+  const lang = useAppStore((s) => s.settings.market.language)
   const navigateActive = useTabsStore((s) => s.navigateActive)
   const openTab = useTabsStore((s) => s.openTab)
   const wfmConnected = useWfmAccountStore((s) => Boolean(s.session.connected && s.session.user))
@@ -83,6 +85,9 @@ export function CodexDetailView({
     )
   }
 
+  const primaryTitle = lang === 'fr' ? detail.nameFr : detail.nameEn || detail.nameFr
+  const secondaryTitle = lang === 'fr' ? detail.nameEn : detail.nameFr
+
   return (
     <main className="mx-auto max-w-5xl space-y-4 p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -114,8 +119,8 @@ export function CodexDetailView({
               size="sm"
               onClick={(e) => {
                 const marketRoute = { kind: 'market-item' as const, slug: detail.marketSlug! }
-                if (e.ctrlKey || e.metaKey) openTab(marketRoute, { title: detail.nameFr })
-                else navigateActive(marketRoute, detail.nameFr)
+                if (e.ctrlKey || e.metaKey) openTab(marketRoute, { title: primaryTitle })
+                else navigateActive(marketRoute, primaryTitle)
               }}
             >
               <ExternalLink className="h-3.5 w-3.5" />
@@ -130,7 +135,7 @@ export function CodexDetailView({
       <Card className="flex flex-col gap-4 p-4 sm:flex-row sm:items-start">
         <SafeAssetImage
           src={detail.imageUrl}
-          alt={detail.nameFr}
+          alt={primaryTitle}
           className={
             detail.category === 'vendors'
               ? 'h-24 w-24 shrink-0 rounded-lg border border-border bg-background/80 object-cover object-top'
@@ -145,9 +150,9 @@ export function CodexDetailView({
 
         <div className="min-w-0 flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-lg font-bold">{detail.nameFr}</h1>
-            {detail.nameEn !== detail.nameFr && (
-              <span className="text-xs text-muted-foreground">({detail.nameEn})</span>
+            <h1 className="text-lg font-bold">{primaryTitle}</h1>
+            {secondaryTitle !== primaryTitle && (
+              <span className="text-xs text-muted-foreground">({secondaryTitle})</span>
             )}
             <Badge variant="secondary">{detail.typeLabel}</Badge>
             {detail.isPrime && <Badge className="bg-amber-500/20 text-amber-300">Prime</Badge>}

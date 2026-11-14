@@ -48,6 +48,7 @@ export function CodexItemsDisplay({
   const [ctxMenu, setCtxMenu] = React.useState<CodexContextMenuState | null>(null)
   const catalog = useMarketStore((s) => s.catalog)
   const ensureCatalogLoaded = useMarketStore((s) => s.ensureCatalogLoaded)
+  const lang = useAppStore((s) => s.settings.market.language)
   const overlayEnabled = useAppStore((s) => s.settings.extensions.codexFarmOverlay)
   const pinnedEntries = useFarmOverlayStore((s) => s.liveState.pinnedEntries)
   const pinQuickItem = useFarmOverlayStore((s) => s.pinQuickItem)
@@ -107,12 +108,13 @@ export function CodexItemsDisplay({
       <>
         <div className={gridClass}>
           {items.map((card) => {
+            const primaryName = lang === 'fr' ? card.nameFr : card.nameEn || card.nameFr
             const route: CodexDetailRoute = {
               kind: 'codex-detail',
               category: card.category,
               slug: card.id
             }
-            const title = `Codex : ${card.nameFr}`
+            const title = `Codex : ${primaryName}`
             const marketSlug = card.isTradable ? resolveCodexMarketSlug(card, catalog) : null
 
             return (
@@ -170,7 +172,7 @@ export function CodexItemsDisplay({
                 <div className="flex min-h-0 flex-1 items-center justify-center py-1">
                   <SafeAssetImage
                     src={card.imageUrl}
-                    alt={card.nameFr}
+                    alt={primaryName}
                     className={cn(
                       imgClass,
                       'max-h-full rounded-md border border-border/60 bg-background/70 transition-transform group-hover:scale-105',
@@ -194,7 +196,7 @@ export function CodexItemsDisplay({
                 <div className="w-full min-w-0 space-y-1">
                   <div className="flex items-center justify-center gap-1">
                     <span className="truncate text-xs font-semibold text-foreground">
-                      {card.nameFr}
+                      {primaryName}
                     </span>
                     {card.isPrime && <Sparkles className="h-3 w-3 shrink-0 text-amber-400" />}
                   </div>
@@ -219,12 +221,13 @@ export function CodexItemsDisplay({
       <>
         <div className={gridClass}>
           {items.map((card) => {
+            const primaryName = lang === 'fr' ? card.nameFr : card.nameEn || card.nameFr
             const route: CodexDetailRoute = {
               kind: 'codex-detail',
               category: card.category,
               slug: card.id
             }
-            const title = `Codex : ${card.nameFr}`
+            const title = `Codex : ${primaryName}`
             const marketSlug = card.isTradable ? resolveCodexMarketSlug(card, catalog) : null
 
             return (
@@ -240,7 +243,7 @@ export function CodexItemsDisplay({
                 <div className="flex min-w-0 flex-1 items-center gap-3">
                   <SafeAssetImage
                     src={card.imageUrl}
-                    alt={card.nameFr}
+                    alt={primaryName}
                     className={cn(
                       imgClass,
                       'shrink-0 rounded-md border border-border/60 bg-background/70',
@@ -263,7 +266,7 @@ export function CodexItemsDisplay({
                   <div className="min-w-0 flex-1 space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="truncate text-xs font-semibold text-foreground">
-                        {card.nameFr}
+                        {primaryName}
                       </span>
                       {card.isPrime && <Sparkles className="h-3 w-3 shrink-0 text-amber-400" />}
                       <span className="truncate text-[11px] text-primary/90">{card.subtitle}</span>
@@ -321,12 +324,13 @@ export function CodexItemsDisplay({
     <>
       <div className={gridClass}>
         {items.map((card) => {
+          const primaryName = lang === 'fr' ? card.nameFr : card.nameEn || card.nameFr
           const route: CodexDetailRoute = {
             kind: 'codex-detail',
             category: card.category,
             slug: card.id
           }
-          const title = `Codex : ${card.nameFr}`
+          const title = `Codex : ${primaryName}`
           const marketSlug = card.isTradable ? resolveCodexMarketSlug(card, catalog) : null
 
           return (
@@ -342,7 +346,7 @@ export function CodexItemsDisplay({
               <div className="flex min-w-0 flex-1 items-start gap-3">
                 <SafeAssetImage
                   src={card.imageUrl}
-                  alt={card.nameFr}
+                  alt={primaryName}
                   className={cn(
                     imgClass,
                     'shrink-0 rounded-md border border-border/60 bg-background/70',
@@ -364,7 +368,7 @@ export function CodexItemsDisplay({
                 <div className="min-w-0 flex-1 space-y-1">
                   <div className="flex items-center gap-1.5">
                     <span className="truncate text-xs font-semibold text-foreground">
-                      {card.nameFr}
+                      {primaryName}
                     </span>
                     {card.isPrime && <Sparkles className="h-3 w-3 shrink-0 text-amber-400" />}
                   </div>

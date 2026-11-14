@@ -1,8 +1,10 @@
 import * as React from 'react'
 import { MessageCircle, RefreshCw, Users, WifiOff } from 'lucide-react'
 import { DISCORD_INVITE_URL } from '@shared/constants'
+import { getLanguageMeta } from '@shared/data/languages'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useUiTranslations } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { ipcClient } from '@/services/ipc-client'
 import { useCommunityStatsStore } from '@/stores/useCommunityStatsStore'
@@ -12,8 +14,8 @@ export interface CommunityCounterPillProps {
   isCompact: boolean
 }
 
-function formatNumberFr(value: number): string {
-  return new Intl.NumberFormat('fr-FR').format(value)
+function formatNumberLocale(value: number, intlLocale: string): string {
+  return new Intl.NumberFormat(intlLocale).format(value)
 }
 
 function formatCompactCount(value: number): string {
@@ -22,16 +24,18 @@ function formatCompactCount(value: number): string {
   return String(value)
 }
 
-function formatUpdatedTime(iso: string): string {
+function formatUpdatedTime(iso: string, intlLocale: string): string {
   const date = new Date(iso)
   if (Number.isNaN(date.getTime())) return '—'
-  return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+  return date.toLocaleTimeString(intlLocale, { hour: '2-digit', minute: '2-digit' })
 }
 
 export function CommunityCounterPill({
   variant,
   isCompact
 }: CommunityCounterPillProps): React.JSX.Element {
+  const { lang, t } = useUiTranslations()
+  const intlLocale = getLanguageMeta(lang).intlLocale
   const stats = useCommunityStatsStore((s) => s.stats)
   const isLoading = useCommunityStatsStore((s) => s.isLoading)
   const isRefreshing = useCommunityStatsStore((s) => s.isRefreshing)
@@ -46,18 +50,18 @@ export function CommunityCounterPill({
   const installedLabel = stats
     ? isCompact
       ? formatCompactCount(stats.installedUsersCount)
-      : formatNumberFr(stats.installedUsersCount)
+      : formatNumberLocale(stats.installedUsersCount, intlLocale)
     : '1'
   const onlineLabel = stats
     ? isCompact
       ? formatCompactCount(stats.onlineCount)
-      : formatNumberFr(stats.onlineCount)
+      : formatNumberLocale(stats.onlineCount, intlLocale)
     : '1'
   const isOffline = Boolean(stats?.fromOfflineCache || error)
 
   const tooltipText = stats
-    ? `${formatNumberFr(stats.installedUsersCount)} utilisateurs installés · ${formatNumberFr(stats.onlineCount)} en ligne`
-    : 'Chargement du compteur d’utilisateurs TennoFrame...'
+    ? `${formatNumberLocale(stats.installedUsersCount, intlLocale)} ${t.shell.installedShort} · ${formatNumberLocale(stats.onlineCount, intlLocale)} ${t.shell.onlineShort}`
+    : t.shell.communityTitle
 
   return (
     <Popover>
@@ -66,7 +70,7 @@ export function CommunityCounterPill({
           <button
             type="button"
             title={tooltipText}
-            aria-label="Compteur permanent d'utilisateurs installés TennoFrame"
+            aria-label={t.shell.communityTitle}
             className={cn(
               'inline-flex h-6 shrink-0 items-center gap-1.5 rounded-full border px-2.5 text-[11px] font-medium transition-colors',
               isOffline
@@ -81,7 +85,7 @@ export function CommunityCounterPill({
                 <Users className="h-3 w-3 shrink-0 text-primary" />
                 <span className="font-semibold tabular-nums">
                   {installedLabel}
-                  {!isCompact && ' installés'}
+                  {!isCompact && ` ${t.shell.installedShort}`}
                 </span>
                 <span className="text-muted-foreground/70">·</span>
                 <span
@@ -92,7 +96,7 @@ export function CommunityCounterPill({
                 />
                 <span className="tabular-nums text-emerald-300">
                   {onlineLabel}
-                  {!isCompact && ' en ligne'}
+                  {!isCompact && ` ${t.shell.onlineShort}`}
                 </span>
               </>
             )}
@@ -101,7 +105,7 @@ export function CommunityCounterPill({
           <button
             type="button"
             title={tooltipText}
-            aria-label="Compteur d'utilisateurs installés"
+            aria-label={t.shell.communityTitle}
             className="inline-flex items-center gap-1.5 rounded px-1.5 py-0.5 text-[10px] text-foreground/85 transition-colors hover:bg-secondary/80 hover:text-foreground"
           >
             {isLoading && !stats ? (
@@ -111,7 +115,7 @@ export function CommunityCounterPill({
                 <Users className="h-2.5 w-2.5 shrink-0 text-primary" />
                 <span className="font-medium tabular-nums">
                   {installedLabel}
-                  {!isCompact && ' installés'}
+                  {!isCompact && ` ${t.shell.installedShort}`}
                 </span>
                 <span className="text-muted-foreground">·</span>
                 <span
@@ -122,7 +126,7 @@ export function CommunityCounterPill({
                 />
                 <span className="tabular-nums text-emerald-400">
                   {onlineLabel}
-                  {!isCompact && ' en ligne'}
+                  {!isCompact && ` ${t.shell.onlineShort}`}
                 </span>
               </>
             )}
@@ -140,22 +144,22 @@ export function CommunityCounterPill({
             <div className="flex items-center gap-1.5">
               <Users className="h-3.5 w-3.5 text-primary" />
               <h4 className="truncate text-xs font-semibold text-foreground">
-                Communauté TennoFrame
+                {t.shell.communityTitle}
               </h4>
             </div>
             <p className="text-[10px] text-muted-foreground">
-              {stats ? `Mis à jour à ${formatUpdatedTime(stats.updatedAt)}` : 'Synchronisation...'}
+              {stats ? formatUpdatedTime(stats.updatedAt, intlLocale) : '...'}
             </p>
           </div>
           <button
             type="button"
             disabled={isRefreshing || isLoading}
             onClick={() => void fetchStats(true)}
-            title="Actualiser les compteurs"
+            title={t.shell.refresh}
             className="inline-flex h-6 items-center gap-1 rounded border border-border bg-secondary/70 px-2 text-[10px] font-medium text-foreground transition-colors hover:bg-secondary disabled:opacity-50"
           >
             <RefreshCw className={cn('h-3 w-3', (isRefreshing || isLoading) && 'animate-spin')} />
-            <span>Actualiser</span>
+            <span>{t.shell.refresh}</span>
           </button>
         </div>
 
@@ -163,7 +167,7 @@ export function CommunityCounterPill({
           <div className="flex items-center justify-between gap-2 rounded border border-amber-500/35 bg-amber-500/10 px-2.5 py-1.5 text-[10px] text-amber-200">
             <span className="inline-flex items-center gap-1.5">
               <WifiOff className="h-3 w-3 shrink-0 text-amber-400" />
-              <span>{error ? error : 'Hors-ligne : dernier cache local affiché.'}</span>
+              <span>{error ? error : t.shell.offlineCache}</span>
             </span>
           </div>
         )}
@@ -174,35 +178,27 @@ export function CommunityCounterPill({
             <Skeleton className="h-14 rounded-md" />
           </div>
         ) : stats ? (
-          <>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="rounded-md border border-primary/30 bg-primary/10 p-2.5">
-                <div className="text-[10px] text-muted-foreground">Utilisateurs installés</div>
-                <div className="mt-0.5 text-base font-bold tabular-nums text-foreground">
-                  {formatNumberFr(stats.installedUsersCount)}
-                </div>
-                <div className="text-[9px] text-primary/90">Base active TennoFrame</div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-md border border-primary/30 bg-primary/10 p-2.5">
+              <div className="text-[10px] text-muted-foreground">{t.shell.installedUsers}</div>
+              <div className="mt-0.5 text-base font-bold tabular-nums text-foreground">
+                {formatNumberLocale(stats.installedUsersCount, intlLocale)}
               </div>
-
-              <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 p-2.5">
-                <div className="text-[10px] text-muted-foreground">En ligne</div>
-                <div className="mt-0.5 text-base font-bold tabular-nums text-emerald-300">
-                  {formatNumberFr(stats.onlineCount)}
-                </div>
-                <div className="truncate text-[9px] text-emerald-300/80">
-                  {stats.discordMemberCount > 0
-                    ? `${formatNumberFr(stats.discordMemberCount)} membres Discord`
-                    : 'Session active'}
-                </div>
-              </div>
+              <div className="text-[9px] text-primary/90">{t.shell.activeBase}</div>
             </div>
 
-            {stats.installedUsersCount <= 1 && (
-              <p className="rounded border border-border bg-secondary/30 px-2.5 py-1.5 text-[10px] text-muted-foreground">
-                Première installation active détectée — invitez vos compagnons de clan Tenno !
-              </p>
-            )}
-          </>
+            <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 p-2.5">
+              <div className="text-[10px] text-muted-foreground">{t.shell.onlineLabel}</div>
+              <div className="mt-0.5 text-base font-bold tabular-nums text-emerald-300">
+                {formatNumberLocale(stats.onlineCount, intlLocale)}
+              </div>
+              <div className="truncate text-[9px] text-emerald-300/80">
+                {stats.discordMemberCount > 0
+                  ? `${formatNumberLocale(stats.discordMemberCount, intlLocale)} Discord`
+                  : t.shell.onlineShort}
+              </div>
+            </div>
+          </div>
         ) : null}
 
         <div className="flex items-center justify-end border-t border-border pt-2 text-[10px]">
@@ -212,7 +208,7 @@ export function CommunityCounterPill({
             className="inline-flex items-center gap-1 text-muted-foreground transition-colors hover:text-primary"
           >
             <MessageCircle className="h-3 w-3" />
-            <span>Rejoindre Discord</span>
+            <span>{t.shell.joinDiscord}</span>
           </button>
         </div>
       </PopoverContent>

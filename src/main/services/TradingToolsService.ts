@@ -1,3 +1,4 @@
+import { getLanguageMeta } from '@shared/data/languages'
 import type {
   DucatItemEntry,
   RivenAuctionCard,
@@ -24,6 +25,7 @@ interface LocalizedAttr {
 
 export class TradingToolsService {
   private rivenAttrMap = new Map<string, LocalizedAttr>()
+  private rivenAttrMapLang = ''
 
   constructor(
     private readonly http: RateLimitedHttpClient,
@@ -32,17 +34,23 @@ export class TradingToolsService {
     private readonly marketApi: MarketApiService
   ) {}
 
+  private async resolveWfmLanguage(): Promise<string> {
+    const { market } = await this.storage.getSettings()
+    return getLanguageMeta(market.language).wfmHeader
+  }
+
   private async buildHeaders(): Promise<Record<string, string>> {
     const { market } = await this.storage.getSettings()
     return {
-      Language: 'fr',
+      Language: getLanguageMeta(market.language).wfmHeader,
       Platform: market.platform,
       Crossplay: market.crossplay ? 'true' : 'false'
     }
   }
 
   public async getDucats(forceRefresh = false): Promise<DucatItemEntry[]> {
-    const cacheKey = 'wfm:ducats:v1'
+    const wfmLang = await this.resolveWfmLanguage()
+    const cacheKey = `wfm:ducats:v1:${wfmLang}`
     if (!forceRefresh) {
       const cached = this.cache.get<DucatItemEntry[]>(cacheKey)
       if (cached) return cached
@@ -90,9 +98,10 @@ export class TradingToolsService {
   }
 
   public async getRivenWeapons(): Promise<RivenWeaponSummary[]> {
-    const cacheKey = 'wfm:riven-weapons:v2'
+    const wfmLang = await this.resolveWfmLanguage()
+    const cacheKey = `wfm:riven-weapons:v2:${wfmLang}`
     const cached = this.cache.get<RivenWeaponSummary[]>(cacheKey)
-    if (cached && this.rivenAttrMap.size > 0) return cached
+    if (cached && this.rivenAttrMap.size > 0 && this.rivenAttrMapLang === wfmLang) return cached
 
     const headers = await this.buildHeaders()
     const [weaponsRaw, attrsRaw] = await Promise.all([
@@ -109,20 +118,21 @@ export class TradingToolsService {
     const nextAttrs = new Map<string, LocalizedAttr>()
     for (const a of attrsRaw.data) {
       const en = a.i18n?.['en']?.name ?? a.slug
-      const fr = a.i18n?.['fr']?.name ?? en
-      nextAttrs.set(a.slug, { fr, en })
+      const loc = a.i18n?.[wfmLang]?.name ?? en
+      nextAttrs.set(a.slug, { fr: loc, en })
     }
     this.rivenAttrMap = nextAttrs
+    this.rivenAttrMapLang = wfmLang
 
     const weapons: RivenWeaponSummary[] = weaponsRaw.data.map((w) => {
       const en = w.i18n?.['en']
-      const fr = w.i18n?.['fr']
+      const loc = w.i18n?.[wfmLang] ?? en
       return {
         id: w.id,
         slug: w.slug,
         nameEn: en?.name ?? w.slug,
-        nameFr: fr?.name ?? en?.name ?? w.slug,
-        thumb: fr?.thumb ?? en?.thumb ?? fr?.icon ?? en?.icon ?? null,
+        nameFr: loc?.name ?? en?.name ?? w.slug,
+        thumb: loc?.thumb ?? en?.thumb ?? loc?.icon ?? en?.icon ?? null,
         disposition: w.disposition,
         rivenType: w.rivenType
       }

@@ -101,6 +101,7 @@ export const useAppStore = create<AppStoreState>((set, get) => ({
         ipcClient.updater.getStatus().catch(() => null)
       ])
       const settings = mergeModule8Fallback(rawSettings)
+      document.documentElement.lang = settings.market.language
       applyThemeToDocument(settings.appearance)
       syncNotificationPrefs(settings)
       useNotificationStore.getState().setHydrated(true)
@@ -213,6 +214,7 @@ export const useAppStore = create<AppStoreState>((set, get) => ({
           }
         },
         audio: { ...get().settings.audio, ...patch.audio },
+        market: { ...get().settings.market, ...patch.market },
         extensions: { ...get().settings.extensions, ...patch.extensions },
         codexFarmOverlay: {
           ...get().settings.codexFarmOverlay,
@@ -227,12 +229,15 @@ export const useAppStore = create<AppStoreState>((set, get) => ({
       },
       patch
     )
+    document.documentElement.lang = optimistic.market.language
     applyThemeToDocument(optimistic.appearance)
     syncNotificationPrefs(optimistic)
+    set({ settings: optimistic })
 
     try {
       const saved = await ipcClient.settings.update(patch)
       const updated = mergeModule8Fallback(saved, patch)
+      document.documentElement.lang = updated.market.language
       applyThemeToDocument(updated.appearance)
       syncNotificationPrefs(updated)
       set({ settings: updated, errorMessage: null })

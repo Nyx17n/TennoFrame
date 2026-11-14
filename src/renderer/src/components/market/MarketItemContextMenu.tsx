@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { BookOpen, Check, Crosshair, ExternalLink, Plus, ShoppingCart, Star } from 'lucide-react'
+import { pickMarketText } from '@shared/data/languages'
 import {
   ContextMenuItem,
   ContextMenuLabel,
@@ -43,7 +44,7 @@ export function MarketItemContextMenu({
   const slugClean = item.slug.trim().toLowerCase()
   const isFav = favorites.includes(slugClean)
   const inCart = cart.some((c) => c.slug === slugClean)
-  const displayTitle = lang === 'fr' ? item.nameFr || item.nameEn : item.nameEn || item.nameFr
+  const displayTitle = pickMarketText(lang, item.nameFr, item.nameEn) || item.slug
 
   return (
     <ContextMenuPortal position={position} onClose={onClose}>

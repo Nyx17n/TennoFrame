@@ -1,4 +1,5 @@
 import { Notification } from 'electron'
+import { pickMarketText } from '@shared/data/languages'
 import { IPC_CHANNELS } from '@shared/ipc-channels'
 import type { PriceSniperRule, TriggeredAlertEvent } from '@shared/schemas/alerts.schema'
 import {
@@ -118,7 +119,7 @@ export class AlertSchedulerService {
             rulesMutated = true
           }
 
-          const displayName = settings.market.language === 'fr' ? rule.nameFr : rule.nameEn
+          const displayName = pickMarketText(settings.market.language, rule.nameFr, rule.nameEn)
           const eventPayload: TriggeredAlertEvent = {
             id: `${rule.id}-${Date.now()}`,
             kind: 'price-sniper',

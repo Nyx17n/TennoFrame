@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Package, Plus } from 'lucide-react'
+import { pickMarketText } from '@shared/data/languages'
 import { toWfAssetUrl } from '@shared/schemas/market.schema'
 import type {
   AppLanguage,
@@ -57,7 +58,7 @@ export function DucatsItemsDisplay({
       <>
         <div className={gridClass}>
           {items.map((item) => {
-            const label = lang === 'fr' ? item.nameFr : item.nameEn
+            const label = pickMarketText(lang, item.nameFr, item.nameEn)
             const thumb = toWfAssetUrl(item.thumb)
 
             return (
@@ -129,7 +130,7 @@ export function DucatsItemsDisplay({
     <>
       <div className={gridClass}>
         {items.map((item) => {
-          const label = lang === 'fr' ? item.nameFr : item.nameEn
+          const label = pickMarketText(lang, item.nameFr, item.nameEn)
           const thumb = toWfAssetUrl(item.thumb)
 
           return (

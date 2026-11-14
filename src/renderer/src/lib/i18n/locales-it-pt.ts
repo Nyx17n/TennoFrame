@@ -1,0 +1,171 @@
+import type { UiMessages } from './types'
+
+export const IT_MESSAGES: UiMessages = {
+  shell: {
+    hub: 'Hub',
+    newTab: 'Nuova scheda (Ctrl+T)',
+    omniboxHint: '— Cerca oggetto, Codex o incolla URL...',
+    back: 'Indietro',
+    forward: 'Avanti',
+    reload: 'Aggiorna scheda (Ctrl+R)',
+    pinOverlay: 'Fissa sopra Warframe (Alt+P)',
+    compactMode: 'Modalità Compatta 460×660 (Alt+M)',
+    settings: 'Impostazioni TennoFrame (Ctrl+,)',
+    zoomLabel: 'Zoom interfaccia',
+    installedShort: 'installati',
+    onlineShort: 'online',
+    communityTitle: 'Comunità TennoFrame',
+    refresh: 'Aggiorna',
+    retry: 'Riprova',
+    installedUsers: 'Utenti installati',
+    activeBase: 'Base attiva TennoFrame',
+    onlineLabel: 'Online',
+    joinDiscord: 'Unisciti a Discord',
+    offlineCache: 'Offline: cache locale mostrato.',
+    patchNotes: 'Note della patch'
+  },
+  bookmarks: {
+    market: 'Mercato',
+    favorites: 'Preferiti',
+    cart: 'Carrello',
+    recent: 'Ordini recenti',
+    codex: 'Codex',
+    ducats: 'Ducanator',
+    rivens: 'Contratti Riven',
+    wfmAccount: 'Mio Profilo WFM',
+    history: 'Cronologia'
+  },
+  market: {
+    settingsTitle: 'Mercato, Lingue Warframe e Sussurri (/w)',
+    settingsDesc: 'Scegli tra le 15 lingue ufficiali di Warframe e configura i messaggi /w.',
+    platformLabel: 'Piattaforma di gioco',
+    crossplayLabel: 'Includi offerte Crossplay',
+    defaultSellerFilter: 'Filtro venditori predefinito',
+    sellerIngame: 'Solo in gioco',
+    sellerOnline: 'In gioco + Online',
+    sellerAll: 'Tutti',
+    appLanguageLabel: 'Lingua di TennoFrame, Mercato e Hub (15 lingue)',
+    whisperLanguageLabel: 'Lingua del comando /w in gioco',
+    whisperPreviewLabel: 'Anteprima messaggio copiato:',
+    whisperCopiedBadge: 'Copiato! Incolla in gioco (Ctrl+V)',
+    whisperReadyBadge: 'Comando /w pronto',
+    copyButton: 'Copia',
+    noResults: 'Nessun oggetto trovato.'
+  },
+  settingsModal: {
+    title: 'Impostazioni TennoFrame',
+    desc: 'Tutte le modifiche sono validate con Zod e salvate automaticamente.',
+    appearance: 'Aspetto e Temi',
+    audio: 'Audio e Avvisi',
+    window: 'Finestra e Scorciatoie',
+    market: 'Mercato e Lingue',
+    extensions: 'Estensioni',
+    system: 'Sistema e Dati'
+  },
+  hub: {
+    planets: 'Pianeti e Taglie',
+    fissures: 'Fratture e Arconte',
+    invasions: 'Invasioni e Arbitrato',
+    duviri: 'Circuito di Duviri',
+    baro: "Baro Ki'Teer",
+    news: 'Notizie e Darvo',
+    activeBadge: 'ATTIVO',
+    unavailableTitle: 'Hub Worldstate non disponibile'
+  },
+  codex: {
+    resources: 'Risorse',
+    warframes: 'Warframes',
+    weapons: 'Armi',
+    mods: 'Mods',
+    relics: 'Reliquie',
+    mobs: '👾 Nemici',
+    vendors: '🏪 Mercanti',
+    helminth: 'Helminth',
+    englishFallbackBadge: 'Codex offline in inglese'
+  }
+}
+
+export const PT_MESSAGES: UiMessages = {
+  shell: {
+    hub: 'Hub',
+    newTab: 'Nova aba (Ctrl+T)',
+    omniboxHint: '— Pesquisar item, Codex ou colar URL...',
+    back: 'Voltar',
+    forward: 'Avançar',
+    reload: 'Atualizar aba (Ctrl+R)',
+    pinOverlay: 'Fixar sobre o Warframe (Alt+P)',
+    compactMode: 'Modo Compacto 460×660 (Alt+M)',
+    settings: 'Configurações TennoFrame (Ctrl+,)',
+    zoomLabel: 'Zoom de exibição',
+    installedShort: 'instalados',
+    onlineShort: 'online',
+    communityTitle: 'Comunidade TennoFrame',
+    refresh: 'Atualizar',
+    retry: 'Tentar novamente',
+    installedUsers: 'Usuários instalados',
+    activeBase: 'Base ativa TennoFrame',
+    onlineLabel: 'Online',
+    joinDiscord: 'Entrar no Discord',
+    offlineCache: 'Offline: exibindo cache local.',
+    patchNotes: 'Notas de atualização'
+  },
+  bookmarks: {
+    market: 'Mercado',
+    favorites: 'Favoritos',
+    cart: 'Carrinho',
+    recent: 'Ordens recentes',
+    codex: 'Codex',
+    ducats: 'Ducanator',
+    rivens: 'Contratos Riven',
+    wfmAccount: 'Meu Perfil WFM',
+    history: 'Histórico'
+  },
+  market: {
+    settingsTitle: 'Mercado, Idiomas do Warframe e Sussurros (/w)',
+    settingsDesc: 'Escolha entre os 15 idiomas oficiais do Warframe e configure suas mensagens /w.',
+    platformLabel: 'Plataforma',
+    crossplayLabel: 'Incluir ofertas Crossplay',
+    defaultSellerFilter: 'Filtro padrão de vendedores',
+    sellerIngame: 'Apenas no jogo',
+    sellerOnline: 'No jogo + Online',
+    sellerAll: 'Todos',
+    appLanguageLabel: 'Idioma do TennoFrame, Mercado e Hub (15 idiomas)',
+    whisperLanguageLabel: 'Idioma do comando /w no jogo',
+    whisperPreviewLabel: 'Prévia da mensagem copiada:',
+    whisperCopiedBadge: 'Copiado! Cole no jogo (Ctrl+V)',
+    whisperReadyBadge: 'Comando /w pronto',
+    copyButton: 'Copiar',
+    noResults: 'Nenhum item encontrado.'
+  },
+  settingsModal: {
+    title: 'Configurações TennoFrame',
+    desc: 'Todas as alterações são validadas e salvas automaticamente.',
+    appearance: 'Aparência e Temas',
+    audio: 'Áudio e Alertas',
+    window: 'Janela e Atalhos',
+    market: 'Mercado e Idiomas',
+    extensions: 'Extensões',
+    system: 'Sistema e Dados'
+  },
+  hub: {
+    planets: 'Planetas e Caçadas',
+    fissures: 'Fendas e Arconte',
+    invasions: 'Invasões e Arbitragem',
+    duviri: 'Circuito de Duviri',
+    baro: "Baro Ki'Teer",
+    news: 'Notícias e Darvo',
+    activeBadge: 'ATIVO',
+    unavailableTitle: 'Hub Worldstate indisponível'
+  },
+  codex: {
+    resources: 'Recursos',
+    warframes: 'Warframes',
+    weapons: 'Armas',
+    mods: 'Mods',
+    relics: 'Relíquias',
+    mobs: '👾 Inimigos',
+    vendors: '🏪 Mercadores',
+    helminth: 'Helminth',
+    englishFallbackBadge: 'Codex offline em inglês'
+  }
+}

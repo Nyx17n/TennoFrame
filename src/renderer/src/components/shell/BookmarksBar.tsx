@@ -12,6 +12,7 @@ import {
   type LucideIcon
 } from 'lucide-react'
 import type { AppRoute, RouteKind } from '@shared/schemas/navigation.schema'
+import { useUiTranslations, type UiMessages } from '@/lib/i18n'
 import { getTabCurrentRoute } from '@/lib/tab-helpers'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/stores/useAppStore'
@@ -20,7 +21,7 @@ import { useWfmAccountStore } from '@/stores/useWfmAccountStore'
 
 interface BookmarkShortcut {
   readonly id: RouteKind
-  readonly label: string
+  readonly labelKey: keyof UiMessages['bookmarks']
   readonly tooltip: string
   readonly icon: LucideIcon
   readonly route: AppRoute
@@ -28,8 +29,8 @@ interface BookmarkShortcut {
 
 const HISTORY_SHORTCUT: BookmarkShortcut = {
   id: 'browser-history',
-  label: 'Historique',
-  tooltip: 'Historique de navigation (Ctrl+H · wf://history)',
+  labelKey: 'history',
+  tooltip: 'Ctrl+H · wf://history',
   icon: History,
   route: { kind: 'browser-history' }
 }
@@ -37,63 +38,64 @@ const HISTORY_SHORTCUT: BookmarkShortcut = {
 const CENTER_SHORTCUTS: readonly BookmarkShortcut[] = [
   {
     id: 'market-home',
-    label: 'Marché',
-    tooltip: 'Accueil Warframe Market (wf://market)',
+    labelKey: 'market',
+    tooltip: 'wf://market',
     icon: Store,
     route: { kind: 'market-home' }
   },
   {
     id: 'market-favorites',
-    label: 'Favoris',
-    tooltip: 'Mes items favoris (wf://market/favorites)',
+    labelKey: 'favorites',
+    tooltip: 'wf://market/favorites',
     icon: Star,
     route: { kind: 'market-favorites' }
   },
   {
     id: 'market-cart',
-    label: 'Panier',
-    tooltip: 'Panier & Trade Bundler (wf://market/cart)',
+    labelKey: 'cart',
+    tooltip: 'wf://market/cart',
     icon: ShoppingCart,
     route: { kind: 'market-cart' }
   },
   {
     id: 'market-recent',
-    label: 'Ordres récents',
-    tooltip: 'Flux des ordres récents Warframe Market (wf://market/recent)',
+    labelKey: 'recent',
+    tooltip: 'wf://market/recent',
     icon: Clock,
     route: { kind: 'market-recent' }
   },
   {
     id: 'codex-home',
-    label: 'Codex',
-    tooltip: 'Codex, Tables de Farm % & Helminth (wf://codex)',
+    labelKey: 'codex',
+    tooltip: 'wf://codex',
     icon: BookOpen,
     route: { kind: 'codex-home' }
   },
   {
     id: 'market-ducats',
-    label: 'Ducanator',
-    tooltip: 'Ducanator — Ratios Ducats / Platinum (wf://market/ducats)',
+    labelKey: 'ducats',
+    tooltip: 'wf://market/ducats',
     icon: Coins,
     route: { kind: 'market-ducats' }
   },
   {
     id: 'market-rivens',
-    label: 'Contrats Mod Riven',
-    tooltip: 'Enchères et contrats Mods Riven (wf://market/rivens)',
+    labelKey: 'rivens',
+    tooltip: 'wf://market/rivens',
     icon: Flame,
     route: { kind: 'market-rivens' }
   },
   {
     id: 'wfm-account',
-    label: 'Mon Profil WFM',
-    tooltip: 'Mon compte Warframe Market optionnel & mes ventes (wf://wfm-account)',
+    labelKey: 'wfmAccount',
+    tooltip: 'wf://wfm-account',
     icon: UserCheck,
     route: { kind: 'wfm-account' }
   }
 ]
 
 export function BookmarksBar(): React.JSX.Element | null {
+  const { t } = useUiTranslations()
   const navigateActive = useTabsStore((s) => s.navigateActive)
   const openTab = useTabsStore((s) => s.openTab)
   const hubActive = useTabsStore((s) => s.hubActive)
@@ -153,7 +155,7 @@ export function BookmarksBar(): React.JSX.Element | null {
         )}
       >
         <Icon className="h-3.5 w-3.5 shrink-0 text-primary" />
-        <span className="whitespace-nowrap">{item.label}</span>
+        <span className="whitespace-nowrap">{t.bookmarks[item.labelKey]}</span>
         {badgeCount > 0 && (
           <span className="rounded-full bg-primary/20 px-1.5 py-0 font-mono text-[10px] font-semibold text-primary">
             {badgeCount}

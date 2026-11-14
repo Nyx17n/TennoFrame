@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Package, Plus } from 'lucide-react'
+import { pickMarketText } from '@shared/data/languages'
 import { toWfAssetUrl, type MarketOrder, type WhisperDraft } from '@shared/schemas/market.schema'
 import type {
   AppLanguage,
@@ -92,7 +93,7 @@ export function RecentOrdersDisplay({
           {orders.map((o) => {
             const slug = o.itemSlug ?? ''
             const name =
-              lang === 'fr' ? (o.itemNameFr ?? slug ?? 'Item') : (o.itemNameEn ?? slug ?? 'Item')
+              pickMarketText(lang, o.itemNameFr, o.itemNameEn) || slug || 'Item'
             const thumbUrl = toWfAssetUrl(o.itemThumb)
 
             return (
@@ -181,7 +182,7 @@ export function RecentOrdersDisplay({
           {orders.map((o) => {
             const slug = o.itemSlug ?? ''
             const name =
-              lang === 'fr' ? (o.itemNameFr ?? slug ?? 'Item') : (o.itemNameEn ?? slug ?? 'Item')
+              pickMarketText(lang, o.itemNameFr, o.itemNameEn) || slug || 'Item'
             const thumbUrl = toWfAssetUrl(o.itemThumb)
 
             return (
@@ -292,7 +293,7 @@ export function RecentOrdersDisplay({
         {orders.map((o) => {
           const slug = o.itemSlug ?? ''
           const name =
-            lang === 'fr' ? (o.itemNameFr ?? slug ?? 'Item') : (o.itemNameEn ?? slug ?? 'Item')
+            pickMarketText(lang, o.itemNameFr, o.itemNameEn) || slug || 'Item'
           const thumbUrl = toWfAssetUrl(o.itemThumb)
 
           return (

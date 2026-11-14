@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Minus, Package, Plus, Trash2 } from 'lucide-react'
+import { pickMarketText } from '@shared/data/languages'
 import { toWfAssetUrl, type WhisperDraft } from '@shared/schemas/market.schema'
 import type {
   AppLanguage,
@@ -40,7 +41,7 @@ export function CartLinesDisplay({
     return (
       <div className={gridClass}>
         {lines.map((line) => {
-          const label = lang === 'fr' ? line.nameFr : line.nameEn
+          const label = pickMarketText(lang, line.nameFr, line.nameEn)
           const thumb = toWfAssetUrl(line.thumb)
 
           return (
@@ -138,7 +139,7 @@ export function CartLinesDisplay({
   return (
     <div className={gridClass}>
       {lines.map((line) => {
-        const label = lang === 'fr' ? line.nameFr : line.nameEn
+        const label = pickMarketText(lang, line.nameFr, line.nameEn)
         const thumb = toWfAssetUrl(line.thumb)
 
         return (

@@ -2,6 +2,7 @@ import {
   ARBITRATION_VITUS_ITEMS,
   BARO_CLASSIC_STOCK
 } from '@shared/data/duviri-rotations'
+import { getLanguageMeta } from '@shared/data/languages'
 import {
   toWfAssetUrl,
   type MarketCatalogItem,
@@ -19,6 +20,7 @@ import {
 import type { RateLimitedHttpClient } from '../infrastructure/http/RateLimitedHttpClient'
 import type { CacheService } from './CacheService'
 import type { MarketApiService } from './MarketApiService'
+import type { StorageService } from './StorageService'
 import {
   extractRewardLabel,
   findCatalogItemByLabel,
@@ -60,7 +62,8 @@ export class WorldstateService {
     private readonly http: RateLimitedHttpClient,
     private readonly cache: CacheService,
     private readonly marketApi: MarketApiService,
-    userDataPath?: string
+    userDataPath?: string,
+    private readonly storage?: StorageService
   ) {
     this.snapshotFallback = new WorldstateSnapshotFallback(userDataPath)
   }
@@ -85,7 +88,9 @@ export class WorldstateService {
   }
 
   public async getCurrent(forceRefresh = false): Promise<WorldstateHubPayload> {
-    const cacheKey = 'wfstat:worldstate:pc:fr'
+    const langId = this.storage ? (await this.storage.getSettings()).market.language : 'fr'
+    const wfstatLang = getLanguageMeta(langId).wfstatCode
+    const cacheKey = `wfstat:worldstate:pc:${wfstatLang}`
     if (!forceRefresh) {
       const cached = this.cache.get<WorldstateHubPayload>(cacheKey)
       if (cached) return cached
@@ -95,7 +100,7 @@ export class WorldstateService {
     let lookup: Awaited<ReturnType<typeof this.getCatalogLookup>>
     try {
       ;[raw, lookup] = await Promise.all([
-        fetchResilientWfStatRaw(this.http),
+        fetchResilientWfStatRaw(this.http, wfstatLang),
         this.getCatalogLookup()
       ])
     } catch (upstreamError) {

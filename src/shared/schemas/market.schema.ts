@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { formatWhisperMessage } from '../data/languages'
 import type { AppLanguage } from './settings.schema'
 
 export const SellerOnlineStatusSchema = z.enum(['ingame', 'online', 'offline'])
@@ -190,13 +191,6 @@ export function toWfAssetUrl(rawSubPath?: string | null): string | null {
 }
 
 export function buildWhisperCommand(draft: WhisperDraft, lang: AppLanguage): string {
-  if (lang === 'fr' && draft.customCommandFr) return draft.customCommandFr
-  if (lang === 'en' && draft.customCommandEn) return draft.customCommandEn
-  const rankEn = draft.rank !== undefined ? ` (rank ${draft.rank})` : ''
-  const rankFr = draft.rank !== undefined ? ` (rang ${draft.rank})` : ''
-  if (lang === 'fr') {
-    return `/w ${draft.ingameName} Bonjour ! Je voudrais acheter : "${draft.itemNameFr}"${rankFr} pour ${draft.platinum} platinum. (warframe.market)`
-  }
-  return `/w ${draft.ingameName} Hi! I want to buy: "${draft.itemNameEn}"${rankEn} for ${draft.platinum} platinum. (warframe.market)`
+  return formatWhisperMessage(draft, lang)
 }
 

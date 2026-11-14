@@ -88,7 +88,8 @@ async function bootstrap(): Promise<void> {
     httpClient,
     cacheService,
     marketApi,
-    app.getPath('userData')
+    app.getPath('userData'),
+    storageService
   )
   const codexRepository = new CodexRepository(marketApi)
   const updaterService = new UpdaterService(windowService)
