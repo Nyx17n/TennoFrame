@@ -1,14 +1,14 @@
 [
   {
     "version": "2.11.0",
-    "date": "Novembre 2026",
-    "titleFr": "15 Langues Officielles de Warframe, Messages /w Universels (EN Recommandé) & Compteur Communautaire en Direct",
-    "badgeFr": "Nouveauté v2.11.0",
-    "highlightsFr": [
-      "Prise en charge intégrale des 15 langues officielles de Warframe (Français, English, Deutsch, Español, Italiano, Português, Русский, Polski, Українська, Türkçe, 日本語, 한국어, 简体中文, 繁體中文, ไทย) sur l’interface TennoFrame, le catalogue & outils Warframe Market et le Hub Worldstate avec rafraîchissement instantané à chaud.",
-      "Messages d’achat `/w` localisés dans les 15 langues avec `★ EN · Recommandé` mis en avant par défaut pour garantir des échanges universels fluides en Crossplay sur Warframe Market, et bascule propre sur l’anglais (`EN`) pour le Codex hors-ligne hors français.",
-      "Compteur communautaire permanent visible en haut à droite et dans la barre de statut : affiche le nombre d’utilisateurs installés et le nombre de Tenno connectés en direct, avec fiche détaillée au clic.",
-      "Harmonisation complète de l’identité TennoFrame dans toute la documentation et l’outillage (`docs/02-tennoframe/`), tout en conservant intacte la migration automatique `%APPDATA%/WireFrame`."
+    "date": "November 2026",
+    "title": "15 Official Warframe Languages, Universal /w Whispers (EN Recommended) & Live Community Counter",
+    "badge": "New in v2.11.0",
+    "highlights": [
+      "Full support for all 15 official Warframe languages (English, Français, Deutsch, Español, Italiano, Português, Русский, Polski, Українська, Türkçe, 日本語, 한국어, 简体中文, 繁體中文, ไทย) across the TennoFrame interface, Warframe Market catalog & trading tools, and live Worldstate Hub with instant hot-reload.",
+      "Localized `/w` trade whisper templates in all 15 languages with `★ EN · Recommended` highlighted first by default for seamless crossplay trading on Warframe Market, plus automatic English (`EN`) fallback for the offline Codex when browsing in non-French locales.",
+      "Permanent live Community Counter in the top title bar and bottom status bar displaying installed TennoFrame users and online community members.",
+      "Unified TennoFrame naming across documentation and release tooling while preserving seamless `%APPDATA%/WireFrame` user data migration."
     ]
   },
   {

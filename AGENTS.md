@@ -32,6 +32,9 @@ Ces règles s'appliquent **inconditionnellement** à toutes les sessions de trav
    - Les installateurs et mises à jour sont produits exclusivement par la pipeline CI/CD (GitHub Actions / GitHub Releases) lors de Releases taguées SemVer.
 3. **Zéro hook Git auto-mutant** :
    - Interdiction de créer des hooks `pre-commit` qui modifient silencieusement le code source à coups de regex ou génèrent des archives binaires pendant un commit. Un hook `pre-commit` ne peut servir qu'à de la vérification pure (lint, typecheck, tests, détection de secrets/binaires).
+4. **Politique de Releases & Patch Notes en Anglais** :
+   - **Tous les patch notes** (`src/shared/data/changelog.json`, descriptions de GitHub Releases et annonces Discord via `scripts/post-discord-release.mjs`) doivent être rédigés intégralement en **anglais (`en`)**.
+   - Seule la **dernière version publiée** conserve son installateur `.exe` téléchargeable : `scripts/post-discord-release.mjs` purge automatiquement les binaires `.exe` et `.blockmap` de toutes les versions antérieures et `resources/installer.nsh` bloque tout downgrade local.
 
 ---
 

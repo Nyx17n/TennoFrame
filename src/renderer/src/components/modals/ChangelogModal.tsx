@@ -21,10 +21,10 @@ export function ChangelogModal(): React.JSX.Element {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base font-bold">
             <Sparkles className="h-4 w-4 text-primary" />
-            <span>Notes de Patch & Historique TennoFrame</span>
+            <span>TennoFrame Patch Notes & Release History</span>
           </DialogTitle>
           <DialogDescription className="text-xs">
-            Journal des nouveautés et améliorations de sécurité de ton compagnon Warframe.
+            What&apos;s new, features, and security improvements for your Warframe companion.
           </DialogDescription>
         </DialogHeader>
 
@@ -39,16 +39,16 @@ export function ChangelogModal(): React.JSX.Element {
                   <Badge variant="default" className="font-mono">
                     v{rel.version}
                   </Badge>
-                  <span className="font-bold text-foreground">{rel.titleFr}</span>
+                  <span className="font-bold text-foreground">{rel.title}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="secondary">{rel.badgeFr}</Badge>
+                  <Badge variant="secondary">{rel.badge}</Badge>
                   <span className="text-[11px] text-muted-foreground">{rel.date}</span>
                 </div>
               </div>
 
               <ul className="space-y-1.5 pt-1 text-muted-foreground">
-                {rel.highlightsFr.map((line, idx) => (
+                {rel.highlights.map((line, idx) => (
                   <li key={idx} className="flex items-start gap-2">
                     <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" />
                     <span>{line}</span>
@@ -62,4 +62,3 @@ export function ChangelogModal(): React.JSX.Element {
     </Dialog>
   )
 }
-

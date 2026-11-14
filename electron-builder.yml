@@ -33,6 +33,7 @@ nsis:
   # Preserve legacy NSIS UUIDv5(com.nyxo17.wireframe) so existing WireFrame installations
   # upgrade seamlessly in-place to TennoFrame and replace Desktop/Start Menu shortcuts cleanly.
   guid: 7e820ac6-b754-5ba4-947f-81d8753d8e46
+  include: resources/installer.nsh
   oneClick: false
   perMachine: false
   allowToChangeInstallationDirectory: true
