@@ -40,7 +40,7 @@ Ces règles s'appliquent **inconditionnellement** à toutes les sessions de trav
 - **Stack officielle (100 % TypeScript strict)** :
   - **Runtime & Backend local** : **Electron** + **Node.js** (Main Process), outillé avec `electron-vite`.
   - **Frontend & Design System** : **React** + **shadcn/ui** (Tailwind CSS + primitives accessibles Radix UI) + **TypeScript strict** (`strict: true`, zéro `any` implicite ou abusif).
-  - **Maquettage (Wireframes)** : Fichiers **Excalidraw** (`.excalidraw`) versionnés dans `docs/02-wireframes/`.
+  - **Maquettage (Excalidraw)** : Fichiers **Excalidraw** (`.excalidraw`) versionnés dans `docs/02-tennoframe/`.
 - **Zéro serveur HTTP local** :
   - N'ouvre **aucun** serveur HTTP/TCP local (`127.0.0.1:xxxx`). Toute communication entre l'UI et le système/réseau passe par l'**IPC typé d'Electron** (`ipcMain.handle` <-> `ipcRenderer.invoke` via `preload`).
 - **Séparation stricte des responsabilités (Clean / Layered Architecture)** :
