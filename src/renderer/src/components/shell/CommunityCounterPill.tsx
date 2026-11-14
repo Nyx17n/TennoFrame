@@ -1,13 +1,6 @@
 import * as React from 'react'
-import {
-  Download,
-  ExternalLink,
-  MessageCircle,
-  RefreshCw,
-  Users,
-  WifiOff
-} from 'lucide-react'
-import { DISCORD_INVITE_URL, GITHUB_REPO_URL } from '@shared/constants'
+import { MessageCircle, RefreshCw, Users, WifiOff } from 'lucide-react'
+import { DISCORD_INVITE_URL } from '@shared/constants'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
@@ -63,7 +56,7 @@ export function CommunityCounterPill({
   const isOffline = Boolean(stats?.fromOfflineCache || error)
 
   const tooltipText = stats
-    ? `${formatNumberFr(stats.installedUsersCount)} utilisateurs installés · ${formatNumberFr(stats.totalDownloadsCount)} téléchargements (.exe) · ${formatNumberFr(stats.onlineCount)} en ligne`
+    ? `${formatNumberFr(stats.installedUsersCount)} utilisateurs installés · ${formatNumberFr(stats.onlineCount)} en ligne`
     : 'Chargement du compteur d’utilisateurs TennoFrame...'
 
   return (
@@ -140,7 +133,7 @@ export function CommunityCounterPill({
       <PopoverContent
         align="end"
         side={variant === 'statusbar' ? 'top' : 'bottom'}
-        className={cn('space-y-3 p-3.5', isCompact ? 'w-72' : 'w-80')}
+        className={cn('space-y-3 p-3.5', isCompact ? 'w-64' : 'w-72')}
       >
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
@@ -176,90 +169,43 @@ export function CommunityCounterPill({
         )}
 
         {isLoading && !stats ? (
-          <div className="grid grid-cols-3 gap-2">
-            <Skeleton className="h-14 rounded-md" />
+          <div className="grid grid-cols-2 gap-2">
             <Skeleton className="h-14 rounded-md" />
             <Skeleton className="h-14 rounded-md" />
           </div>
         ) : stats ? (
           <>
-            <div className="grid grid-cols-3 gap-2">
-              <div className="rounded-md border border-primary/30 bg-primary/10 p-2">
-                <div className="text-[10px] text-muted-foreground">Installés</div>
-                <div className="mt-0.5 text-sm font-bold tabular-nums text-foreground">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="rounded-md border border-primary/30 bg-primary/10 p-2.5">
+                <div className="text-[10px] text-muted-foreground">Utilisateurs installés</div>
+                <div className="mt-0.5 text-base font-bold tabular-nums text-foreground">
                   {formatNumberFr(stats.installedUsersCount)}
                 </div>
-                <div className="text-[9px] text-primary/90">Base active</div>
+                <div className="text-[9px] text-primary/90">Base active TennoFrame</div>
               </div>
 
-              <div className="rounded-md border border-border bg-secondary/40 p-2">
-                <div className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
-                  <Download className="h-2.5 w-2.5" />
-                  <span>Cumul .exe</span>
-                </div>
-                <div className="mt-0.5 text-sm font-bold tabular-nums text-foreground">
-                  {formatNumberFr(stats.totalDownloadsCount)}
-                </div>
-                <div className="text-[9px] text-muted-foreground">Releases GitHub</div>
-              </div>
-
-              <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 p-2">
+              <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 p-2.5">
                 <div className="text-[10px] text-muted-foreground">En ligne</div>
-                <div className="mt-0.5 text-sm font-bold tabular-nums text-emerald-300">
+                <div className="mt-0.5 text-base font-bold tabular-nums text-emerald-300">
                   {formatNumberFr(stats.onlineCount)}
                 </div>
                 <div className="truncate text-[9px] text-emerald-300/80">
                   {stats.discordMemberCount > 0
-                    ? `${formatNumberFr(stats.discordMemberCount)} sur Discord`
+                    ? `${formatNumberFr(stats.discordMemberCount)} membres Discord`
                     : 'Session active'}
                 </div>
               </div>
             </div>
 
-            {stats.installedUsersCount <= 1 && stats.totalDownloadsCount <= 1 && (
+            {stats.installedUsersCount <= 1 && (
               <p className="rounded border border-border bg-secondary/30 px-2.5 py-1.5 text-[10px] text-muted-foreground">
                 Première installation active détectée — invitez vos compagnons de clan Tenno !
               </p>
             )}
-
-            {stats.releases.length > 0 && (
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-[10px] font-medium text-muted-foreground">
-                  <span>Téléchargements par version (.exe)</span>
-                  <span>Dernière : v{stats.latestVersion}</span>
-                </div>
-                <div className="space-y-1">
-                  {stats.releases.map((rel) => (
-                    <div key={rel.tag} className="space-y-0.5 text-[10px]">
-                      <div className="flex items-center justify-between">
-                        <span className="font-mono text-foreground/90">{rel.tag}</span>
-                        <span className="tabular-nums text-muted-foreground">
-                          {formatNumberFr(rel.downloads)} inst. ({rel.sharePercent}%)
-                        </span>
-                      </div>
-                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
-                        <div
-                          className="h-full rounded-full bg-primary transition-all"
-                          style={{ width: `${Math.max(4, rel.sharePercent)}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </>
         ) : null}
 
-        <div className="flex items-center justify-between gap-2 border-t border-border pt-2 text-[10px]">
-          <button
-            type="button"
-            onClick={() => void ipcClient.window.openExternalUrl(`${GITHUB_REPO_URL}/releases`)}
-            className="inline-flex items-center gap-1 text-muted-foreground transition-colors hover:text-primary"
-          >
-            <ExternalLink className="h-3 w-3" />
-            <span>Releases GitHub</span>
-          </button>
+        <div className="flex items-center justify-end border-t border-border pt-2 text-[10px]">
           <button
             type="button"
             onClick={() => void ipcClient.window.openExternalUrl(DISCORD_INVITE_URL)}

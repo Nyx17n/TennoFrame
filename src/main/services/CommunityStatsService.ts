@@ -1,12 +1,10 @@
-import { app } from 'electron'
 import { promises as fs } from 'node:fs'
 import { join } from 'node:path'
 import { z } from 'zod'
 import { DISCORD_INVITE_CODE } from '@shared/constants'
 import {
   CommunityStatsSnapshotSchema,
-  type CommunityStatsSnapshot,
-  type ReleaseDownloadStat
+  type CommunityStatsSnapshot
 } from '@shared/schemas/system.schema'
 import type { RateLimitedHttpClient } from '../infrastructure/http/RateLimitedHttpClient'
 
@@ -23,9 +21,7 @@ const GitHubReleaseAssetSchema = z.object({
 })
 
 const GitHubReleaseItemSchema = z.object({
-  tag_name: z.string(),
   draft: z.boolean().optional().default(false),
-  published_at: z.string().nullable().optional(),
   assets: z.array(GitHubReleaseAssetSchema).default([])
 })
 
@@ -35,14 +31,6 @@ const DiscordInviteCountsSchema = z.object({
   approximate_member_count: z.number().int().nonnegative().optional().default(0),
   approximate_presence_count: z.number().int().nonnegative().optional().default(0)
 })
-
-interface GitHubComputedMetrics {
-  installedUsersCount: number
-  totalDownloadsCount: number
-  latestVersion: string
-  latestVersionDownloads: number
-  releases: ReleaseDownloadStat[]
-}
 
 export class CommunityStatsService {
   private readonly cacheFilePath: string
@@ -74,14 +62,14 @@ export class CommunityStatsService {
     }
 
     const [githubOutcome, discordOutcome] = await Promise.allSettled([
-      this.fetchGitHubMetrics(),
+      this.fetchInstalledUsersEstimate(),
       this.fetchDiscordMetrics()
     ])
 
-    const gh = githubOutcome.status === 'fulfilled' ? githubOutcome.value : null
+    const ghInstalled = githubOutcome.status === 'fulfilled' ? githubOutcome.value : null
     const dc = discordOutcome.status === 'fulfilled' ? discordOutcome.value : null
 
-    if (!gh && !dc) {
+    if (ghInstalled === null && !dc) {
       if (this.memorySnapshot) {
         return {
           ...this.memorySnapshot,
@@ -94,35 +82,29 @@ export class CommunityStatsService {
     const previous = this.memorySnapshot
     const discordMemberCount = dc?.memberCount ?? previous?.discordMemberCount ?? 0
     const onlineCount = Math.max(1, dc?.onlineCount ?? previous?.onlineCount ?? 1)
-    const totalDownloadsCount = gh?.totalDownloadsCount ?? previous?.totalDownloadsCount ?? 1
     const installedUsersCount = Math.max(
       1,
-      gh?.installedUsersCount ?? previous?.installedUsersCount ?? 1,
+      ghInstalled ?? previous?.installedUsersCount ?? 1,
       discordMemberCount
     )
 
     const snapshot: CommunityStatsSnapshot = CommunityStatsSnapshotSchema.parse({
       installedUsersCount,
-      totalDownloadsCount: Math.max(installedUsersCount, totalDownloadsCount),
       onlineCount,
       discordMemberCount,
-      latestVersion: gh?.latestVersion ?? previous?.latestVersion ?? app.getVersion(),
-      latestVersionDownloads:
-        gh?.latestVersionDownloads ?? previous?.latestVersionDownloads ?? 0,
-      releases: gh?.releases ?? previous?.releases ?? [],
       updatedAt: new Date().toISOString(),
-      fromOfflineCache: !gh
+      fromOfflineCache: ghInstalled === null
     })
 
     this.memorySnapshot = snapshot
-    if (gh) {
+    if (ghInstalled !== null) {
       this.lastNetworkFetchAt = now
     }
     await this.persistDiskCache(snapshot)
     return snapshot
   }
 
-  private async fetchGitHubMetrics(): Promise<GitHubComputedMetrics> {
+  private async fetchInstalledUsersEstimate(): Promise<number> {
     const rawReleases = await this.httpClient.getJson(
       GITHUB_RELEASES_API_URL,
       GitHubReleasesArraySchema,
@@ -135,45 +117,16 @@ export class CommunityStatsService {
       }
     )
 
-    const published = rawReleases.filter((rel) => !rel.draft)
-    const perRelease = published.map((rel) => {
-      const exeDownloads = rel.assets
-        .filter((asset) => asset.name.toLowerCase().endsWith('.exe'))
-        .reduce((sum, asset) => sum + asset.download_count, 0)
-      const version = rel.tag_name.replace(/^v/i, '')
-      return {
-        tag: rel.tag_name,
-        version,
-        downloads: exeDownloads,
-        publishedAt: rel.published_at ?? ''
-      }
-    })
+    const peakSingleRelease = rawReleases
+      .filter((rel) => !rel.draft)
+      .reduce((max, rel) => {
+        const exeDownloads = rel.assets
+          .filter((asset) => asset.name.toLowerCase().endsWith('.exe'))
+          .reduce((sum, asset) => sum + asset.download_count, 0)
+        return Math.max(max, exeDownloads)
+      }, 0)
 
-    const totalDownloadsCount = perRelease.reduce((sum, r) => sum + r.downloads, 0)
-    const peakSingleRelease = perRelease.reduce((max, r) => Math.max(max, r.downloads), 0)
-    const latest = perRelease[0]
-
-    const topFive = perRelease.slice(0, 5)
-    const topFiveSum = Math.max(
-      1,
-      topFive.reduce((sum, item) => sum + item.downloads, 0)
-    )
-
-    const releases: ReleaseDownloadStat[] = topFive.map((item) => ({
-      tag: item.tag,
-      version: item.version,
-      downloads: item.downloads,
-      sharePercent: Math.round((item.downloads / topFiveSum) * 100),
-      publishedAt: item.publishedAt
-    }))
-
-    return {
-      installedUsersCount: Math.max(1, peakSingleRelease),
-      totalDownloadsCount: Math.max(1, totalDownloadsCount),
-      latestVersion: latest?.version ?? app.getVersion(),
-      latestVersionDownloads: latest?.downloads ?? 0,
-      releases
-    }
+    return Math.max(1, peakSingleRelease)
   }
 
   private async fetchDiscordMetrics(): Promise<{ memberCount: number; onlineCount: number }> {
@@ -192,23 +145,10 @@ export class CommunityStatsService {
   }
 
   private buildBootstrapFallback(): CommunityStatsSnapshot {
-    const currentVersion = app.getVersion()
     return {
       installedUsersCount: 1,
-      totalDownloadsCount: 1,
       onlineCount: 1,
       discordMemberCount: 0,
-      latestVersion: currentVersion,
-      latestVersionDownloads: 1,
-      releases: [
-        {
-          tag: `v${currentVersion}`,
-          version: currentVersion,
-          downloads: 1,
-          sharePercent: 100,
-          publishedAt: new Date().toISOString()
-        }
-      ],
       updatedAt: new Date().toISOString(),
       fromOfflineCache: true
     }
