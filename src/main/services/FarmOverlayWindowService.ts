@@ -322,5 +322,11 @@ export class FarmOverlayWindowService {
       overWin.webContents.send(IPC_CHANNELS.OVERLAY_ON_STATE_CHANGED, state)
     }
   }
+
+  public async notifyAppearanceChanged(): Promise<void> {
+    if (!this.getOverlayWindow()) return
+    const state = await this.getLiveState()
+    this.broadcastState(state)
+  }
 }
 

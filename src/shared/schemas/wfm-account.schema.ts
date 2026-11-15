@@ -31,19 +31,6 @@ export const WfmSessionStateSchema = z.object({
 })
 export type WfmSessionState = z.infer<typeof WfmSessionStateSchema>
 
-export const WfmSignInCredentialsInputSchema = z.object({
-  email: z.string().trim().email('Adresse e-mail invalide').max(180),
-  password: z.string().min(1, 'Mot de passe requis').max(256),
-  initialStatus: WfmPresenceStatusSchema.default('ingame')
-})
-export type WfmSignInCredentialsInput = z.infer<typeof WfmSignInCredentialsInputSchema>
-
-export const WfmSignInTokenInputSchema = z.object({
-  jwtToken: z.string().trim().min(20, 'Jeton de session JWT invalide').max(4096),
-  initialStatus: WfmPresenceStatusSchema.default('ingame')
-})
-export type WfmSignInTokenInput = z.infer<typeof WfmSignInTokenInputSchema>
-
 export const WfmSignInWebInputSchema = z.object({
   initialStatus: WfmPresenceStatusSchema.default('ingame')
 })

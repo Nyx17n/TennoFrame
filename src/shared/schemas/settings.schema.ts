@@ -111,6 +111,13 @@ export const CompactTimerKeySchema = z.enum([
 export type CompactTimerKey = z.infer<typeof CompactTimerKeySchema>
 export const COMPACT_TIMERS_MAX_PINNED = 6
 
+export const GLASS_OPACITY_MIN = 20
+export const GLASS_OPACITY_MAX = 85
+export const GLASS_OPACITY_DEFAULT = 48
+
+export const GlassStyleSchema = z.enum(['liquid-glass', 'simple', 'medieval'])
+export type GlassStyle = z.infer<typeof GlassStyleSchema>
+
 export const CompactTimersSettingsSchema = z.object({
   enabled: z.boolean().default(true),
   showOnDesktop: z.boolean().default(false),
@@ -129,6 +136,15 @@ export const UserSettingsSchema = z.object({
     primaryColor: HexColorSchema.default('#0f161d'),
     secondaryColor: HexColorSchema.default('#26b9d1'),
     glowEnabled: z.boolean().default(true),
+    glassModeEnabled: z.boolean().default(false),
+    glassStyle: GlassStyleSchema.default('liquid-glass'),
+    glassDesktopBackdropEnabled: z.boolean().default(true),
+    glassOpacityPercent: z
+      .number()
+      .int()
+      .min(GLASS_OPACITY_MIN)
+      .max(GLASS_OPACITY_MAX)
+      .default(GLASS_OPACITY_DEFAULT),
     startupAnimationEnabled: z.boolean().default(true),
     animationLevel: AnimationLevelSchema.default('full'),
     respectOsReducedMotion: z.boolean().default(true),

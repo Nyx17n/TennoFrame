@@ -45,7 +45,7 @@ function TimersBarContent({ timers }: { timers: CompactTimersSettings }): React.
 
   if (timers.collapsed) {
     return (
-      <div className="flex h-3.5 shrink-0 items-center justify-end border-t border-border bg-card/90 px-2">
+      <div className="wf-shell-bar flex h-3.5 shrink-0 items-center justify-end border-t border-border bg-card/90 px-2">
         <button type="button" aria-label="Déplier les minuteurs" onClick={() => save({ ...timers, collapsed: false })} className="text-muted-foreground hover:text-foreground">
           <ChevronUp className="h-3 w-3" />
         </button>
@@ -54,7 +54,7 @@ function TimersBarContent({ timers }: { timers: CompactTimersSettings }): React.
   }
 
   return (
-    <div className="flex h-8 shrink-0 items-center gap-1 border-t border-border bg-card/90 pl-1.5 pr-1">
+    <div className="wf-shell-bar flex h-8 shrink-0 items-center gap-1 border-t border-border bg-card/90 pl-1.5 pr-1">
       <div
         className="flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto [mask-image:linear-gradient(to_right,transparent,black_8px,black_calc(100%-16px),transparent)] [scrollbar-width:none]"
         onWheel={(e) => {

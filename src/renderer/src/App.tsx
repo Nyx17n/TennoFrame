@@ -13,6 +13,7 @@ import { StartupSplashOverlay } from '@/components/shell/StartupSplashOverlay'
 import { StatusBar } from '@/components/shell/StatusBar'
 import { TitleTabsBar } from '@/components/shell/TitleTabsBar'
 import { UpdateBanner } from '@/components/shell/UpdateBanner'
+import { WindowResizeHandles } from '@/components/shell/WindowResizeHandles'
 import { CompactTimersBar } from '@/components/shell/timers/CompactTimersBar'
 import { CreateWfmOrderModal } from '@/components/wfm-account/CreateWfmOrderModal'
 import { WfmSignInModal } from '@/components/wfm-account/WfmSignInModal'
@@ -36,6 +37,9 @@ export function App(): React.JSX.Element {
   const marketPlatform = useAppStore((s) => s.settings.market.platform)
   const marketCrossplay = useAppStore((s) => s.settings.market.crossplay)
   const isCompactMode = useAppStore((s) => s.windowState.isCompactMode)
+  const isMaximized = useAppStore((s) => s.windowState.isMaximized)
+  const isSnapped = useAppStore((s) => s.windowState.isSnapped)
+  const snapPreview = useAppStore((s) => s.windowState.snapPreview)
   const hydrateFromSession = useTabsStore((s) => s.hydrateFromSession)
   const transitionRevision = useTabsStore((s) => s.transitionRevision)
   const setLatestAlertToast = useMarketStore((s) => s.setLatestAlertToast)
@@ -148,7 +152,12 @@ export function App(): React.JSX.Element {
   }, [initialize, initWfmAccount, hydrateFromSession, setLatestAlertToast])
 
   return (
-    <div className="relative flex h-screen w-screen flex-col overflow-hidden bg-background text-foreground">
+    <div
+      data-maximized={isMaximized || isSnapped ? 'true' : 'false'}
+      className={`wf-app-root relative flex h-screen w-screen flex-col overflow-hidden bg-background text-foreground ${
+        snapPreview ? 'ring-2 ring-inset ring-primary/80' : ''
+      }`}
+    >
       <div
         aria-hidden="true"
         className="wf-app-gradient-layer pointer-events-none fixed inset-0 z-0"
@@ -180,6 +189,7 @@ export function App(): React.JSX.Element {
       <SettingsModal />
       <ChangelogModal />
       <StartupSplashOverlay />
+      <WindowResizeHandles />
     </div>
   )
 }

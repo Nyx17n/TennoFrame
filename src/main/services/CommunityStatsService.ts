@@ -123,10 +123,7 @@ export class CommunityStatsService {
         const exeDownloads = rel.assets
           .filter((asset) => asset.name.toLowerCase().endsWith('.exe'))
           .reduce((sum, asset) => sum + asset.download_count, 0)
-        const latestYmlDownloads = rel.assets
-          .filter((asset) => asset.name.toLowerCase() === 'latest.yml')
-          .reduce((sum, asset) => sum + asset.download_count, 0)
-        return Math.max(max, exeDownloads, latestYmlDownloads)
+        return Math.max(max, exeDownloads)
       }, 0)
 
     return Math.max(1, peakSingleRelease)

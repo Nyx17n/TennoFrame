@@ -29,7 +29,7 @@ export function CodexFarmOverlayCard({
   return (
     <div
       className={cn(
-        'rounded-lg border bg-card/85 transition-colors',
+        'wf-farm-overlay-card rounded-lg border bg-card/85 transition-colors',
         entry.isResource ? 'border-amber-500/35' : 'border-border/75',
         density === 'sm' ? 'px-2.5 py-1.5' : density === 'lg' ? 'p-3' : 'px-3 py-2',
         entry.obtained && 'opacity-55'

@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { BackgroundGradientSection } from '@/components/settings/BackgroundGradientSection'
 import { ColorSwatchPicker } from '@/components/settings/ColorSwatchPicker'
+import { GlassModeSection } from '@/components/settings/GlassModeSection'
 import { MotionSettingsSection } from '@/components/settings/MotionSettingsSection'
 import { ACCENT_SWATCH_GROUPS, BACKGROUND_SWATCH_GROUPS } from '@/lib/color-swatches'
 import { THEME_PRESETS } from '@/lib/theme-engine'
@@ -14,6 +15,8 @@ export function AppearanceSettingsTab(): React.JSX.Element {
 
   return (
     <div className="space-y-4">
+      <GlassModeSection />
+
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h3 className="flex items-center gap-1.5 text-sm font-semibold text-primary">

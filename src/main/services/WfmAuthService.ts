@@ -9,15 +9,14 @@ import {
   WfmPresenceStatusSchema,
   type WfmAccountUser,
   type WfmPresenceStatus,
-  type WfmSessionState,
-  type WfmSignInCredentialsInput,
-  type WfmSignInTokenInput
+  type WfmSessionState
 } from '@shared/schemas/wfm-account.schema'
 import { HttpStatusError, type RateLimitedHttpClient } from '../infrastructure/http/RateLimitedHttpClient'
 import { RawWfmMeResponseSchema } from './wfm-account-raw.schemas'
 import { WfmPresenceService } from './WfmPresenceService'
 
 const WFM_API_BASE = 'https://api.warframe.market'
+const JWT_THREE_PART_REGEX = /[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/
 
 const EncryptedEnvelopeSchema = z.object({
   v: z.literal(1),
@@ -36,15 +35,16 @@ export class WfmAuthRequiredError extends Error {
 }
 
 /**
- * Handles optional Warframe Market authentication and OS-level encrypted token persistence
- * using Electron `safeStorage` (Windows DPAPI).
- * Passwords are NEVER persisted, logged, or retained in memory.
- * The session JWT is NEVER exposed to the Renderer process.
+ * Handles optional Warframe Market browser-based authentication and OS-level encrypted
+ * token persistence using Electron `safeStorage` (Windows DPAPI).
+ * TennoFrame NEVER collects or handles user passwords; only the verified session JWT
+ * is kept in Main Process memory and encrypted on disk.
  */
 export class WfmAuthService {
   private readonly sessionFilePath: string
   private readonly presence: WfmPresenceService
   private jwtToken: string | null = null
+  private authScheme: 'Bearer' | 'JWT' = 'Bearer'
   private currentUser: WfmAccountUser | null = null
   private persistedOnDisk = false
   private deviceId: string = randomUUID()
@@ -101,10 +101,13 @@ export class WfmAuthService {
     return { jwt: this.jwtToken, user: this.currentUser }
   }
 
-  public buildAuthHeaders(jwt: string, extraHeaders: Record<string, string> = {}): Record<string, string> {
+  public buildAuthHeaders(
+    jwt: string,
+    extraHeaders: Record<string, string> = {},
+    scheme: 'Bearer' | 'JWT' = this.authScheme
+  ): Record<string, string> {
     return {
-      Authorization: `Bearer ${jwt}`,
-      Cookie: `JWT=${jwt}`,
+      Authorization: `${scheme} ${jwt}`,
       Language: 'fr',
       ...extraHeaders
     }
@@ -149,52 +152,13 @@ export class WfmAuthService {
     return this.getSessionState()
   }
 
-  public async signInWithCredentials(input: WfmSignInCredentialsInput): Promise<WfmSessionState> {
-    let response: Response
-    try {
-      response = await this.http.sendRawResponse('POST', `${WFM_API_BASE}/v1/auth/signin`, {
-        headers: {
-          Authorization: 'JWT',
-          Language: 'fr',
-          Platform: 'pc'
-        },
-        bodyJson: {
-          auth_type: 'header',
-          email: input.email.trim(),
-          password: input.password,
-          device_id: this.deviceId
-        }
-      })
-    } catch (err) {
-      if (err instanceof HttpStatusError) {
-        if (err.status === 401 || err.status === 400 || err.status === 422) {
-          throw new Error(
-            'Identifiants Warframe Market invalides (vérifiez votre e-mail et votre mot de passe, ou utilisez l’onglet Jeton si vous passez par Steam/Discord).'
-          )
-        }
-        if (err.status === 403) {
-          throw new Error(
-            'Warframe Market demande une vérification de sécurité sur le navigateur. Utilisez l’onglet « Compte Steam / Console / Discord (Jeton) » pour connecter votre session.'
-          )
-        }
-      }
-      throw err
-    }
-
-    const extractedJwt = this.extractJwtFromSignInResponse(response)
-    if (!extractedJwt) {
-      throw new Error(
-        'Connexion refusée : aucun jeton de session retourné par Warframe Market (compte protégé ou 2FA requis).'
-      )
-    }
-
-    return this.activateVerifiedJwt(extractedJwt, input.initialStatus)
-  }
-
-  public async signInWithToken(input: WfmSignInTokenInput): Promise<WfmSessionState> {
-    const cleaned = this.normalizeJwtString(input.jwtToken)
-    if (cleaned.length < 20 || /\s/.test(cleaned)) {
-      throw new Error('Format de jeton JWT invalide (copiez uniquement la valeur du cookie JWT).')
+  public async signInWithToken(input: {
+    jwtToken: string
+    initialStatus: WfmPresenceStatus
+  }): Promise<WfmSessionState> {
+    const cleaned = this.extractCleanJwt(input.jwtToken)
+    if (!cleaned) {
+      throw new Error('Jeton de session Warframe Market invalide.')
     }
     return this.activateVerifiedJwt(cleaned, input.initialStatus)
   }
@@ -240,7 +204,9 @@ export class WfmAuthService {
       user = await this.verifyJwtAndFetchMe(jwt)
     } catch (err) {
       if (err instanceof HttpStatusError && (err.status === 401 || err.status === 403)) {
-        throw new Error('Jeton de session Warframe Market invalide ou expiré.')
+        throw new Error(
+          'Ce jeton JWT est expiré ou correspond à un visiteur non connecté. Connectez-vous d’abord sur warframe.market puis recopiez le cookie JWT.'
+        )
       }
       throw err
     }
@@ -254,14 +220,29 @@ export class WfmAuthService {
   }
 
   private async verifyJwtAndFetchMe(jwt: string): Promise<WfmAccountUser> {
-    const raw = await this.http.getJson(`${WFM_API_BASE}/v2/me`, RawWfmMeResponseSchema, {
-      headers: this.buildAuthHeaders(jwt)
-    })
+    let raw: z.infer<typeof RawWfmMeResponseSchema>
+    try {
+      raw = await this.http.getJson(`${WFM_API_BASE}/v2/me`, RawWfmMeResponseSchema, {
+        headers: this.buildAuthHeaders(jwt, {}, 'Bearer')
+      })
+      this.authScheme = 'Bearer'
+    } catch (err) {
+      if (err instanceof HttpStatusError && err.status === 401) {
+        raw = await this.http.getJson(`${WFM_API_BASE}/v2/me`, RawWfmMeResponseSchema, {
+          headers: this.buildAuthHeaders(jwt, {}, 'JWT')
+        })
+        this.authScheme = 'JWT'
+      } else {
+        throw err
+      }
+    }
+
     const d = raw.data
+    const fallbackName = d.ingameName || d.slug || 'Tenno'
     return WfmAccountUserSchema.parse({
       id: d.id,
-      ingameName: d.ingameName || d.slug,
-      slug: d.slug || d.ingameName.toLowerCase(),
+      ingameName: fallbackName,
+      slug: d.slug || fallbackName.toLowerCase(),
       avatar: d.avatar ?? null,
       reputation: d.reputation,
       masteryRank: d.masteryRank ?? 0,
@@ -274,30 +255,34 @@ export class WfmAuthService {
     })
   }
 
-  private extractJwtFromSignInResponse(response: Response): string | null {
-    const authHeader = response.headers.get('authorization')
-    if (authHeader) {
-      const normalized = this.normalizeJwtString(authHeader)
-      if (normalized.split('.').length === 3) return normalized
-    }
-    const setCookie = response.headers.get('set-cookie')
-    if (setCookie) {
-      const match = /JWT=([^;\s]+)/i.exec(setCookie)
-      if (match?.[1]) return match[1].trim()
-    }
-    return null
-  }
+  /**
+   * Extracts a clean 3-segment JWT (`header.payload.signature`) from any browser copy format:
+   * - direct cookie value (`eyJhbG...`),
+   * - full Chrome/Edge/Firefox DevTools row (`JWT\teyJhbG...\t.warframe.market\t/...`),
+   * - `Cookie: JWT=...` or `Authorization: Bearer ...`,
+   * - URL-encoded strings (`JWT%20eyJhbG...`).
+   */
+  public extractCleanJwt(raw: string): string | null {
+    let candidate = raw.trim()
+    if (!candidate) return null
 
-  private normalizeJwtString(raw: string): string {
-    let token = raw.trim()
-    token = token.replace(/^Authorization:\s*/i, '')
-    token = token.replace(/^(?:Bearer|JWT)\s+/i, '')
-    token = token.replace(/^Cookie:\s*/i, '')
-    const cookieMatch = /JWT=([^;\s]+)/i.exec(token)
-    if (cookieMatch?.[1]) {
-      token = cookieMatch[1]
+    if (candidate.includes('%')) {
+      try {
+        candidate = decodeURIComponent(candidate)
+      } catch {
+        // Keep raw string if malformed percent-encoding
+      }
     }
-    return token.replace(/^["']+|["']+$/g, '').trim()
+
+    // Standard base64 to base64url normalization just in case '+' or '/' appear without padding
+    const directMatch = JWT_THREE_PART_REGEX.exec(candidate)
+    if (directMatch?.[0]) {
+      return directMatch[0]
+    }
+
+    const normalizedBase64Url = candidate.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
+    const fallbackMatch = JWT_THREE_PART_REGEX.exec(normalizedBase64Url)
+    return fallbackMatch?.[0] ?? null
   }
 
   private isEncryptionAvailableSafe(): boolean {
@@ -348,4 +333,3 @@ export class WfmAuthService {
     }
   }
 }
-

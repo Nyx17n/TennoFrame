@@ -4,6 +4,8 @@ import { IPC_CHANNELS } from '@shared/ipc-channels'
 import { UserSettingsPatchSchema } from '@shared/schemas/settings.schema'
 import { CommunityStatsQuerySchema } from '@shared/schemas/system.schema'
 import {
+  BeginDragPayloadSchema,
+  BeginResizePayloadSchema,
   BooleanTogglePayloadSchema,
   ExternalUrlPayloadSchema,
   ZoomPayloadSchema
@@ -92,6 +94,10 @@ export function registerIpcHandlers(services: MainServicesContainer): void {
     if (patch.extensions !== undefined || patch.codexFarmOverlay !== undefined) {
       await farmOverlayService.syncWithSettings()
     }
+    if (patch.appearance !== undefined) {
+      windowService.syncAppearanceWithSettings()
+      await farmOverlayService.notifyAppearanceChanged()
+    }
     if (patch.window?.clickThroughWhenPinned !== undefined) {
       windowService.syncClickThroughWithSettings()
     }
@@ -108,7 +114,9 @@ export function registerIpcHandlers(services: MainServicesContainer): void {
   ipcMain.handle(IPC_CHANNELS.SETTINGS_RESET, async (event) => {
     assertTrustedSender(event, windowService.getMainWindow())
     const reset = await storageService.resetSettings()
+    windowService.syncAppearanceWithSettings()
     await farmOverlayService.syncWithSettings()
+    await farmOverlayService.notifyAppearanceChanged()
     await onShortcutsUpdated()
     return reset
   })
@@ -139,7 +147,9 @@ export function registerIpcHandlers(services: MainServicesContainer): void {
     const firstFile = result.filePaths[0]
     if (result.canceled || !firstFile) return null
     const imported = await storageService.importFromPath(firstFile)
+    windowService.syncAppearanceWithSettings()
     await farmOverlayService.syncWithSettings()
+    await farmOverlayService.notifyAppearanceChanged()
     await onShortcutsUpdated()
     return imported
   })
@@ -147,6 +157,28 @@ export function registerIpcHandlers(services: MainServicesContainer): void {
   ipcMain.handle(IPC_CHANNELS.WINDOW_GET_STATE, async (event) => {
     assertTrustedSender(event, windowService.getMainWindow())
     return windowService.getState()
+  })
+
+  ipcMain.handle(IPC_CHANNELS.WINDOW_BEGIN_DRAG, (event, rawPayload: unknown) => {
+    assertTrustedSender(event, windowService.getMainWindow())
+    const payload = BeginDragPayloadSchema.parse(rawPayload)
+    windowService.beginDrag(payload)
+  })
+
+  ipcMain.handle(IPC_CHANNELS.WINDOW_END_DRAG, async (event) => {
+    assertTrustedSender(event, windowService.getMainWindow())
+    return windowService.endDrag()
+  })
+
+  ipcMain.handle(IPC_CHANNELS.WINDOW_BEGIN_RESIZE, (event, rawPayload: unknown) => {
+    assertTrustedSender(event, windowService.getMainWindow())
+    const payload = BeginResizePayloadSchema.parse(rawPayload)
+    windowService.beginResize(payload)
+  })
+
+  ipcMain.handle(IPC_CHANNELS.WINDOW_END_RESIZE, async (event) => {
+    assertTrustedSender(event, windowService.getMainWindow())
+    await windowService.endResize()
   })
 
   ipcMain.handle(IPC_CHANNELS.WINDOW_MINIMIZE, (event) => {

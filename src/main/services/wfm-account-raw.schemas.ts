@@ -1,19 +1,21 @@
 import { z } from 'zod'
 import { RawWfmOrderSchema } from './wfm-raw.schemas'
 
+const nullToUndefined = <T>(v: T | null | undefined): T | undefined => (v === null ? undefined : v)
+
 export const RawWfmMeDataSchema = z
   .object({
     id: z.string(),
-    ingameName: z.string().default(''),
-    slug: z.string().default(''),
+    ingameName: z.string().nullish().transform((v) => v ?? ''),
+    slug: z.string().nullish().transform((v) => v ?? ''),
     avatar: z.string().nullable().optional(),
-    reputation: z.number().default(0),
-    masteryRank: z.number().int().nonnegative().optional(),
-    platform: z.string().default('pc'),
-    crossplay: z.boolean().default(true),
-    locale: z.string().default('fr'),
-    verified: z.boolean().default(false),
-    banned: z.boolean().default(false),
+    reputation: z.number().nullish().transform((v) => v ?? 0),
+    masteryRank: z.number().int().nonnegative().nullish().transform(nullToUndefined),
+    platform: z.string().nullish().transform((v) => v || 'pc'),
+    crossplay: z.boolean().nullish().transform((v) => v ?? true),
+    locale: z.string().nullish().transform((v) => v || 'fr'),
+    verified: z.boolean().nullish().transform((v) => v ?? false),
+    banned: z.boolean().nullish().transform((v) => v ?? false),
     about: z.string().nullable().optional(),
     aboutRaw: z.string().nullable().optional()
   })
@@ -35,13 +37,13 @@ export const RawWfmExtendedUserResponseSchema = z.object({
   data: z
     .object({
       id: z.string(),
-      ingameName: z.string(),
-      slug: z.string(),
+      ingameName: z.string().nullish().transform((v) => v ?? ''),
+      slug: z.string().nullish().transform((v) => v ?? ''),
       avatar: z.string().nullable().optional(),
-      reputation: z.number().default(0),
-      masteryRank: z.number().int().nonnegative().optional(),
-      platform: z.string().default('pc'),
-      crossplay: z.boolean().default(true),
+      reputation: z.number().nullish().transform((v) => v ?? 0),
+      masteryRank: z.number().int().nonnegative().nullish().transform(nullToUndefined),
+      platform: z.string().nullish().transform((v) => v || 'pc'),
+      crossplay: z.boolean().nullish().transform((v) => v ?? true),
       about: z.string().nullable().optional(),
       aboutRaw: z.string().nullable().optional()
     })
@@ -50,17 +52,18 @@ export const RawWfmExtendedUserResponseSchema = z.object({
 
 const RawV1ReviewEntrySchema = z
   .object({
-    id: z.string().optional(),
-    _id: z.string().optional(),
-    text: z.string().default(''),
-    review_type: z.number().optional(),
-    date: z.string().optional(),
+    id: z.string().nullish().transform(nullToUndefined),
+    _id: z.string().nullish().transform(nullToUndefined),
+    text: z.string().nullish().transform((v) => v ?? ''),
+    review_type: z.number().nullish().transform(nullToUndefined),
+    date: z.string().nullish().transform(nullToUndefined),
     user_from: z
       .object({
-        ingame_name: z.string().default('Tenno')
+        ingame_name: z.string().nullish().transform((v) => v || 'Tenno')
       })
       .passthrough()
-      .optional()
+      .nullish()
+      .transform(nullToUndefined)
   })
   .passthrough()
 
@@ -71,4 +74,3 @@ export const RawWfmV1ReviewsResponseSchema = z.object({
     })
     .passthrough()
 })
-

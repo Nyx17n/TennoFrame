@@ -263,3 +263,4 @@ export function BackgroundGradientSection(): React.JSX.Element {
     </div>
   )
 }
+

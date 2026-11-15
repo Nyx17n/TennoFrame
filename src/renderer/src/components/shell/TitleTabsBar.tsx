@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { ChevronLeft, ChevronRight, Copy, Globe, Loader2, Minus, Plus, Square, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Copy, Globe, Loader2, Maximize2, Minus, Plus, Square, X } from 'lucide-react'
+import type { SnapZone } from '@shared/schemas/window.schema'
 import { BrowserTabPill } from '@/components/shell/BrowserTabPill'
 import { CommunityCounterPill } from '@/components/shell/CommunityCounterPill'
 import { TabOrganizerPopover } from '@/components/shell/TabOrganizerPopover'
@@ -9,8 +10,36 @@ import { ipcClient } from '@/services/ipc-client'
 import { useAppStore } from '@/stores/useAppStore'
 import { useTabsStore } from '@/stores/useTabsStore'
 
+const SNAP_ZONE_LABELS_FR: Record<SnapZone, string> = {
+  maximize: 'Relâcher : Plein écran',
+  left: 'Relâcher : Moitié gauche',
+  right: 'Relâcher : Moitié droite',
+  'top-left': 'Relâcher : Coin haut-gauche',
+  'top-right': 'Relâcher : Coin haut-droite',
+  'bottom-left': 'Relâcher : Coin bas-gauche',
+  'bottom-right': 'Relâcher : Coin bas-droite'
+}
+
+const SNAP_ZONE_LABELS_EN: Record<SnapZone, string> = {
+  maximize: 'Release: Maximize',
+  left: 'Release: Snap left',
+  right: 'Release: Snap right',
+  'top-left': 'Release: Top-left',
+  'top-right': 'Release: Top-right',
+  'bottom-left': 'Release: Bottom-left',
+  'bottom-right': 'Release: Bottom-right'
+}
+
+function isInteractiveTitleTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false
+  return Boolean(
+    target.closest('.app-no-drag, button, a, input, [role="button"], [data-tab-id]')
+  )
+}
+
 export function TitleTabsBar(): React.JSX.Element {
   const windowState = useAppStore((s) => s.windowState)
+  const lang = useAppStore((s) => s.settings.market.language)
   const { t } = useUiTranslations()
   const hubActive = useTabsStore((s) => s.hubActive)
   const tabs = useTabsStore((s) => s.tabs)
@@ -74,9 +103,50 @@ export function TitleTabsBar(): React.JSX.Element {
     }
   }
 
+  const handleHeaderPointerDown = (e: React.PointerEvent<HTMLElement>): void => {
+    if (e.button !== 0 || isInteractiveTitleTarget(e.target)) return
+    const ratioX = Math.min(1, Math.max(0, e.clientX / Math.max(1, window.innerWidth)))
+    const offsetY = Math.min(120, Math.max(0, e.clientY))
+
+    const headerEl = e.currentTarget
+    const pointerId = e.pointerId
+    try {
+      headerEl.setPointerCapture(pointerId)
+    } catch {
+      // Ignore si le pointeur est déjà relâché
+    }
+
+    let ended = false
+    void ipcClient.window.beginDrag({ ratioX, offsetY })
+
+    const finish = (): void => {
+      if (ended) return
+      ended = true
+      window.removeEventListener('pointerup', finish)
+      window.removeEventListener('pointercancel', finish)
+      window.removeEventListener('blur', finish)
+      void ipcClient.window.endDrag()
+    }
+
+    window.addEventListener('pointerup', finish)
+    window.addEventListener('pointercancel', finish)
+    window.addEventListener('blur', finish)
+  }
+
+  const handleHeaderDoubleClick = (e: React.MouseEvent<HTMLElement>): void => {
+    if (isInteractiveTitleTarget(e.target)) return
+    void ipcClient.window.toggleMaximize()
+  }
+
+  const snapLabel = windowState.snapPreview
+    ? (lang === 'fr' ? SNAP_ZONE_LABELS_FR : SNAP_ZONE_LABELS_EN)[windowState.snapPreview]
+    : null
+
   return (
     <header
-      className="app-drag-region flex h-9 shrink-0 select-none items-center justify-between border-b border-border bg-background/95 pl-2"
+      onPointerDown={handleHeaderPointerDown}
+      onDoubleClick={handleHeaderDoubleClick}
+      className="wf-shell-bar flex h-9 shrink-0 select-none items-center justify-between border-b border-border bg-background/95 pl-2"
       aria-label="Barre d'onglets et contrôles fenêtre"
     >
       <div className="app-no-drag flex min-w-0 items-center gap-1">
@@ -85,7 +155,7 @@ export function TitleTabsBar(): React.JSX.Element {
           onClick={activateHub}
           title="Hub Temps Réel Warframe (wf://hub)"
           className={cn(
-            'inline-flex h-7 shrink-0 items-center gap-1.5 rounded-md border px-2.5 text-xs font-semibold transition-colors',
+            'wf-glass-pill inline-flex h-7 shrink-0 items-center gap-1.5 rounded-md border px-2.5 text-xs font-semibold transition-colors',
             hubActive
               ? 'border-primary/60 bg-primary/20 text-foreground'
               : 'border-border bg-secondary/60 text-muted-foreground hover:bg-secondary hover:text-foreground'
@@ -170,7 +240,14 @@ export function TitleTabsBar(): React.JSX.Element {
         </div>
       </div>
 
-      <div className="app-drag-region h-full min-w-[24px] flex-1" />
+      <div className="flex h-full min-w-[24px] flex-1 items-center justify-center px-2">
+        {snapLabel && (
+          <span className="pointer-events-none inline-flex items-center gap-1 rounded-full border border-primary/50 bg-primary/15 px-2.5 py-0.5 text-[11px] font-semibold text-primary shadow-sm">
+            <Maximize2 className="h-3 w-3" />
+            <span>{snapLabel}</span>
+          </span>
+        )}
+      </div>
 
       <div className="app-no-drag flex h-full shrink-0 items-center">
         <div className="pr-1.5">

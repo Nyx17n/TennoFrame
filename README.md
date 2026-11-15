@@ -7,7 +7,7 @@
 
 > Conçu par **Maxime (`Nyxo17`)** — Architecture **Electron 35 · Node.js · React 19 · `shadcn/ui` · TypeScript strict (`strict: true`) · Validation `zod`**.
 
-**TennoFrame v2** (`v2.11.0`) est un compagnon bureau tout-en-un pour **Warframe** traduit dans les **15 langues officielles de Warframe**, combinant un navigateur de trading multi-onglets connecté à **Warframe Market** (avec connexion compte optionnelle, mise en vente, recherche cumulative à pastilles & messages `/w` multilingues), un **Hub Worldstate temps réel** (avec règles d’alertes sur mesure et minuteurs épinglés), une **Encyclopédie de Farm, Bestiaire des Mobs, Annuaire des Marchands & Helminth** hors-ligne complète en FR/EN et un **Système d’Extensions modulaires** incluant le **Codex Farm Overlay en jeu (`Alt+O`)**.
+**TennoFrame v2** (`v2.12.0`) est un compagnon bureau tout-en-un pour **Warframe** traduit dans les **15 langues officielles de Warframe**, combinant un navigateur de trading multi-onglets connecté à **Warframe Market** (avec connexion compte automatique par navigateur intégré, mise en vente, recherche cumulative à pastilles & messages `/w` multilingues), un **Hub Worldstate temps réel** (avec règles d’alertes sur mesure et minuteurs épinglés), une **Encyclopédie de Farm, Bestiaire des Mobs, Annuaire des Marchands & Helminth** hors-ligne complète en FR/EN, **3 Styles d’Interface Visuels** (*Liquid Glass*, *Transparence Simple*, *Style Médiéval Grimoire*) et un **Système d’Extensions modulaires** incluant le **Codex Farm Overlay en jeu (`Alt+O`)**.
 
 ---
 
@@ -24,10 +24,10 @@
    - Onglets dynamiques réordonnables par glisser-déposer, épinglables, indicateur fluide de transition de page et navigation *Précédent / Suivant* indépendante par onglet.
    - **Barre d’adresse `wf://` pleine largeur (`Ctrl+K`)** : recherche instantanée FR/EN dans les 3 900+ items du Marché, les 3 810 fiches du Codex, ou ouverture directe d’une URL `https://warframe.market/items/...` collée.
    - **Barre de raccourcis centrée** (*Marché · Favoris · Panier · Ordres récents · Codex · Ducanator · Contrats Mod Riven*) + **Historique de navigation complet (`wf://history`, `Ctrl+H`)** aligné à droite (masquée automatiquement sur le Hub Temps Réel).
-   - **Mode Compact Overlay (`460×660`, `Alt+M`)** + *Always-on-Top* (`Alt+P`) avec **souris traversante automatique en plein jeu (`Alt+G`)** + bascule rapide (`Alt+Shift+W`) + contrôle du zoom `[ − | 100% | + ]`.
+   - **Mode Compact Overlay (`460×660`, `Alt+M`)** + *Always-on-Top* (`Alt+P`) avec **souris traversante automatique en plein jeu (`Alt+G`)** + **Aero Snap natif 120 Hz multi-écrans** (bords, 4 coins, détachement Windows 11, double-clic & `F11`) + bascule rapide (`Alt+Shift+W`) + contrôle du zoom `[ − | 100% | + ]`.
 
 2. **Marché Warframe Market Temps Réel, Compte Vendeur & Outils Avancés**
-   - **Compte Warframe Market optionnel & Mise en vente (`wf://wfm-account`)** : connexion sécurisée chiffrée via DPAPI Windows (`safeStorage`) avec statut temps réel (*En jeu · En ligne · Invisible*), gestion complète de tes ventes/achats, bouton `✓ Vendu -1` et modale intelligente « Mettre un item en vente » avec aide au prix en direct.
+   - **Compte Warframe Market optionnel & Mise en vente (`wf://wfm-account`)** : connexion 100 % automatique via la fenêtre navigateur intégrée durcie (aucun mot de passe saisi dans l’app, aucun cookie à copier, session chiffrée via DPAPI Windows `safeStorage`) avec statut temps réel (*En jeu · En ligne · Invisible*), gestion complète de tes ventes/achats, bouton `✓ Vendu -1` et modale intelligente « Mettre un item en vente » avec aide au prix en direct.
    - **Barre de recherche cumulative à pastilles (`Tokenized Filter Bar`)** : croise librement plusieurs pastilles (`[📦 Item] + [👤 Vendeur] + [💎 ≤ Xp]`) et consulte des **profils joueurs publics enrichis** (KPIs, ventes, achats et avis vérifiés).
    - **Menus contextuels rapides au clic droit** : sur les onglets, sur tous les items du Marché (*Favoris, Nouvel onglet, Panier, Snipe, Codex, Wiki Officiel*) et sur les entrées du Codex (*Afficher en Overlay Farm* lorsque l’extension est activée).
    - Ordres d’achat/vente en direct, filtres statut/rang/réputation, flux complet des **annonces les plus récentes** dès l’accueil Marché et barre **`/w` Whisper** copiée en 1 clic dans les **15 langues de Warframe (`★ EN` recommandé)**.
@@ -51,7 +51,8 @@
    - **Extension `Codex Farm Overlay` en jeu (`Alt+O`)** : fenêtre transparente *Always-on-Top* avec souris traversante (`👻` Click-Through + déverrouillage `0,5 s`), sélection granulaire d’un set complet, des **ressources de craft Fonderie**, d’un Mob, d’une offre Marchand ou d’un objet précis, gérée depuis **`Paramètres → Extensions`**.
    - **Infirmerie Helminth** : compétences subsumables par Warframe (filtre *★ Méta S-Tier*), **6 Sécrétions & Bile** et compétences natives.
 
-5. **Personnalisation Visuelle Avancée, Notifications & Animations**
+5. **Personnalisation Visuelle Avancée, Styles d’Interface, Notifications & Animations**
+   - **3 Styles d’Interface & Transparence Bureau (`Paramètres → Apparence`)** : **Liquid Glass** (verre dépoli spéculaire), **Transparence Simple** (alpha épuré) et **Style Médiéval** (*Grimoire de Duviri*, doubles bordures fer forgé & or vieilli, typographie Serif noble, Parchemin de Quête en Overlay Farm et 3 palettes rapides), avec interrupteur indépendant **« Afficher le bureau en arrière-plan »** (40 %–95 % ou fond 100 % opaque).
    - **3 modes d’affichage** (*Grille Carrée*, *Grille Rectangulaire*, *Liste pleine largeur*) et **3 tailles de cartes (`S` / `M` / `L`)** avec images adaptatives sur l’ensemble des catalogues et outils, couplés au chargement progressif **« Afficher plus »** sans rechargement de page.
    - **20 thèmes visuels intégrés** (*Sombre*, *Clair*, *Full Black OLED `#000`*, *Full White `#FFF`* + 16 déclinaisons chromatiques) **+ 8 styles de dégradés de fond d’écran Sci-Fi** (intensité, angle et teintes personnalisables) **+ 76 couleurs prédéfinies indépendantes** (28 fonds & 48 accents).
    - **Notifications in-app empilées & Centre de notifications (`🔔`)** : 5 styles visuels, pause du minuteur au survol, fusion anti-spam et historique de session.

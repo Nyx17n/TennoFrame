@@ -564,11 +564,9 @@ L'index `codex-mobs-vendors.json` est chargé **à la demande (lazy-load asynchr
 - **Puce Compte WFM dans la `CommandNavBar` & Raccourci `BookmarksBar`** :
   - **État Non connecté** : bouton discret `👤 Connexion WFM` dans la barre de commande (et entrée `Mon Profil WFM` dans les favoris de navigation).
   - **État Connecté** : puce compacte `🟢 <PseudoEnJeu> ▾` affichant la pastille de statut en direct, le pseudo vérifié, un menu déroulant rapide (`🟢 En jeu`, `🟣 En ligne`, `⚫ Invisible`, `👤 Ouvrir Mon Profil WFM`, `➕ Mettre un item en vente`, `🚪 Se déconnecter`).
-- **Modale de Connexion Sécurisée (`WfmSignInModal`) — Double Connexion 100 % Automatique + Secours Navigateur Principal** :
-  1. **Onglet 1 — « Dans l'app (E-mail & Mot de passe WFM) »** : authentification directe via `POST https://api.warframe.market/v1/auth/signin` (HTTPS TLS strict côté Main Process uniquement). Le mot de passe n'est **jamais** stocké ni journalisé ; seul le jeton de session `JWT` obtenu est chiffré sur disque via **Electron `safeStorage` (Windows DPAPI)**.
-  2. **Onglet 2 — « 🌐 Page Web Officielle Warframe Market (Auto : Steam, Discord, Google, PSN, Xbox) »** : ouvre une fenêtre `BrowserWindow` isolée et durcie (`nodeIntegration: false`, `contextIsolation: true`, `sandbox: true`, `webSecurity: true`, partition éphémère en RAM sans `preload`, liste blanche HTTPS stricte pour `warframe.market` et ses fournisseurs SSO officiels) sur `https://warframe.market/auth/signin`. Dès que l'utilisateur se connecte, le Main Process détecte automatiquement le cookie `JWT` valide, vérifie `/v2/me`, chiffre la session via `safeStorage` (DPAPI), purge la partition éphémère et referme la fenêtre tout seul (**zéro copier-coller**).
-  3. **Option avancée repliable — « Navigateur principal Windows + Jeton »** : bouton `↗ Ouvrir warframe.market dans mon navigateur principal` (`shell.openExternal`) accompagné d'un champ optionnel de collage de jeton `JWT` (car un navigateur externe isole ses cookies en l'absence d'OAuth2 public chez WFM).
-  - Bandeau de transparence sécurité affiché clairement dans la modale : *« Connexion 100 % optionnelle · Mot de passe jamais conservé · Session chiffrée localement par Windows DPAPI (`safeStorage`) »*.
+- **Modale de Connexion Sécurisée (`WfmSignInModal`) — 100 % Automatique via Navigateur Sécurisé (Zéro mot de passe, zéro demande de cookie)** :
+  - **« 🌐 Fenêtre Navigateur Officielle Warframe Market (100 % Automatique : Steam, Discord, Google, PSN, Xbox, E-mail) »** : ouvre une fenêtre `BrowserWindow` isolée et durcie (`nodeIntegration: false`, `contextIsolation: true`, `sandbox: true`, `webSecurity: true`, partition éphémère en RAM sans `preload`, liste blanche HTTPS stricte pour `warframe.market` et ses fournisseurs SSO officiels) sur `https://warframe.market/fr/auth/signin`. Dès que l'utilisateur se connecte, le Main Process détecte automatiquement la session valide, vérifie `/v2/me`, chiffre la session via `safeStorage` (Windows DPAPI), purge la partition éphémère et referme la fenêtre tout seul (**zéro saisie de mot de passe dans l'app, zéro copier-coller de cookie**).
+  - Bandeau de transparence sécurité affiché clairement dans la modale : *« Connexion 100 % optionnelle · Aucun mot de passe ni cookie demandé · Session chiffrée localement par Windows DPAPI (`safeStorage`) »*.
   - **Respect strict Anti-Bot / CAPTCHA** : aucune automatisation ni contournement ; l'utilisateur interagit lui-même normalement dans la fenêtre web officielle si `warframe.market` le demande.
 - **Synchronisation du Statut en Direct (`wss://ws.warframe.market/socket`)** :
   - Connexion WebSocket sécurisée (`TLS`, sous-protocole `wfm`) gérée exclusivement dans le Main Process (`WfmPresenceService`) lorsque l'utilisateur est connecté et choisit `En jeu` ou `En ligne`, avec reconnexion exponentielle propre et fermeture immédiate au passage sur `Invisible` ou à la déconnexion.
@@ -779,6 +777,71 @@ Pour épurer l'interface tout en accélérant les actions fréquentes à la sour
    - **`WhisperBar`** : menu déroulant compact des 15 langues remplaçant l'ancien bouton binaire `FR ↔ EN`.
    - **4 États UI** : *Skeleton* lors du rechargement du catalogue dans une nouvelle langue, *Badge de repli EN discret* quand une entrée n'est disponible qu'en anglais, *État Nominal multilingue (latin, cyrillique, CJK, thaï)*, et *Erreur réseau avec bouton Réessayer*.
 
+### 3.17. Module 17 — Mode Transparent (« Liquid Glass » & « Transparence Simple » + Visibilité Bureau)
+
+1. **Objectif Métier & Deux Styles de Transparence Complémentaires** :
+   - Permettre au joueur d'activer ou désactiver à chaud depuis **`Paramètres → Apparence`** un **Mode Transparent intégral** décliné en **2 styles visuels** au choix :
+     - **Style A — `liquid-glass` (« Liquid Glass » — Verre Givré Spéculaire, défaut)** :
+       1. **Voile vitré flouté** : fond semi-transparent piloté par l'opacité choisie (`20 %` à `85 %`, défaut `48 %`) couplé à un flou interne GPU (`backdrop-filter: blur(18px) saturate(145%)`).
+       2. **Vignette réfractive interne (*Inner Frosted Glow*)** : centre du panneau plus limpide et pourtour intérieur givré (`inset box-shadow` doux blanc glacé + accent du thème).
+       3. **Reflets spéculaires d'arêtes (*Specular Rim Highlights*)** : liseré fin `1px` avec éclat lumineux directionnel sur les **angles haut-gauche et bas-droite**, mêlant blanc glacé et la **couleur d'accent `--primary` du thème actif**.
+     - **Style B — `simple` (« Transparence Simple » — Alpha Pur Épuré)** :
+       - Transparence plate, sobre et ultra-légère GPU utilisant uniquement le canal alpha (`20 %` à `85 %`) et des bordures nettes discrètes, **sans** reflets spéculaires, **sans** dégradés radiaux de brillance et **sans** halo interne givré.
+   - **Option indépendante « Voir le bureau / le jeu en arrière-plan » (`glassDesktopBackdropEnabled`, défaut `true`)** :
+     - **Activée (`true`)** : le fond global de la fenêtre Electron (`.wf-app-root`) devient translucide, laissant transparaître **Warframe ou le bureau Windows** derrière TennoFrame.
+     - **Désactivée (`false`)** : le fond global de la fenêtre reste **100 % opaque** (couleur du thème + dégradé Sci-Fi interne `--wf-app-gradient` uniquement), **aucun élément du bureau Windows n'est visible derrière**, mais toutes les cartes, barres, pilules et modales internes conservent l'effet **Liquid Glass** ou **Transparence Simple** par-dessus le fond de l'application.
+2. **Architecture Technique Electron / Windows DWM & Schéma `zod`** :
+   - **Contrat `UserSettingsSchema.shape.appearance`** (`src/shared/schemas/settings.schema.ts`) :
+     - `glassModeEnabled: z.boolean().default(false)`
+     - `glassStyle: z.enum(['liquid-glass', 'simple']).default('liquid-glass')`
+     - `glassDesktopBackdropEnabled: z.boolean().default(true)`
+     - `glassOpacityPercent: z.number().int().min(20).max(85).default(48)`
+   - **Pilotage à chaud sans redémarrage (`WindowOverlayService` & `FarmOverlayWindowService`)** :
+     - Fenêtre DirectComposition transparente sans cadre Win32 (`transparent: true`, `frame: false`, `thickFrame: false`, `resizable: false`, `backgroundColor: '#00000000'`) éliminant toute barre de titre blanche DWM, couplée au moteur **Aero Snap multi-écrans + Tear-off 120 Hz + poignées de redimensionnement IPC**.
+   - **Moteur CSS GPU (`theme-engine.ts` + `globals.css`)** :
+     - Pose de `data-glass="off | liquid-glass | simple"` et `data-glass-backdrop="true | false"` ainsi que des variables `--wf-glass-*-alpha` sur `<html>`, garantissant zéro surcharge React et le maintien strict du lissage ClearType sur les textes.
+3. **Ergonomie dans `Paramètres → Apparence`, Mode Compact (`460×660`) & 4 États UI** :
+   - **Section dédiée `GlassModeSection`** dans `AppearanceSettingsTab` (traduite dans les **15 langues**) :
+     - Interrupteur principal **Activer / Désactiver le Mode Transparent** + badge d'état en direct (`Liquid Glass · 48 %` ou `Simple · 48 %`).
+     - **Sélecteur de style à 2 boutons** : `✨ Liquid Glass` vs `◻ Transparence simple`.
+     - **Bouton / Interrupteur dédié « 🖥 Voir le bureau en arrière-plan »** permettant de basculer en 1 clic entre *Fenêtre transparente sur Windows/Warframe* et *Fond d'application opaque avec cartes vitrées internes*.
+     - **Curseur d'opacité (`20 %` à `85 %`)** + 3 préréglages rapides (`Cristal 30 %`, `Équilibré 48 %`, `Fumé lisible 70 %`) + **capsule d'aperçu en direct** reflétant fidèlement le style choisi (`Liquid Glass` vs `Simple`) et l'état du fond bureau.
+   - **Adaptation Mode Compact (`460×660`)** : contrôles empilés proprement sur une colonne sans débordement horizontal.
+   - **4 États UI Obligatoires** :
+     1. *Désactivé (Mode Opaque classique par défaut)*,
+     2. *Hydratation initiale sans flash blanc au démarrage*,
+     3. *Nominal Actif (`Liquid Glass` ou `Simple`, avec fond Bureau `ON` ou `OFF`, réglable `20–85 %` en temps réel)*,
+     4. *Repli gracieux OS (si le compositeur transparent OS est indisponible : maintien propre des surfaces vitrées internes sur le fond du thème)*.
+
+### 3.18. Module 18 — Style d'Interface « Médiéval » (Grimoire de Duviri, Parchemin & Fer Forgé Doré)
+
+1. **Objectif Métier & Identité Visuelle Médiévale / Duviri** :
+   - Offrir au joueur un **3e style d'habillage visuel intégral (`'medieval'`)** dans **`Paramètres → Apparence`**, sélectionnable aux côtés de **`Liquid Glass`** et **`Transparence simple`**, inspiré des grimoires enluminés, du fer forgé doré et de l'esthétique médiévale-fantastique de **Duviri / Soulframe**.
+   - **Signature graphique 100 % vectorielle CSS (0 image bitmap lourde, 0 % surcharge CPU)** :
+     1. **Doubles cadres ciselés en fer forgé & laiton vieilli** : angles droits/chanfreinés (`border-radius: 2px`), bordure externe franche teintée par l'or/accent + double filet intérieur (`inset 0 0 0 3px ..., inset 0 0 0 4px ...`) et rivets losanges (`◆`) sur les panneaux clés.
+     2. **Texture chaude Grimoire / Parchemin** : grain radial subtil sépia/ambre et vignettage intérieur chaleureux (mode sombre *Donjon & Pierre d'ombre* ou mode clair *Parchemin Royal Vélin*).
+     3. **Typographie noble & lisibilité trading intacte** : titres de sections, onglets et en-têtes en police **Serif noble** (`Palatino Linotype`, `Book Antiqua`, `Georgia`, `serif` avec léger espacement des lettres `0.025em`), tandis que tous les **prix Platinum, Ducats, pourcentages de drop et compteurs** restent en **chiffres tabulaires (`tabular-nums`)** ultra-nets.
+     4. **Boutons biseautés & Sceaux de cire** : relief métallique ciselé haut/bas (`inset 0 1px 0`) sur les boutons d'action et badges d'accent évoquant un sceau de cire / blason doré.
+2. **Palettes Médiévales Rapides & Compatibilité « Grimoire Opaque » vs « Vitrail Transparent »** :
+   - **Compatibilité totale avec les thèmes existants + 3 Palettes Médiévales Rapides (1 clic)** :
+     - **`Donjon & Or Forgé` *(Sombre)* :** fond pierre d'ombre chaude (`#1a130d`) + encre ivoire (`#fef3c7`) + accent laiton/or forgé (`#d97706`).
+     - **`Parchemin Royal` *(Clair)* :** fond vélin ancien (`#f4e7cc`) + encre sépia (`#2b180a`) + accent ambre royal (`#b45309`).
+     - **`Ordre Écarlate` *(Sombre)* :** fond obsidienne chaude (`#220d10`) + accent cire vermillon (`#dc2626`).
+     - Le joueur peut également conserver n'importe laquelle de ses couleurs personnalisées actuelles tout en activant la géométrie et les ornements du **Style Médiéval**.
+   - **Synergie avec le bouton « Voir le bureau en arrière-plan » (`glassDesktopBackdropEnabled`)** :
+     - **Bureau masqué (`false`)** : véritable **Grimoire 100 % opaque** (pierre/parchemin plein, idéal pour une immersion manuscrite maximale).
+     - **Bureau visible (`true`)** : mode **« Vitrail Médiéval »** translucide (piloté par le curseur d'opacité `20 % – 85 %`), laissant transparaître Warframe ou le bureau Windows à travers les panneaux teintés et les cadres en fer forgé.
+3. **Architecture Technique, Schéma `zod`, Mode Compact (`460×660`) & 4 États UI** :
+   - **Contrat `UserSettingsSchema.shape.appearance`** (`src/shared/schemas/settings.schema.ts`) :
+     - Extension rétrocompatible de `GlassStyleSchema` : `z.enum(['liquid-glass', 'simple', 'medieval']).default('liquid-glass')`.
+   - **Moteur CSS (`theme-engine.ts` + `globals.css`)** :
+     - Pose de `data-glass="medieval"` sur `<html>` et application automatique sur la fenêtre principale (`1440×900`), le **Mode Compact (`460×660`)** et la fenêtre secondaire **`Codex Farm Overlay`** (transformée en *Parchemin de Quête* en jeu).
+   - **4 États UI Obligatoires** :
+     1. *Chargement / Skeleton Parchemin* (reflet ambré doux sans flash blanc froid, respectant `animationLevel="off"`),
+     2. *État Vide « Grimoire vierge »* (encadré enluminé sobre avec bouton forgé d'action rapide),
+     3. *Nominal Donjon Sombre, Parchemin Clair & Mode Vitrail* (bascule instantanée à chaud entre `Liquid Glass`, `Simple` et `Médiéval` sur les **15 langues Warframe**),
+     4. *Erreur réseau* (bannière d'alerte encadrée avec bouton ciselé `Réessayer`).
+
 ---
 
 ## 4. Architecture Technique, Contrats IPC & Sécurité
@@ -841,7 +904,7 @@ Tous les paramètres d'entrée et toutes les réponses API passent par une valid
 | Domaine | Canaux IPC (`invoke` / événements `on`) | Responsabilité |
 | :--- | :--- | :--- |
 | **`market`** | `market:getCatalog`, `market:getItemDetail`, `market:getItemOrders`, `market:getItemStats`, `market:getRecentOrders`, `market:getUserProfile`, `market:searchFacetedOrders`, `market:getDucats`, `market:searchRivens`, `market:analyzeSetVsParts`, `market:analyzeCartBundles` | Données Warframe Market, recherche cumulative à pastilles croisées et calculs métier lourds |
-| **`wfmAccount`** | `wfmAccount:getSession`, `wfmAccount:signInCredentials`, `wfmAccount:signInWeb`, `wfmAccount:signInToken`, `wfmAccount:signOut`, `wfmAccount:setStatus`, `wfmAccount:getOverview`, `wfmAccount:createOrder`, `wfmAccount:updateOrder`, `wfmAccount:closeOrderUnit`, `wfmAccount:deleteOrder`, `wfmAccount:onSessionChanged` *(event Main → Renderer)* | Connexion optionnelle WFM chiffrée (`safeStorage` DPAPI, formulaire in-app + fenêtre Web auto SSO + jeton secours), statut temps réel (`En jeu / En ligne / Invisible`), profil complet & mise en vente / gestion d'annonces |
+| **`wfmAccount`** | `wfmAccount:getSession`, `wfmAccount:signInWeb`, `wfmAccount:signOut`, `wfmAccount:setStatus`, `wfmAccount:getOverview`, `wfmAccount:createOrder`, `wfmAccount:updateOrder`, `wfmAccount:closeOrderUnit`, `wfmAccount:deleteOrder`, `wfmAccount:onSessionChanged` *(event Main → Renderer)* | Connexion optionnelle WFM 100 % automatique via fenêtre navigateur isolée chiffrée (`safeStorage` DPAPI, zéro mot de passe ni cookie manuel), statut temps réel (`En jeu / En ligne / Invisible`), profil complet & mise en vente / gestion d'annonces |
 | **`worldstate`** | `worldstate:getCurrent`, `worldstate:getBaroWithPrices` | État du monde Warframe et enrichissement Platinum de Baro |
 | **`codex`** | `codex:search`, `codex:getItemDetail`, `codex:getHelminthData` | Requêtes rapides paginées dans la base Codex locale (Ressources, Warframes, Armes, Mods, Reliques, **Mobs** & **Marchands**) sans charger plusieurs Mo dans chaque onglet React |
 | **`alerts`** | `alerts:list`, `alerts:upsertPriceAlert`, `alerts:deletePriceAlert`, `alerts:updateWorldAlerts`, `alerts:onTriggered` *(event Main → Renderer)* | Gestion et réception temps réel des alertes *Price Sniper* et cycles |
@@ -869,7 +932,7 @@ Tous les paramètres d'entrée et toutes les réponses API passent par une valid
 
 ## 5. Plan des Maquettes Excalidraw (`docs/02-tennoframe/` — Synchronisées `v2.10+`)
 
-L'ensemble des **17 planches Excalidraw** dans `docs/02-tennoframe/` documente fidèlement l'architecture de **TennoFrame**, chacune présentant côte à côte la version **Desktop (`1440×900`)**, son adaptation **Compact Overlay (`460×660`)**, et **les 4 états UI obligatoires** (*Chargement / Skeleton*, *Vide*, *Nominal*, *Erreur*) :
+L'ensemble des **19 planches Excalidraw** dans `docs/02-tennoframe/` documente fidèlement l'architecture de **TennoFrame**, chacune présentant côte à côte la version **Desktop (`1440×900`)**, son adaptation **Compact Overlay (`460×660`)**, et **les 4 états UI obligatoires** (*Chargement / Skeleton*, *Vide*, *Nominal*, *Erreur*) :
 
 1. `01-app-shell-navigation.excalidraw` : Fenêtre *Frameless* `v2.6.0`, `TitleTabsBar` (défilement molette + chevrons `‹ / ›` + fermeture clic molette), `ClickThroughBanner` (`👻` `Alt+G` + maintien `0.5s`), `CommandNavBar` (`Ctrl+K`, cloche `🔔`, `PC · Cross · FR ▾`, Zoom, `📌`, `👻`, `🗖`, `⚙`), `BookmarksBar` centrée + `Historique` (`Ctrl+H`), Omnibox, Organisateur d'onglets, bandeau `/w`, `CompactTimersBar`, bouton Discord et `StatusBar v2.6.0`.
 2. `02-market-home-catalog-item.excalidraw` : Accueil Marché (flux d'annonces récentes en direct, `ViewModeToggle` `[⊞|▭|☰] + [S|M|L]`, badges `Min · Moy · Max` Platinum), Catalogue, Favoris, Profil joueur, et **Fiche Item complète** (Ordres Vente/Achat, Comparateur *Set vs Pièces*, Pont bidirectionnel *Codex*, Statistiques 48h/90j + pagination *Afficher plus*).
@@ -888,6 +951,8 @@ L'ensemble des **17 planches Excalidraw** dans `docs/02-tennoframe/` documente f
 15. `15-progressive-tokenized-search.excalidraw` *(Module 13 — Barre de Recherche Cumulative à Pastilles `Tokenized Filter Bar`)* : **Schéma du parcours en 3 étapes** (`[📦 volt ×]` → saisie `TennoTrader42` → intersection `[📦 volt ×] + [👤 TennoTrader42 ×]`), **Vue Desktop `1440×900` de `MarketCatalogView`** (barre `MarketTokenFilterBar` avec pastilles typées, menu d'autocomplétion contextuel Item vs Vendeur vs Prix, carte vendeur ciblé et résultats d'offres croisées avec `/w` et `+ Panier`), **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
 16. `16-user-install-counter.excalidraw` *(Module 15 — Compteur Permanent d'Utilisateurs & d'Installations — validé)* : **Pilule permanente dans `TitleTabsBar` (haut-droite avant `— ▢ ✕`) et rappel dans `StatusBar` (bas-droite)** garantissant une visibilité `100 %` permanente sur tous les onglets et vues, **Popover épuré au clic** (*Utilisateurs installés* & *En ligne*), **Adaptation Mode Compact `460×660` (`👥 X · 🟢 Y`)** et **les 4 états UI obligatoires**.
 17. `17-multilang-15-warframe-languages.excalidraw` *(Module 16 — Internationalisation Complète 15 Langues Officielles Warframe)* : **Grille des 15 langues Warframe (`FR, EN, DE, ES, IT, PT, RU, PL, UK, TR, JA, KO, ZH, TC, TH`)** dans `QuickMarketPopover` (`CommandNavBar`) et `SettingsModal → Marché & Échanges`, **dissociation Langue d'affichage vs Langue `/w`** avec aperçu en direct dans `WhisperBar`, **repli intelligent `EN` sur Codex/WFM**, **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
+18. `18-liquid-glass-transparent-mode.excalidraw` *(Module 17 — Mode Transparent « Liquid Glass » & « Transparence Simple » + Visibilité Bureau — validé)* : **Carte dans `SettingsModal → Apparence`** (interrupteur Activer/Désactiver, sélecteur à 2 styles `✨ Liquid Glass` vs `◻ Transparence simple`, bouton `🖥 Voir le bureau en arrière-plan` ON/OFF, curseur d'opacité `20 % – 85 %`, préréglages rapides et capsule d'aperçu en direct), **anatomie optique comparée Verre Spéculaire vs Alpha Plat**, **rendu Desktop `1440×900`, Mode Compact `460×660` & `Codex Farm Overlay` en jeu**, et **les 4 états UI obligatoires**.
+19. `19-medieval-ui-style.excalidraw` *(Module 18 — Style d'Interface « Médiéval » : Grimoire de Duviri, Parchemin & Fer Forgé Doré)* : **Sélecteur à 3 styles dans `SettingsModal → Apparence`** (`✨ Liquid Glass` | `◻ Transparence simple` | `🏰 Style Médiéval`), **3 Palettes Médiévales Rapides** (`Donjon & Or Forgé`, `Parchemin Royal`, `Ordre Écarlate` + conservation libre du thème actif), **synergie Grimoire Opaque vs Vitrail Transparent** (`Voir le bureau` ON/OFF), **anatomie CSS 100 % vectorielle** (doubles cadres ciselés en fer forgé/laiton, rivets `◆`, titres Serif nobles + prix Platinum tabulaires, boutons biseautés & sceaux de cire), **rendu Desktop `1440×900` (Donjon sombre + échantillon Parchemin clair), Mode Compact `460×660` & `Parchemin Farm Overlay` en jeu**, et **les 4 états UI obligatoires**.
 
 ---
 

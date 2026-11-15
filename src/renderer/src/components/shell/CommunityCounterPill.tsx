@@ -72,7 +72,7 @@ export function CommunityCounterPill({
             title={tooltipText}
             aria-label={t.shell.communityTitle}
             className={cn(
-              'inline-flex h-6 shrink-0 items-center gap-1.5 rounded-full border px-2.5 text-[11px] font-medium transition-colors',
+              'wf-glass-pill inline-flex h-6 shrink-0 items-center gap-1.5 rounded-full border px-2.5 text-[11px] font-medium transition-colors',
               isOffline
                 ? 'border-amber-500/40 bg-amber-500/10 text-foreground hover:bg-amber-500/20'
                 : 'border-primary/35 bg-primary/10 text-foreground hover:border-primary/60 hover:bg-primary/20'

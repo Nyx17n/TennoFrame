@@ -1,5 +1,17 @@
 [
   {
+    "version": "2.12.0",
+    "date": "November 2026",
+    "title": "Glass, Simple & Medieval UI Styles, 120 Hz Aero Snap Window Engine & Seamless WFM Sign-In",
+    "badge": "New in v2.12.0",
+    "highlights": [
+      "Three Visual UI Styles & Transparency Engine (`Settings → Appearance`, localized in all 15 Warframe languages): choose between **Liquid Glass** (frosted glass with specular rim highlights), **Simple Transparency** (clean flat alpha), or **Medieval Grimoire Style** (Duviri wrought-iron & aged-gold double borders, noble Serif headings with tabular Platinum numbers, beveled buttons, Quest-Scroll Farm Overlay, and 3 one-click palettes: *Dungeon & Forged Gold*, *Royal Parchment*, *Crimson Order*).",
+      "Independent **Show Desktop in Background** toggle & 40%–95% opacity slider: let your Windows desktop or Warframe shine directly through TennoFrame (including *Stained-Glass* Medieval mode), or keep a 100% opaque window background while preserving internal glass/grimoire panels at zero idle CPU cost.",
+      "Native 120 Hz Frameless Window Engine: completely eliminates the Windows 10/11 DWM white ghost titlebar while adding smooth multi-monitor Aero Snap (top maximize, left/right 50%, 4 corners 25%), Windows 11 proportional tear-off unmaximize on drag, double-click titlebar & `F11` fullscreen, and 8-edge custom resize handles.",
+      "Streamlined 100% Automatic Warframe Market Browser Sign-In: sign in directly through the hardened built-in browser window with automatic session detection (zero in-app password prompts, zero manual cookie copying, and hardened `/v2/me` validation), plus refined Community Installed Users counter accuracy."
+    ]
+  },
+  {
     "version": "2.11.0",
     "date": "November 2026",
     "title": "15 Official Warframe Languages, Universal /w Whispers (EN Recommended) & Live Community Counter",

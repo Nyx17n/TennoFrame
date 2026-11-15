@@ -61,7 +61,12 @@ import {
   type RivenSearchParams,
   type RivenWeaponSummary
 } from '@shared/schemas/tools.schema'
-import { WindowStateSchema, type WindowState } from '@shared/schemas/window.schema'
+import {
+  WindowStateSchema,
+  type BeginDragPayload,
+  type BeginResizePayload,
+  type WindowState
+} from '@shared/schemas/window.schema'
 import {
   WorldRulePreviewResultSchema,
   type WorldAlertRuleInput,
@@ -82,8 +87,6 @@ import {
   type WfmOwnOrder,
   type WfmPresenceStatus,
   type WfmSessionState,
-  type WfmSignInCredentialsInput,
-  type WfmSignInTokenInput,
   type WfmSignInWebInput
 } from '@shared/schemas/wfm-account.schema'
 import {
@@ -142,6 +145,18 @@ export const ipcClient = {
   window: {
     async getState(): Promise<WindowState> {
       return WindowStateSchema.parse(await getBridge().window.getState())
+    },
+    beginDrag(payload: BeginDragPayload): Promise<void> {
+      return getBridge().window.beginDrag(payload)
+    },
+    async endDrag(): Promise<WindowState> {
+      return WindowStateSchema.parse(await getBridge().window.endDrag())
+    },
+    beginResize(payload: BeginResizePayload): Promise<void> {
+      return getBridge().window.beginResize(payload)
+    },
+    endResize(): Promise<void> {
+      return getBridge().window.endResize()
     },
     minimize(): Promise<void> {
       return getBridge().window.minimize()
@@ -221,13 +236,6 @@ export const ipcClient = {
       }
       return WfmSessionStateSchema.parse(await bridge.wfmAccount.getSession())
     },
-    async signInCredentials(input: WfmSignInCredentialsInput): Promise<WfmSessionState> {
-      const bridge = getBridge()
-      if (!bridge.wfmAccount) {
-        throw new Error('Relance npm.cmd run dev pour activer le compte Warframe Market.')
-      }
-      return WfmSessionStateSchema.parse(await bridge.wfmAccount.signInCredentials(input))
-    },
     async signInWeb(input: WfmSignInWebInput): Promise<WfmSessionState> {
       const bridge = getBridge()
       if (typeof bridge.wfmAccount?.signInWeb !== 'function') {
@@ -236,13 +244,6 @@ export const ipcClient = {
         )
       }
       return WfmSessionStateSchema.parse(await bridge.wfmAccount.signInWeb(input))
-    },
-    async signInToken(input: WfmSignInTokenInput): Promise<WfmSessionState> {
-      const bridge = getBridge()
-      if (!bridge.wfmAccount) {
-        throw new Error('Relance npm.cmd run dev pour activer le compte Warframe Market.')
-      }
-      return WfmSessionStateSchema.parse(await bridge.wfmAccount.signInToken(input))
     },
     async signOut(): Promise<WfmSessionState> {
       const bridge = getBridge()
