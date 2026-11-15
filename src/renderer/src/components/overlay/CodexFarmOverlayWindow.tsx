@@ -119,7 +119,7 @@ export function CodexFarmOverlayWindow(): React.JSX.Element {
     <div className="h-screen w-screen overflow-hidden bg-transparent">
       <div
         style={{ backgroundColor: `hsl(var(--background) / ${surfaceOpacity})` }}
-        className="relative flex h-full w-full flex-col overflow-hidden rounded-xl border border-primary/35 text-foreground backdrop-blur-md"
+        className="wf-farm-overlay-shell relative flex h-full w-full flex-col overflow-hidden rounded-xl border border-primary/35 text-foreground backdrop-blur-md"
       >
         <CodexFarmOverlayHeader
           liveState={liveState}

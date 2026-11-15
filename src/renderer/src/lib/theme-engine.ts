@@ -1,4 +1,11 @@
-import type { AnimationLevel, ThemePresetId, UserSettings } from '@shared/schemas/settings.schema'
+import {
+  GLASS_OPACITY_DEFAULT,
+  GLASS_OPACITY_MAX,
+  GLASS_OPACITY_MIN,
+  type AnimationLevel,
+  type ThemePresetId,
+  type UserSettings
+} from '@shared/schemas/settings.schema'
 import { buildGradientCssImage, normalizeGradientSettings } from '@/lib/gradient-engine'
 
 export interface ThemePresetDefinition {
@@ -182,6 +189,34 @@ export const THEME_PRESETS: readonly ThemePresetDefinition[] = [
   }
 ] as const
 
+export interface MedievalPalettePreset {
+  readonly id: 'dungeon-gold' | 'royal-parchment' | 'crimson-order'
+  readonly glyph: string
+  readonly primaryHex: string
+  readonly secondaryHex: string
+}
+
+export const MEDIEVAL_PALETTE_PRESETS: readonly MedievalPalettePreset[] = [
+  {
+    id: 'dungeon-gold',
+    glyph: '🏰',
+    primaryHex: '#1a130d',
+    secondaryHex: '#d97706'
+  },
+  {
+    id: 'royal-parchment',
+    glyph: '📜',
+    primaryHex: '#f4e7cc',
+    secondaryHex: '#b45309'
+  },
+  {
+    id: 'crimson-order',
+    glyph: '🩸',
+    primaryHex: '#220d10',
+    secondaryHex: '#dc2626'
+  }
+] as const
+
 interface HslTriplet {
   h: number
   s: number
@@ -267,12 +302,22 @@ export function applyThemeToDocument(appearance: UserSettings['appearance']): vo
   const isLightTheme = bg.l > 55
   const isAchromatic = bg.s === 0
 
+  const glassEnabled = Boolean(appearance.glassModeEnabled)
+  const glassStyle = appearance.glassStyle ?? 'liquid-glass'
+  const isMedievalActive = glassEnabled && glassStyle === 'medieval'
+
   const root = document.documentElement
   root.classList.toggle('dark', !isLightTheme)
   root.dataset.motion = resolveEffectiveMotion(appearance)
   document.body.classList.toggle('glow-enabled', appearance.glowEnabled)
 
-  const fg = isLightTheme ? '222 47% 11%' : '210 40% 96%'
+  const fg = isMedievalActive
+    ? isLightTheme
+      ? '26 62% 11%'
+      : '38 55% 93%'
+    : isLightTheme
+      ? '222 47% 11%'
+      : '210 40% 96%'
   const cardL =
     bg.l === 0
       ? 3
@@ -286,15 +331,20 @@ export function applyThemeToDocument(appearance: UserSettings['appearance']): vo
   const surfaceSat = isAchromatic ? 0 : clamp(bg.s, 8, 35)
   const mutedSat = isAchromatic ? 0 : clamp(bg.s, 8, 30)
   const borderSat = isAchromatic ? 0 : clamp(bg.s, 10, 35)
-  const mutedFg = isAchromatic
+  const mutedFg = isMedievalActive
     ? isLightTheme
-      ? '215 16% 42%'
-      : '215 15% 65%'
-    : isLightTheme
-      ? `${bg.h} 16% 40%`
-      : `${bg.h} 18% 66%`
+      ? '28 34% 34%'
+      : '34 26% 70%'
+    : isAchromatic
+      ? isLightTheme
+        ? '215 16% 42%'
+        : '215 15% 65%'
+      : isLightTheme
+        ? `${bg.h} 16% 40%`
+        : `${bg.h} 18% 66%`
   const accentFg = ac.l > 62 ? '222 47% 11%' : '210 40% 98%'
 
+  root.style.setProperty('--radius', isMedievalActive ? '0.25rem' : '0.5rem')
   root.style.setProperty('--background', `${bg.h} ${bg.s}% ${bg.l}%`)
   root.style.setProperty('--foreground', fg)
   root.style.setProperty('--card', `${bg.h} ${bg.s}% ${cardL}%`)
@@ -327,4 +377,18 @@ export function applyThemeToDocument(appearance: UserSettings['appearance']): vo
   })
   root.style.setProperty('--wf-app-gradient', gradientCss)
   root.dataset.hasGradient = grad.style !== 'none' ? 'true' : 'false'
+
+  const desktopBackdrop = appearance.glassDesktopBackdropEnabled !== false
+  const glassPct = clamp(
+    appearance.glassOpacityPercent ?? GLASS_OPACITY_DEFAULT,
+    GLASS_OPACITY_MIN,
+    GLASS_OPACITY_MAX
+  )
+  root.dataset.glass = glassEnabled ? glassStyle : 'off'
+  root.dataset.glassBackdrop = glassEnabled && desktopBackdrop ? 'true' : 'false'
+  root.style.setProperty('--wf-glass-bg-alpha', (glassPct / 100).toFixed(3))
+  root.style.setProperty('--wf-glass-bar-alpha', (clamp(glassPct + 12, 28, 90) / 100).toFixed(3))
+  root.style.setProperty('--wf-glass-card-alpha', (clamp(glassPct - 6, 18, 82) / 100).toFixed(3))
+  root.style.setProperty('--wf-glass-modal-alpha', (clamp(glassPct + 18, 40, 93) / 100).toFixed(3))
+  root.style.setProperty('--wf-glass-pill-alpha', (clamp(glassPct - 2, 20, 84) / 100).toFixed(3))
 }

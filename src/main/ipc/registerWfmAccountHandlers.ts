@@ -6,8 +6,6 @@ import {
   CreateWfmOrderInputSchema,
   UpdateWfmOrderInputSchema,
   WfmPresenceStatusSchema,
-  WfmSignInCredentialsInputSchema,
-  WfmSignInTokenInputSchema,
   WfmSignInWebInputSchema
 } from '@shared/schemas/wfm-account.schema'
 import type { WfmAccountService } from '../services/WfmAccountService'
@@ -55,25 +53,10 @@ export function registerWfmAccountHandlers(deps: {
     return wfmAuth.getSessionState()
   })
 
-  ipcMain.handle(
-    IPC_CHANNELS.WFM_ACCOUNT_SIGN_IN_CREDENTIALS,
-    async (event, rawPayload: unknown) => {
-      assertTrustedSender(event, windowService.getMainWindow())
-      const input = WfmSignInCredentialsInputSchema.parse(rawPayload)
-      return wfmAuth.signInWithCredentials(input)
-    }
-  )
-
   ipcMain.handle(IPC_CHANNELS.WFM_ACCOUNT_SIGN_IN_WEB, async (event, rawPayload: unknown) => {
     assertTrustedSender(event, windowService.getMainWindow())
     const input = WfmSignInWebInputSchema.parse(rawPayload ?? {})
     return wfmWebLogin.signInViaWebWindow(input)
-  })
-
-  ipcMain.handle(IPC_CHANNELS.WFM_ACCOUNT_SIGN_IN_TOKEN, async (event, rawPayload: unknown) => {
-    assertTrustedSender(event, windowService.getMainWindow())
-    const input = WfmSignInTokenInputSchema.parse(rawPayload)
-    return wfmAuth.signInWithToken(input)
   })
 
   ipcMain.handle(IPC_CHANNELS.WFM_ACCOUNT_SIGN_OUT, async (event) => {

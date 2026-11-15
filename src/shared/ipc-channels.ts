@@ -33,7 +33,11 @@ import type {
   RivenWeaponSummary
 } from './schemas/tools.schema'
 import type { UpdaterStatus } from './schemas/updater.schema'
-import type { WindowState } from './schemas/window.schema'
+import type {
+  BeginDragPayload,
+  BeginResizePayload,
+  WindowState
+} from './schemas/window.schema'
 import type { WorldAlertRuleInput, WorldRulePreviewResult } from './schemas/world-rules.schema'
 import type {
   VoidTraderSnapshot,
@@ -48,8 +52,6 @@ import type {
   WfmOwnOrder,
   WfmPresenceStatus,
   WfmSessionState,
-  WfmSignInCredentialsInput,
-  WfmSignInTokenInput,
   WfmSignInWebInput
 } from './schemas/wfm-account.schema'
 
@@ -63,6 +65,10 @@ export const IPC_CHANNELS = {
   SETTINGS_EXPORT_JSON: 'settings:exportJson',
   SETTINGS_IMPORT_JSON: 'settings:importJson',
   WINDOW_GET_STATE: 'window:getState',
+  WINDOW_BEGIN_DRAG: 'window:beginDrag',
+  WINDOW_END_DRAG: 'window:endDrag',
+  WINDOW_BEGIN_RESIZE: 'window:beginResize',
+  WINDOW_END_RESIZE: 'window:endResize',
   WINDOW_MINIMIZE: 'window:minimize',
   WINDOW_TOGGLE_MAXIMIZE: 'window:toggleMaximize',
   WINDOW_CLOSE: 'window:close',
@@ -82,9 +88,7 @@ export const IPC_CHANNELS = {
   MARKET_GET_USER_PROFILE: 'market:getUserProfile',
   MARKET_SEARCH_FACETED_ORDERS: 'market:searchFacetedOrders',
   WFM_ACCOUNT_GET_SESSION: 'wfmAccount:getSession',
-  WFM_ACCOUNT_SIGN_IN_CREDENTIALS: 'wfmAccount:signInCredentials',
   WFM_ACCOUNT_SIGN_IN_WEB: 'wfmAccount:signInWeb',
-  WFM_ACCOUNT_SIGN_IN_TOKEN: 'wfmAccount:signInToken',
   WFM_ACCOUNT_SIGN_OUT: 'wfmAccount:signOut',
   WFM_ACCOUNT_SET_STATUS: 'wfmAccount:setStatus',
   WFM_ACCOUNT_GET_OVERVIEW: 'wfmAccount:getOverview',
@@ -135,6 +139,10 @@ export interface TennoFrameBridgeApi {
   }
   readonly window: {
     getState: () => Promise<WindowState>
+    beginDrag: (payload: BeginDragPayload) => Promise<void>
+    endDrag: () => Promise<WindowState>
+    beginResize: (payload: BeginResizePayload) => Promise<void>
+    endResize: () => Promise<void>
     minimize: () => Promise<void>
     toggleMaximize: () => Promise<WindowState>
     close: () => Promise<void>
@@ -160,9 +168,7 @@ export interface TennoFrameBridgeApi {
   }
   readonly wfmAccount: {
     getSession: () => Promise<WfmSessionState>
-    signInCredentials: (input: WfmSignInCredentialsInput) => Promise<WfmSessionState>
     signInWeb: (input: WfmSignInWebInput) => Promise<WfmSessionState>
-    signInToken: (input: WfmSignInTokenInput) => Promise<WfmSessionState>
     signOut: () => Promise<WfmSessionState>
     setStatus: (status: WfmPresenceStatus) => Promise<WfmSessionState>
     getOverview: (forceRefresh?: boolean) => Promise<WfmAccountOverview>

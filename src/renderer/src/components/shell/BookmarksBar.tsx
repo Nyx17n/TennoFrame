@@ -172,7 +172,7 @@ export function BookmarksBar(): React.JSX.Element | null {
           e.currentTarget.scrollLeft += e.deltaY
         }
       }}
-      className="wf-no-scrollbar flex h-8 shrink-0 items-center gap-2 overflow-x-auto border-b border-border bg-card/55 px-2.5 lg:grid lg:grid-cols-[1fr_auto_1fr]"
+      className="wf-shell-bar wf-no-scrollbar flex h-8 shrink-0 items-center gap-2 overflow-x-auto border-b border-border bg-card/55 px-2.5 lg:grid lg:grid-cols-[1fr_auto_1fr]"
       role="navigation"
       aria-label="Barre de raccourcis et outils"
     >

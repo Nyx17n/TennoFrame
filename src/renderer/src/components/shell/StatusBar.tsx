@@ -14,7 +14,7 @@ export function StatusBar(): React.JSX.Element {
   const openSettingsModal = useAppStore((s) => s.openSettingsModal)
 
   return (
-    <footer className="flex h-6 shrink-0 select-none items-center justify-between border-t border-border bg-card/90 px-3 text-[11px] text-muted-foreground">
+    <footer className="wf-shell-bar flex h-6 shrink-0 select-none items-center justify-between border-t border-border bg-card/90 px-3 text-[11px] text-muted-foreground">
       <div className="flex items-center gap-3 overflow-hidden">
         <span className="inline-flex items-center gap-1.5 text-emerald-400">
           <ShieldCheck className="h-3 w-3 shrink-0" />

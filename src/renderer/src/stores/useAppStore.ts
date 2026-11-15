@@ -54,6 +54,8 @@ interface AppStoreState {
 
 const DEFAULT_WINDOW_STATE: WindowState = {
   isMaximized: false,
+  isSnapped: false,
+  snapPreview: null,
   isAlwaysOnTop: false,
   isCompactMode: false,
   isClickThrough: false,

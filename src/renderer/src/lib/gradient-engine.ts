@@ -178,3 +178,4 @@ export function buildGradientCssImage(params: {
       return `linear-gradient(${deg}deg, ${rgba(primaryRgb, peak)} 0%, transparent 52%, ${rgba(secondaryRgb, mid)} 100%)`
   }
 }
+

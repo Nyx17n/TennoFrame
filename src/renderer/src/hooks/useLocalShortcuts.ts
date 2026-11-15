@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { getTabCurrentRoute } from '@/lib/tab-helpers'
+import { ipcClient } from '@/services/ipc-client'
 import { useAppStore } from '@/stores/useAppStore'
 import { useMarketStore } from '@/stores/useMarketStore'
 import { useTabsStore } from '@/stores/useTabsStore'
@@ -13,6 +14,12 @@ export function useLocalShortcuts(): void {
     const handleKeyDown = (event: KeyboardEvent): void => {
       const ctrl = event.ctrlKey || event.metaKey
       const key = event.key.toLowerCase()
+
+      if (event.key === 'F11') {
+        event.preventDefault()
+        void ipcClient.window.toggleMaximize()
+        return
+      }
 
       if (event.key === 'F5' || (ctrl && key === 'r')) {
         event.preventDefault()

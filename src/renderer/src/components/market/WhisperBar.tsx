@@ -62,7 +62,7 @@ export function WhisperBar(): React.JSX.Element | null {
   }
 
   return (
-    <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-primary/40 bg-primary/10 px-3 py-1.5 text-xs">
+    <div className="wf-shell-bar flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-primary/40 bg-primary/10 px-3 py-1.5 text-xs">
       <div className="flex min-w-0 flex-1 items-center gap-2">
         <Badge variant="success" className="shrink-0">
           {justCopied ? <Check className="h-3 w-3" /> : <MessageSquare className="h-3 w-3" />}

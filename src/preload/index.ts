@@ -16,11 +16,13 @@ import type {
   UpdateWfmOrderInput,
   WfmPresenceStatus,
   WfmSessionState,
-  WfmSignInCredentialsInput,
-  WfmSignInTokenInput,
   WfmSignInWebInput
 } from '@shared/schemas/wfm-account.schema'
-import type { WindowState } from '@shared/schemas/window.schema'
+import type {
+  BeginDragPayload,
+  BeginResizePayload,
+  WindowState
+} from '@shared/schemas/window.schema'
 import type { WorldAlertRuleInput } from '@shared/schemas/world-rules.schema'
 
 const tennoframeApi: TennoFrameBridgeApi = Object.freeze({
@@ -39,6 +41,12 @@ const tennoframeApi: TennoFrameBridgeApi = Object.freeze({
   }),
   window: Object.freeze({
     getState: () => ipcRenderer.invoke(IPC_CHANNELS.WINDOW_GET_STATE),
+    beginDrag: (payload: BeginDragPayload) =>
+      ipcRenderer.invoke(IPC_CHANNELS.WINDOW_BEGIN_DRAG, payload),
+    endDrag: () => ipcRenderer.invoke(IPC_CHANNELS.WINDOW_END_DRAG),
+    beginResize: (payload: BeginResizePayload) =>
+      ipcRenderer.invoke(IPC_CHANNELS.WINDOW_BEGIN_RESIZE, payload),
+    endResize: () => ipcRenderer.invoke(IPC_CHANNELS.WINDOW_END_RESIZE),
     minimize: () => ipcRenderer.invoke(IPC_CHANNELS.WINDOW_MINIMIZE),
     toggleMaximize: () => ipcRenderer.invoke(IPC_CHANNELS.WINDOW_TOGGLE_MAXIMIZE),
     close: () => ipcRenderer.invoke(IPC_CHANNELS.WINDOW_CLOSE),
@@ -85,12 +93,8 @@ const tennoframeApi: TennoFrameBridgeApi = Object.freeze({
   }),
   wfmAccount: Object.freeze({
     getSession: () => ipcRenderer.invoke(IPC_CHANNELS.WFM_ACCOUNT_GET_SESSION),
-    signInCredentials: (input: WfmSignInCredentialsInput) =>
-      ipcRenderer.invoke(IPC_CHANNELS.WFM_ACCOUNT_SIGN_IN_CREDENTIALS, input),
     signInWeb: (input: WfmSignInWebInput) =>
       ipcRenderer.invoke(IPC_CHANNELS.WFM_ACCOUNT_SIGN_IN_WEB, input),
-    signInToken: (input: WfmSignInTokenInput) =>
-      ipcRenderer.invoke(IPC_CHANNELS.WFM_ACCOUNT_SIGN_IN_TOKEN, input),
     signOut: () => ipcRenderer.invoke(IPC_CHANNELS.WFM_ACCOUNT_SIGN_OUT),
     setStatus: (status: WfmPresenceStatus) =>
       ipcRenderer.invoke(IPC_CHANNELS.WFM_ACCOUNT_SET_STATUS, { status }),

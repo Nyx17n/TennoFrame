@@ -73,16 +73,12 @@ export function WfmAccountView(): React.JSX.Element {
             </div>
             <div className="flex items-center gap-1.5 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-[11px] text-emerald-300">
               <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
-              <span>Mot de passe jamais stocké · Session chiffrée via Windows DPAPI</span>
+              <span>Connexion 100 % via Navigateur · Session chiffrée via Windows DPAPI</span>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-2">
-              <Button onClick={() => openSignInModal('credentials')}>
-                <KeyRound className="h-4 w-4" />
-                <span>Connexion dans l’app</span>
-              </Button>
-              <Button variant="outline" onClick={() => openSignInModal('web')}>
+              <Button onClick={() => openSignInModal()}>
                 <Globe className="h-4 w-4" />
-                <span>Connexion via page Web WFM</span>
+                <span>Se connecter via Navigateur (Warframe Market)</span>
               </Button>
             </div>
           </CardContent>

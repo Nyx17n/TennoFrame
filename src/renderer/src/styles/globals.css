@@ -426,4 +426,409 @@ html[data-motion='off'] .animate-spin {
   animation: spin 1s linear infinite !important;
 }
 
+/* ============================================================================
+   Modules 17 & 18 — Styles Visuels & Transparence :
+   « Specular Liquid Glass », « Transparence Simple » & « Style Médiéval »
+   Piloté par :
+   - <html data-glass="off | liquid-glass | simple | medieval">
+   - <html data-glass-backdrop="true | false"> (visibilité du bureau Windows en arrière-plan)
+   - --wf-glass-*-alpha (20 % → 85 %)
+   ============================================================================ */
+
+html[data-glass='liquid-glass'],
+html[data-glass='liquid-glass'] body,
+html[data-glass='liquid-glass'] #root,
+html[data-glass='simple'],
+html[data-glass='simple'] body,
+html[data-glass='simple'] #root,
+html[data-glass='medieval'],
+html[data-glass='medieval'] body,
+html[data-glass='medieval'] #root {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Fond global translucide vers le bureau / jeu UNIQUEMENT si glassDesktopBackdropEnabled = true */
+html[data-glass-backdrop='true'] .wf-app-root {
+  background-color: hsl(var(--background) / var(--wf-glass-bg-alpha, 0.48)) !important;
+}
+
+html[data-glass='liquid-glass'][data-glass-backdrop='true'] .wf-app-root {
+  backdrop-filter: blur(22px) saturate(145%);
+}
+
+html[data-glass='medieval'][data-glass-backdrop='true'] .wf-app-root {
+  backdrop-filter: blur(12px) saturate(130%);
+}
+
+html[data-glass='liquid-glass'] .wf-app-root {
+  box-shadow:
+    inset 1px 1px 0 0 rgba(255, 255, 255, 0.36),
+    inset -1px -1px 0 0 hsl(var(--primary) / 0.32),
+    inset 0 0 32px -8px rgba(215, 245, 255, 0.08);
+}
+
+html[data-glass='liquid-glass'] .wf-app-root[data-maximized='false'] {
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+html[data-glass='simple'] .wf-app-root[data-maximized='false'] {
+  border-radius: 0.75rem;
+  border: 1px solid hsl(var(--border) / 0.75);
+}
+
+html[data-glass='medieval'] .wf-app-root[data-maximized='false'] {
+  border-radius: 3px;
+  border: 1px solid hsl(var(--primary) / 0.72);
+}
+
+html[data-glass-backdrop='true'] .wf-app-gradient-layer {
+  opacity: 0.68;
+}
+
+/* ----------------------------------------------------------------------------
+   STYLE A : « Liquid Glass » (Verre Givré Spéculaire)
+   ---------------------------------------------------------------------------- */
+
+html[data-glass='liquid-glass'] .wf-shell-bar {
+  background-color: hsl(var(--card) / var(--wf-glass-bar-alpha, 0.6)) !important;
+  backdrop-filter: blur(18px) saturate(150%);
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    transparent 28%,
+    transparent 72%,
+    hsl(var(--primary) / 0.07) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.24),
+    inset 0 -1px 0 0 hsl(var(--primary) / 0.16);
+}
+
+html[data-glass='liquid-glass'] .wf-glow-surface,
+html[data-glass='liquid-glass'] .wf-glass-panel,
+html[data-glass='liquid-glass'] .wf-farm-overlay-card {
+  background-color: hsl(var(--card) / var(--wf-glass-card-alpha, 0.42)) !important;
+  backdrop-filter: blur(18px) saturate(150%);
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  background-image:
+    radial-gradient(
+      135px 36px at 14% 0%,
+      rgba(255, 255, 255, 0.28),
+      hsl(var(--primary) / 0.14) 48%,
+      transparent 78%
+    ),
+    radial-gradient(
+      135px 36px at 86% 100%,
+      hsl(var(--primary) / 0.26),
+      rgba(255, 255, 255, 0.12) 48%,
+      transparent 78%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.07) 0%,
+      transparent 36%,
+      transparent 64%,
+      hsl(var(--primary) / 0.07) 100%
+    );
+  box-shadow:
+    inset 1px 1px 0 0 rgba(255, 255, 255, 0.52),
+    inset -1px -1px 0 0 hsl(var(--primary) / 0.42),
+    inset 0 0 24px -4px rgba(220, 245, 255, 0.12),
+    inset 0 0 16px -6px hsl(var(--primary) / 0.22),
+    0 10px 28px -12px rgba(0, 0, 0, 0.52) !important;
+}
+
+html[data-glass='liquid-glass'] .wf-dialog-motion,
+html[data-glass='liquid-glass'] .wf-drawer-motion,
+html[data-glass='liquid-glass'] .wf-popover-motion {
+  background-color: hsl(var(--popover) / var(--wf-glass-modal-alpha, 0.66)) !important;
+  backdrop-filter: blur(24px) saturate(155%);
+  border-color: rgba(255, 255, 255, 0.24) !important;
+  background-image:
+    radial-gradient(
+      180px 44px at 12% 0%,
+      rgba(255, 255, 255, 0.3),
+      hsl(var(--primary) / 0.15) 50%,
+      transparent 80%
+    ),
+    radial-gradient(
+      180px 44px at 88% 100%,
+      hsl(var(--primary) / 0.26),
+      rgba(255, 255, 255, 0.12) 50%,
+      transparent 80%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      transparent 38%,
+      transparent 62%,
+      hsl(var(--primary) / 0.08) 100%
+    );
+  box-shadow:
+    inset 1px 1px 0 0 rgba(255, 255, 255, 0.56),
+    inset -1px -1px 0 0 hsl(var(--primary) / 0.46),
+    inset 0 0 28px -6px rgba(220, 246, 255, 0.13),
+    0 18px 42px -12px rgba(0, 0, 0, 0.62) !important;
+}
+
+html[data-glass='liquid-glass'] .wf-farm-overlay-shell {
+  backdrop-filter: blur(22px) saturate(155%);
+  border-color: rgba(255, 255, 255, 0.26) !important;
+  background-image:
+    radial-gradient(
+      150px 38px at 14% 0%,
+      rgba(255, 255, 255, 0.3),
+      hsl(var(--primary) / 0.16) 50%,
+      transparent 80%
+    ),
+    radial-gradient(
+      150px 38px at 86% 100%,
+      hsl(var(--primary) / 0.28),
+      rgba(255, 255, 255, 0.12) 50%,
+      transparent 80%
+    );
+  box-shadow:
+    inset 1px 1px 0 0 rgba(255, 255, 255, 0.56),
+    inset -1px -1px 0 0 hsl(var(--primary) / 0.46),
+    inset 0 0 26px -6px rgba(220, 246, 255, 0.14) !important;
+}
+
+html[data-glass='liquid-glass'] .wf-tab-pill,
+html[data-glass='liquid-glass'] .wf-glass-pill {
+  background-color: hsl(var(--card) / var(--wf-glass-pill-alpha, 0.46));
+  backdrop-filter: blur(12px) saturate(140%);
+  border-color: rgba(255, 255, 255, 0.18);
+  background-image:
+    radial-gradient(64px 20px at 16% 0%, rgba(255, 255, 255, 0.25), transparent 76%),
+    radial-gradient(64px 20px at 84% 100%, hsl(var(--primary) / 0.22), transparent 76%);
+  box-shadow:
+    inset 1px 1px 0 0 rgba(255, 255, 255, 0.44),
+    inset -1px -1px 0 0 hsl(var(--primary) / 0.34),
+    inset 0 0 14px -4px rgba(220, 245, 255, 0.1);
+}
+
+html[data-glass='liquid-glass']:not(.dark) .wf-glow-surface,
+html[data-glass='liquid-glass']:not(.dark) .wf-glass-panel,
+html[data-glass='liquid-glass']:not(.dark) .wf-farm-overlay-card {
+  border-color: rgba(255, 255, 255, 0.68) !important;
+  box-shadow:
+    inset 1px 1px 0 0 rgba(255, 255, 255, 0.92),
+    inset -1px -1px 0 0 hsl(var(--primary) / 0.32),
+    inset 0 0 22px -4px rgba(255, 255, 255, 0.5),
+    0 8px 24px -10px rgba(15, 23, 42, 0.18) !important;
+}
+
+/* ----------------------------------------------------------------------------
+   STYLE B : « Transparence Simple » (Alpha Pur Épuré — zéro reflet spéculaire)
+   ---------------------------------------------------------------------------- */
+
+html[data-glass='simple'] .wf-shell-bar {
+  background-color: hsl(var(--card) / var(--wf-glass-bar-alpha, 0.6)) !important;
+  border-color: hsl(var(--border) / 0.65) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none;
+}
+
+html[data-glass='simple'] .wf-glow-surface,
+html[data-glass='simple'] .wf-glass-panel,
+html[data-glass='simple'] .wf-farm-overlay-card {
+  background-color: hsl(var(--card) / var(--wf-glass-card-alpha, 0.42)) !important;
+  border-color: hsl(var(--border) / 0.7) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none;
+}
+
+html[data-glass='simple'] .wf-dialog-motion,
+html[data-glass='simple'] .wf-drawer-motion,
+html[data-glass='simple'] .wf-popover-motion {
+  background-color: hsl(var(--popover) / var(--wf-glass-modal-alpha, 0.66)) !important;
+  border-color: hsl(var(--border) / 0.8) !important;
+  background-image: none !important;
+  backdrop-filter: blur(8px);
+}
+
+html[data-glass='simple'] .wf-farm-overlay-shell {
+  border-color: hsl(var(--border) / 0.75) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none;
+}
+
+html[data-glass='simple'] .wf-tab-pill,
+html[data-glass='simple'] .wf-glass-pill {
+  background-color: hsl(var(--card) / var(--wf-glass-pill-alpha, 0.46));
+  border-color: hsl(var(--border) / 0.65);
+  background-image: none;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+/* ----------------------------------------------------------------------------
+   STYLE C : « Style Médiéval » (Grimoire de Duviri, Parchemin & Fer Forgé Doré)
+   100 % vectoriel CSS (0 image lourde, 0 % surcharge CPU), compatible Grimoire
+   Opaque (data-glass-backdrop="false") et Vitrail (data-glass-backdrop="true")
+   ---------------------------------------------------------------------------- */
+
+html[data-glass='medieval'] .wf-app-root {
+  background-image:
+    radial-gradient(125% 80% at 50% 0%, hsl(var(--primary) / 0.11), transparent 70%),
+    radial-gradient(110% 85% at 50% 100%, rgba(0, 0, 0, 0.34), transparent 76%);
+  box-shadow:
+    inset 0 0 0 2px hsl(var(--primary) / 0.56),
+    inset 0 0 0 5px hsl(var(--background) / 0.92),
+    inset 0 0 0 6px hsl(var(--primary) / 0.28),
+    inset 0 0 40px -10px rgba(0, 0, 0, 0.58);
+}
+
+html[data-glass='medieval']:not(.dark) .wf-app-root {
+  background-image:
+    radial-gradient(125% 80% at 50% 0%, hsl(var(--primary) / 0.1), transparent 72%),
+    radial-gradient(110% 85% at 50% 100%, rgba(120, 53, 15, 0.14), transparent 78%);
+  box-shadow:
+    inset 0 0 0 2px hsl(var(--primary) / 0.52),
+    inset 0 0 0 5px hsl(var(--background) / 0.94),
+    inset 0 0 0 6px hsl(var(--primary) / 0.26),
+    inset 0 0 34px -10px rgba(120, 53, 15, 0.24);
+}
+
+html[data-glass='medieval'] h1,
+html[data-glass='medieval'] h2,
+html[data-glass='medieval'] h3,
+html[data-glass='medieval'] h4,
+html[data-glass='medieval'] .wf-shell-bar,
+html[data-glass='medieval'] .wf-tab-pill,
+html[data-glass='medieval'] .wf-bookmark-link {
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, 'Times New Roman', serif;
+  letter-spacing: 0.02em;
+}
+
+html[data-glass='medieval'] .font-mono,
+html[data-glass='medieval'] input,
+html[data-glass='medieval'] select,
+html[data-glass='medieval'] textarea,
+html[data-glass='medieval'] kbd {
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+    monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: normal;
+}
+
+html[data-glass='medieval'] .wf-shell-bar {
+  background-color: hsl(var(--card) / 0.96) !important;
+  border-color: hsl(var(--primary) / 0.46) !important;
+  background-image: linear-gradient(
+    180deg,
+    hsl(var(--primary) / 0.1) 0%,
+    transparent 44%,
+    rgba(0, 0, 0, 0.16) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 242, 200, 0.2),
+    inset 0 -1px 0 0 hsl(var(--primary) / 0.32);
+}
+
+html[data-glass='medieval'][data-glass-backdrop='true'] .wf-shell-bar {
+  background-color: hsl(var(--card) / var(--wf-glass-bar-alpha, 0.6)) !important;
+  backdrop-filter: blur(12px) saturate(130%);
+}
+
+html[data-glass='medieval'] .wf-glow-surface,
+html[data-glass='medieval'] .wf-glass-panel,
+html[data-glass='medieval'] .wf-card-lift,
+html[data-glass='medieval'] .wf-farm-overlay-card {
+  border-radius: 3px !important;
+  background-color: hsl(var(--card) / 0.95) !important;
+  border-color: hsl(var(--primary) / 0.48) !important;
+  background-image:
+    radial-gradient(120% 90% at 50% 0%, hsl(var(--primary) / 0.09), transparent 70%),
+    linear-gradient(180deg, rgba(255, 244, 214, 0.035) 0%, rgba(0, 0, 0, 0.14) 100%);
+  box-shadow:
+    inset 0 0 0 2px hsl(var(--background) / 0.85),
+    inset 0 0 0 3px hsl(var(--primary) / 0.24),
+    inset 0 1px 0 0 rgba(255, 240, 195, 0.16),
+    0 6px 18px -8px rgba(0, 0, 0, 0.56) !important;
+}
+
+html[data-glass='medieval'][data-glass-backdrop='true'] .wf-glow-surface,
+html[data-glass='medieval'][data-glass-backdrop='true'] .wf-glass-panel,
+html[data-glass='medieval'][data-glass-backdrop='true'] .wf-card-lift,
+html[data-glass='medieval'][data-glass-backdrop='true'] .wf-farm-overlay-card {
+  background-color: hsl(var(--card) / var(--wf-glass-card-alpha, 0.42)) !important;
+  backdrop-filter: blur(10px) saturate(130%);
+}
+
+html[data-glass='medieval']:not(.dark) .wf-glow-surface,
+html[data-glass='medieval']:not(.dark) .wf-glass-panel,
+html[data-glass='medieval']:not(.dark) .wf-card-lift,
+html[data-glass='medieval']:not(.dark) .wf-farm-overlay-card {
+  background-image:
+    radial-gradient(120% 90% at 50% 0%, hsl(var(--primary) / 0.08), transparent 72%),
+    linear-gradient(180deg, rgba(255, 252, 240, 0.55) 0%, rgba(146, 64, 14, 0.06) 100%);
+  box-shadow:
+    inset 0 0 0 2px hsl(var(--background) / 0.9),
+    inset 0 0 0 3px hsl(var(--primary) / 0.28),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.65),
+    0 6px 16px -8px rgba(92, 45, 12, 0.22) !important;
+}
+
+html[data-glass='medieval'] .wf-dialog-motion,
+html[data-glass='medieval'] .wf-drawer-motion,
+html[data-glass='medieval'] .wf-popover-motion,
+html[data-glass='medieval'] .wf-farm-overlay-shell {
+  border-radius: 3px !important;
+  background-color: hsl(var(--popover) / 0.97) !important;
+  border-color: hsl(var(--primary) / 0.66) !important;
+  background-image:
+    radial-gradient(140% 80% at 50% 0%, hsl(var(--primary) / 0.12), transparent 72%),
+    linear-gradient(180deg, rgba(255, 244, 214, 0.04) 0%, rgba(0, 0, 0, 0.18) 100%);
+  box-shadow:
+    inset 0 0 0 3px hsl(var(--popover) / 0.92),
+    inset 0 0 0 4px hsl(var(--primary) / 0.34),
+    0 18px 42px -10px rgba(0, 0, 0, 0.68) !important;
+}
+
+html[data-glass='medieval'][data-glass-backdrop='true'] .wf-dialog-motion,
+html[data-glass='medieval'][data-glass-backdrop='true'] .wf-drawer-motion,
+html[data-glass='medieval'][data-glass-backdrop='true'] .wf-popover-motion,
+html[data-glass='medieval'][data-glass-backdrop='true'] .wf-farm-overlay-shell {
+  background-color: hsl(var(--popover) / var(--wf-glass-modal-alpha, 0.66)) !important;
+  backdrop-filter: blur(14px) saturate(135%);
+}
+
+html[data-glass='medieval'] .wf-tab-pill,
+html[data-glass='medieval'] .wf-glass-pill {
+  border-radius: 3px;
+  border-color: hsl(var(--primary) / 0.42);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 242, 200, 0.22),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.28);
+}
+
+html[data-glass='medieval'] .wf-interactive-btn {
+  border-radius: 3px;
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 244, 208, 0.26),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.28);
+}
+
+html[data-glass='medieval'] ::-webkit-scrollbar-track,
+html[data-glass='medieval'] ::-webkit-scrollbar-thumb {
+  border-radius: 2px;
+}
+
+/* Voile arrière des modales allégé pour voir TennoFrame réagir en direct */
+html[data-glass='liquid-glass'] .wf-overlay-motion,
+html[data-glass='simple'] .wf-overlay-motion,
+html[data-glass='medieval'] .wf-overlay-motion {
+  background-color: rgba(8, 6, 4, 0.38) !important;
+  backdrop-filter: blur(4px);
+}
+
+
 
