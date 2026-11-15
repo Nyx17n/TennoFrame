@@ -136,9 +136,11 @@ async function syncGitHubReleaseNotes(version, markdownBody) {
 }
 
 /**
- * Prevents installation of any superseded version by deleting `.exe` and `.blockmap`
- * installer assets from all releases older than `v${activeVersion}`, and updating their
- * release notes to redirect users to `/releases/latest`.
+ * Prevents anyone from downloading any superseded version of TennoFrame:
+ * 1. Verifies that the active release (`v${activeVersion}`) is live and has its `.exe` installer.
+ * 2. Deletes all older GitHub Releases (removing `.exe`, `latest.yml`, and `Source code (zip/tar.gz)`).
+ * 3. Deletes all older `v*` Git tags on GitHub (removing tag archive downloads).
+ * 4. Deletes any GitHub Actions installer zip artifacts so downloads only come from `/releases/latest`.
  */
 async function pruneLegacyReleaseInstallers(activeVersion) {
   const token = (process.env.GH_TOKEN || '').trim()
@@ -147,47 +149,77 @@ async function pruneLegacyReleaseInstallers(activeVersion) {
   const apiBase = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`
   const headers = buildGitHubHeaders(token)
   const activeTag = `v${activeVersion}`
-  const latestUrl = `https://github.com/${REPO_OWNER}/${REPO_NAME}/releases/latest`
+
+  const activeRes = await fetch(`${apiBase}/releases/tags/${activeTag}`, { headers })
+  if (!activeRes.ok) {
+    console.warn(`[GitHub Release] Active release ${activeTag} not found — skipping legacy purge.`)
+    return
+  }
+  const activeRel = await activeRes.json()
+  const hasExe = (activeRel.assets || []).some((asset) =>
+    String(asset.name || '')
+      .toLowerCase()
+      .endsWith('.exe')
+  )
+  if (activeRel.draft || !hasExe) {
+    console.warn(
+      `[GitHub Release] Active release ${activeTag} is draft or missing .exe — skipping legacy purge.`
+    )
+    return
+  }
 
   const listRes = await fetch(`${apiBase}/releases?per_page=100`, { headers })
-  if (!listRes.ok) return
-
-  const releases = await listRes.json()
-  let deletedAssets = 0
-
-  for (const rel of releases) {
-    if (!rel?.id || rel.draft || rel.tag_name === activeTag) continue
-
-    const installerAssets = (rel.assets || []).filter((asset) => {
-      const lower = String(asset.name || '').toLowerCase()
-      return lower.endsWith('.exe') || lower.endsWith('.blockmap')
-    })
-
-    for (const asset of installerAssets) {
-      const delRes = await fetch(`${apiBase}/releases/assets/${asset.id}`, {
+  let deletedReleases = 0
+  if (listRes.ok) {
+    const releases = await listRes.json()
+    for (const rel of releases) {
+      if (!rel?.id || rel.tag_name === activeTag) continue
+      const delRes = await fetch(`${apiBase}/releases/${rel.id}`, {
         method: 'DELETE',
         headers
       })
       if (delRes.ok || delRes.status === 204) {
-        deletedAssets += 1
+        deletedReleases += 1
       }
-    }
-
-    const supersededBanner = `> ⚠️ **Superseded Release (\`${rel.tag_name}\`)** — Direct installation of older versions is disabled. Please install the latest version: **[Download Latest TennoFrame Release](${latestUrl})**.`
-    const existingBody = String(rel.body || '')
-    if (!existingBody.includes('Superseded Release')) {
-      const cleanedBody = existingBody
-        .replace(/\[[^\]]*Setup[^\]]*\.exe\]\([^)]+\)/gi, `[Latest TennoFrame Installer](${latestUrl})`)
-      const updatedBody = `${supersededBanner}\n\n${cleanedBody}`.trim()
-      await fetch(`${apiBase}/releases/${rel.id}`, {
-        method: 'PATCH',
-        headers: { ...headers, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ body: updatedBody })
-      })
     }
   }
 
-  console.log(`[GitHub Release] Pruned ${deletedAssets} legacy installer asset(s) across older releases.`)
+  const tagsRes = await fetch(`${apiBase}/tags?per_page=100`, { headers })
+  let deletedTags = 0
+  if (tagsRes.ok) {
+    const tags = await tagsRes.json()
+    for (const tag of tags) {
+      const name = String(tag?.name || '')
+      if (!name || name === activeTag || !name.startsWith('v')) continue
+      const delTagRes = await fetch(`${apiBase}/git/refs/tags/${encodeURIComponent(name)}`, {
+        method: 'DELETE',
+        headers
+      })
+      if (delTagRes.ok || delTagRes.status === 204) {
+        deletedTags += 1
+      }
+    }
+  }
+
+  const artifactsRes = await fetch(`${apiBase}/actions/artifacts?per_page=100`, { headers })
+  let deletedArtifacts = 0
+  if (artifactsRes.ok) {
+    const artifactsData = await artifactsRes.json()
+    for (const artifact of artifactsData.artifacts || []) {
+      if (!artifact?.id || artifact.expired) continue
+      const delArtRes = await fetch(`${apiBase}/actions/artifacts/${artifact.id}`, {
+        method: 'DELETE',
+        headers
+      })
+      if (delArtRes.ok || delArtRes.status === 204) {
+        deletedArtifacts += 1
+      }
+    }
+  }
+
+  console.log(
+    `[GitHub Release] Purged ${deletedReleases} older release(s), ${deletedTags} older tag(s), and ${deletedArtifacts} Actions artifact(s).`
+  )
 }
 
 async function purgeGitHubCamoBadges() {
