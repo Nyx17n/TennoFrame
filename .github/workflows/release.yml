@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   build-and-release:
@@ -39,10 +40,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx electron-builder --win --publish ${{ startsWith(github.ref, 'refs/tags/v') && 'always' || 'never' }}
 
-      - name: Upload Installer Artifacts
+      - name: Upload Installer Artifacts (Manual Dispatch Only)
+        if: "!startsWith(github.ref, 'refs/tags/v')"
         uses: actions/upload-artifact@v4
         with:
           name: tennoframe-windows-installer
+          retention-days: 1
           path: |
             release/*.exe
             release/*.blockmap
