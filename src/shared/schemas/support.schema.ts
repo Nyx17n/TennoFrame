@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
-export const SUPPORT_COOLDOWN_SECONDS = 180 as const
+export const SUPPORT_COOLDOWN_SECONDS = 600 as const // 10 minutes
+export const SUPPORT_DAILY_MAX = 3 as const // Max 3 tickets per rolling 24h
 
 export const SupportTicketCategorySchema = z.enum(['bug', 'feature', 'help'])
 export type SupportTicketCategory = z.infer<typeof SupportTicketCategorySchema>
@@ -18,6 +19,8 @@ export type SupportTicketInput = z.infer<typeof SupportTicketInputSchema>
 export const SupportStatusSchema = z.object({
   relayConfigured: z.boolean(),
   cooldownRemainingSec: z.number().int().nonnegative(),
+  dailyRemaining: z.number().int().min(0).max(SUPPORT_DAILY_MAX).default(SUPPORT_DAILY_MAX),
+  dailyMax: z.number().int().positive().default(SUPPORT_DAILY_MAX),
   lastTicketId: z.string().nullable()
 })
 export type SupportStatus = z.infer<typeof SupportStatusSchema>
@@ -25,6 +28,10 @@ export type SupportStatus = z.infer<typeof SupportStatusSchema>
 export const SupportErrorCodeSchema = z.enum([
   'NOT_CONFIGURED',
   'COOLDOWN',
+  'DAILY_LIMIT',
+  'SPAM_CONTENT',
+  'DUPLICATE',
+  'BANNED',
   'RATE_LIMITED',
   'NETWORK_ERROR',
   'VALIDATION_ERROR'
@@ -35,6 +42,7 @@ export const SupportTicketResultSchema = z.object({
   ok: z.boolean(),
   ticketId: z.string().nullable(),
   cooldownRemainingSec: z.number().int().nonnegative(),
+  dailyRemaining: z.number().int().min(0).max(SUPPORT_DAILY_MAX).optional(),
   errorCode: SupportErrorCodeSchema.optional(),
   errorMessage: z.string().optional()
 })

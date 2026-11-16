@@ -1,10 +1,14 @@
-import { randomBytes } from 'node:crypto'
-import { app } from 'electron'
+import { createHash, randomBytes } from 'node:crypto'
+import { promises as fs } from 'node:fs'
+import { join } from 'node:path'
+import { app, safeStorage } from 'electron'
 import { z } from 'zod'
 import { DEFAULT_SUPPORT_RELAY_URL } from '@shared/constants'
 import {
   SUPPORT_COOLDOWN_SECONDS,
+  SUPPORT_DAILY_MAX,
   SupportTicketInputSchema,
+  type SupportErrorCode,
   type SupportStatus,
   type SupportTicketInput,
   type SupportTicketResult
@@ -16,9 +20,28 @@ import {
 import type { StorageService } from './StorageService'
 import type { WindowOverlayService } from './WindowOverlayService'
 
-const RelaySuccessResponseSchema = z.object({
+const WINDOW_24H_MS = 24 * 3_600_000
+const CHALLENGE_MAX_AGE_MS = 12 * 60_000
+
+const PersistedSupportQuotaSchema = z.object({
+  deviceToken: z.string().min(16).max(64),
+  timestamps: z.array(z.number().int().positive()).max(20).default([]),
+  lastDigest: z.string().default(''),
+  lastTicketId: z.string().nullable().default(null)
+})
+type PersistedSupportQuota = z.infer<typeof PersistedSupportQuotaSchema>
+
+const ChallengeResponseSchema = z.object({
   ok: z.boolean(),
-  ticketId: z.string().min(3).max(32).optional()
+  challengeToken: z.string().min(16),
+  minDelayMs: z.number().int().nonnegative().default(3500)
+})
+
+const RelayTicketResponseSchema = z.object({
+  ok: z.boolean(),
+  ticketId: z.string().min(3).max(32).optional(),
+  cooldownRemainingSec: z.number().int().nonnegative().optional(),
+  dailyRemaining: z.number().int().min(0).max(SUPPORT_DAILY_MAX).optional()
 })
 
 const DISCORD_HOSTS = new Set([
@@ -40,10 +63,7 @@ function resolveConfiguredRelayUrl(): string | null {
 
   try {
     const parsed = new URL(raw)
-    if (parsed.protocol !== 'https:') {
-      return null
-    }
-    // Security invariant: NEVER allow a raw Discord Webhook URL inside the desktop client.
+    if (parsed.protocol !== 'https:') return null
     if (
       DISCORD_HOSTS.has(parsed.hostname.toLowerCase()) &&
       parsed.pathname.startsWith('/api/webhooks/')
@@ -56,52 +76,213 @@ function resolveConfiguredRelayUrl(): string | null {
   }
 }
 
-function generateLocalTicketId(): string {
-  return `TF-${randomBytes(2).toString('hex').toUpperCase()}`
+function deriveChallengeUrl(ticketRelayUrl: string): string {
+  const u = new URL(ticketRelayUrl)
+  u.pathname = u.pathname.replace(/\/ticket\/?$/, '/challenge')
+  return u.toString()
+}
+
+function validateHumanContent(subject: string, message: string): string | null {
+  const combined = `${subject} ${message}`
+  if (/(.)\1{7,}/i.test(combined)) {
+    return 'Repeated character spam is not allowed.'
+  }
+  const words = message.split(/\s+/).filter((w) => w.length >= 2)
+  if (words.length < 3) {
+    return 'Please write at least 3 complete words describing your issue.'
+  }
+  if (/\b(\w{2,})\b(?:\s+\1\b){3,}/i.test(combined)) {
+    return 'Repeated word spam is not allowed.'
+  }
+  const invites = combined.match(/(?:discord\.gg|discord(?:app)?\.com\/invite)\/([a-z0-9-]+)/gi) ?? []
+  for (const inv of invites) {
+    if (!inv.toLowerCase().endsWith('/dhgwhpf82n')) {
+      return 'External Discord server invites are not allowed.'
+    }
+  }
+  if (/free\s+nitro|steamcommunlty|dlscord\.com/i.test(combined)) {
+    return 'Suspicious promotional link blocked.'
+  }
+  if ((combined.match(/https?:\/\//gi) ?? []).length > 2) {
+    return 'Maximum 2 URLs allowed per support message.'
+  }
+  return null
+}
+
+function computeMessageDigest(subject: string, message: string): string {
+  const norm = `${subject.toLowerCase().trim()}::${message.toLowerCase().replace(/\s+/g, ' ').trim()}`
+  return createHash('sha256').update(norm).digest('hex').slice(0, 24)
 }
 
 export class SupportService {
-  private nextAllowedAtMs = 0
-  private lastTicketId: string | null = null
+  private readonly quotaFilePath: string
+  private loaded = false
+  private state: PersistedSupportQuota = {
+    deviceToken: randomBytes(16).toString('hex'),
+    timestamps: [],
+    lastDigest: '',
+    lastTicketId: null
+  }
+  private cachedChallenge: { token: string; fetchedAt: number; minDelayMs: number } | null = null
 
   public constructor(
     private readonly httpClient: RateLimitedHttpClient,
     private readonly storageService: StorageService,
-    private readonly windowService: WindowOverlayService
-  ) {}
-
-  public getCooldownRemainingSec(): number {
-    const diffMs = this.nextAllowedAtMs - Date.now()
-    return diffMs > 0 ? Math.ceil(diffMs / 1000) : 0
+    private readonly windowService: WindowOverlayService,
+    userDataPath: string
+  ) {
+    this.quotaFilePath = join(userDataPath, 'support-quota.bin')
   }
 
-  public getStatus(): SupportStatus {
+  private async ensureLoaded(): Promise<void> {
+    if (this.loaded) return
+    this.loaded = true
+    try {
+      const buf = await fs.readFile(this.quotaFilePath)
+      const jsonStr = safeStorage.isEncryptionAvailable()
+        ? safeStorage.decryptString(buf)
+        : buf.toString('utf8')
+      const parsed = PersistedSupportQuotaSchema.safeParse(JSON.parse(jsonStr))
+      if (parsed.success) {
+        this.state = parsed.data
+      }
+    } catch {
+      await this.persistState()
+    }
+  }
+
+  private async persistState(): Promise<void> {
+    try {
+      const jsonStr = JSON.stringify(this.state)
+      const payload = safeStorage.isEncryptionAvailable()
+        ? safeStorage.encryptString(jsonStr)
+        : Buffer.from(jsonStr, 'utf8')
+      const tmp = `${this.quotaFilePath}.tmp`
+      await fs.writeFile(tmp, payload)
+      await fs.rename(tmp, this.quotaFilePath)
+    } catch {
+      // Ignore transient disk lock
+    }
+  }
+
+  private pruneWindow(now = Date.now()): number[] {
+    this.state.timestamps = this.state.timestamps.filter((t) => now - t < WINDOW_24H_MS)
+    return this.state.timestamps
+  }
+
+  private computeQuotaMetrics(now = Date.now()): {
+    cooldownRemainingSec: number
+    dailyRemaining: number
+  } {
+    const active = this.pruneWindow(now)
+    const dailyRemaining = Math.max(0, SUPPORT_DAILY_MAX - active.length)
+    if (dailyRemaining === 0 && active[0]) {
+      const resetSec = Math.max(1, Math.ceil((active[0] + WINDOW_24H_MS - now) / 1000))
+      return { cooldownRemainingSec: resetSec, dailyRemaining: 0 }
+    }
+    const lastSent = active[active.length - 1] ?? 0
+    const elapsedSec = Math.floor((now - lastSent) / 1000)
+    const cooldownRemainingSec =
+      lastSent > 0 && elapsedSec < SUPPORT_COOLDOWN_SECONDS
+        ? SUPPORT_COOLDOWN_SECONDS - elapsedSec
+        : 0
+    return { cooldownRemainingSec, dailyRemaining }
+  }
+
+  private async ensureChallengeToken(relayUrl: string): Promise<{ token: string; waitMs: number }> {
+    const now = Date.now()
+    if (!this.cachedChallenge || now - this.cachedChallenge.fetchedAt > CHALLENGE_MAX_AGE_MS) {
+      const challengeRes = await this.httpClient.getJson(
+        deriveChallengeUrl(relayUrl),
+        ChallengeResponseSchema,
+        { bypassRateLimit: true, timeoutMs: 8_000 }
+      )
+      this.cachedChallenge = {
+        token: challengeRes.challengeToken,
+        fetchedAt: Date.now(),
+        minDelayMs: challengeRes.minDelayMs
+      }
+    }
+    const ageMs = Date.now() - this.cachedChallenge.fetchedAt
+    const waitMs = Math.max(0, this.cachedChallenge.minDelayMs + 250 - ageMs)
+    return { token: this.cachedChallenge.token, waitMs }
+  }
+
+  public async getStatus(): Promise<SupportStatus> {
+    await this.ensureLoaded()
+    const relayUrl = resolveConfiguredRelayUrl()
+    if (relayUrl) {
+      void this.ensureChallengeToken(relayUrl).catch(() => undefined)
+    }
+    const { cooldownRemainingSec, dailyRemaining } = this.computeQuotaMetrics()
     return {
-      relayConfigured: resolveConfiguredRelayUrl() !== null,
-      cooldownRemainingSec: this.getCooldownRemainingSec(),
-      lastTicketId: this.lastTicketId
+      relayConfigured: relayUrl !== null,
+      cooldownRemainingSec,
+      dailyRemaining,
+      dailyMax: SUPPORT_DAILY_MAX,
+      lastTicketId: this.state.lastTicketId
     }
   }
 
   public async sendTicket(rawInput: SupportTicketInput): Promise<SupportTicketResult> {
+    await this.ensureLoaded()
+    const metrics = this.computeQuotaMetrics()
+
     const parsed = SupportTicketInputSchema.safeParse(rawInput)
     if (!parsed.success) {
       return {
         ok: false,
         ticketId: null,
-        cooldownRemainingSec: this.getCooldownRemainingSec(),
+        cooldownRemainingSec: metrics.cooldownRemainingSec,
+        dailyRemaining: metrics.dailyRemaining,
         errorCode: 'VALIDATION_ERROR',
-        errorMessage: parsed.error.issues[0]?.message ?? 'Invalid support ticket payload'
+        errorMessage: parsed.error.issues[0]?.message ?? 'Invalid support ticket'
       }
     }
 
-    const cooldownSec = this.getCooldownRemainingSec()
-    if (cooldownSec > 0) {
+    if (metrics.dailyRemaining <= 0) {
       return {
         ok: false,
-        ticketId: this.lastTicketId,
-        cooldownRemainingSec: cooldownSec,
+        ticketId: this.state.lastTicketId,
+        cooldownRemainingSec: metrics.cooldownRemainingSec,
+        dailyRemaining: 0,
+        errorCode: 'DAILY_LIMIT',
+        errorMessage: `Daily limit reached (${SUPPORT_DAILY_MAX}/${SUPPORT_DAILY_MAX} per 24h).`
+      }
+    }
+
+    if (metrics.cooldownRemainingSec > 0) {
+      return {
+        ok: false,
+        ticketId: this.state.lastTicketId,
+        cooldownRemainingSec: metrics.cooldownRemainingSec,
+        dailyRemaining: metrics.dailyRemaining,
         errorCode: 'COOLDOWN'
+      }
+    }
+
+    const input = parsed.data
+    const spamReason = validateHumanContent(input.subject, input.message)
+    if (spamReason) {
+      return {
+        ok: false,
+        ticketId: null,
+        cooldownRemainingSec: 0,
+        dailyRemaining: metrics.dailyRemaining,
+        errorCode: 'SPAM_CONTENT',
+        errorMessage: spamReason
+      }
+    }
+
+    const digest = computeMessageDigest(input.subject, input.message)
+    if (this.state.lastDigest && this.state.lastDigest === digest) {
+      return {
+        ok: false,
+        ticketId: null,
+        cooldownRemainingSec: 0,
+        dailyRemaining: metrics.dailyRemaining,
+        errorCode: 'DUPLICATE',
+        errorMessage: 'This exact message was already sent.'
       }
     }
 
@@ -111,13 +292,12 @@ export class SupportService {
         ok: false,
         ticketId: null,
         cooldownRemainingSec: 0,
+        dailyRemaining: metrics.dailyRemaining,
         errorCode: 'NOT_CONFIGURED'
       }
     }
 
-    const input = parsed.data
-    const clientTicketId = generateLocalTicketId()
-
+    const clientTicketId = `TF-${randomBytes(2).toString('hex').toUpperCase()}`
     let diagnostics: Record<string, string> | null = null
     if (input.includeDiagnostics) {
       const [settings, winState] = await Promise.all([
@@ -138,18 +318,24 @@ export class SupportService {
     }
 
     try {
+      const challenge = await this.ensureChallengeToken(relayUrl)
+      if (challenge.waitMs > 0) {
+        await new Promise((resolve) => setTimeout(resolve, challenge.waitMs))
+      }
+      this.cachedChallenge = null
+
       const response = await this.httpClient.sendJson(
         'POST',
         relayUrl,
-        RelaySuccessResponseSchema,
+        RelayTicketResponseSchema,
         {
           bypassRateLimit: true,
-          timeoutMs: 10_000,
-          headers: {
-            'X-TennoFrame-Client': `TennoFrame/${app.getVersion()}`
-          },
+          timeoutMs: 12_000,
+          headers: { 'X-TennoFrame-Client': `TennoFrame/${app.getVersion()}` },
           bodyJson: {
             ticketId: clientTicketId,
+            challengeToken: challenge.token,
+            deviceToken: this.state.deviceToken,
             category: input.category,
             subject: input.subject,
             message: input.message,
@@ -164,33 +350,50 @@ export class SupportService {
           ok: false,
           ticketId: null,
           cooldownRemainingSec: 0,
+          dailyRemaining: metrics.dailyRemaining,
           errorCode: 'NETWORK_ERROR'
         }
       }
 
       const finalTicketId = response.ticketId ?? clientTicketId
-      this.lastTicketId = finalTicketId
-      this.nextAllowedAtMs = Date.now() + SUPPORT_COOLDOWN_SECONDS * 1000
+      this.state.timestamps.push(Date.now())
+      this.state.lastDigest = digest
+      this.state.lastTicketId = finalTicketId
+      await this.persistState()
 
+      const updated = this.computeQuotaMetrics()
       return {
         ok: true,
         ticketId: finalTicketId,
-        cooldownRemainingSec: SUPPORT_COOLDOWN_SECONDS
+        cooldownRemainingSec: response.cooldownRemainingSec ?? updated.cooldownRemainingSec,
+        dailyRemaining: response.dailyRemaining ?? updated.dailyRemaining
       }
     } catch (err) {
-      if (err instanceof HttpStatusError && err.status === 429) {
-        this.nextAllowedAtMs = Date.now() + 60_000
+      if (err instanceof HttpStatusError) {
+        const code: SupportErrorCode =
+          err.status === 403
+            ? 'BANNED'
+            : err.status === 409
+              ? 'DUPLICATE'
+              : err.status === 400
+                ? 'SPAM_CONTENT'
+                : err.status === 429
+                  ? 'RATE_LIMITED'
+                  : 'NETWORK_ERROR'
         return {
           ok: false,
           ticketId: null,
-          cooldownRemainingSec: 60,
-          errorCode: 'RATE_LIMITED'
+          cooldownRemainingSec: err.status === 429 ? 60 : 0,
+          dailyRemaining: metrics.dailyRemaining,
+          errorCode: code,
+          errorMessage: err.detailMessage || err.message.slice(0, 140)
         }
       }
       return {
         ok: false,
         ticketId: null,
         cooldownRemainingSec: 0,
+        dailyRemaining: metrics.dailyRemaining,
         errorCode: 'NETWORK_ERROR',
         errorMessage: err instanceof Error ? err.message.slice(0, 140) : 'Network error'
       }

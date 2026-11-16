@@ -1,5 +1,13 @@
 import * as React from 'react'
-import { AlertTriangle, CheckCircle2, Clock, Copy, ExternalLink, RefreshCw } from 'lucide-react'
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  Copy,
+  ExternalLink,
+  RefreshCw,
+  ShieldAlert
+} from 'lucide-react'
 import { DISCORD_INVITE_URL } from '@shared/constants'
 import type { SupportTicketResult } from '@shared/schemas/support.schema'
 import { Button } from '@/components/ui/button'
@@ -8,6 +16,7 @@ import type { FontAndSupportStrings } from '@/lib/i18n/typography-support-i18n'
 interface SupportTicketResultBannerProps {
   readonly result: SupportTicketResult | null
   readonly cooldownSec: number
+  readonly dailyRemaining: number
   readonly strings: FontAndSupportStrings
   readonly isSending: boolean
   readonly canRetry: boolean
@@ -17,14 +26,17 @@ interface SupportTicketResultBannerProps {
 }
 
 export function formatCooldown(sec: number): string {
-  const m = Math.floor(sec / 60)
+  const h = Math.floor(sec / 3600)
+  const m = Math.floor((sec % 3600) / 60)
   const s = sec % 60
+  if (h > 0) return `${h}h ${String(m).padStart(2, '0')}m`
   return m > 0 ? `${m}m ${String(s).padStart(2, '0')}s` : `${s}s`
 }
 
 export function SupportTicketResultBanner({
   result,
   cooldownSec,
+  dailyRemaining,
   strings,
   isSending,
   canRetry,
@@ -32,7 +44,7 @@ export function SupportTicketResultBanner({
   onCopyAndOpenDiscord,
   onOpenDiscordOnly
 }: SupportTicketResultBannerProps): React.JSX.Element | null {
-  if (!result && cooldownSec <= 0) return null
+  if (!result && cooldownSec <= 0 && dailyRemaining > 0) return null
 
   if (result?.ok) {
     return (
@@ -71,6 +83,32 @@ export function SupportTicketResultBanner({
     )
   }
 
+  const isAntiSpamRejection =
+    result &&
+    !result.ok &&
+    (result.errorCode === 'SPAM_CONTENT' ||
+      result.errorCode === 'DUPLICATE' ||
+      result.errorCode === 'BANNED' ||
+      result.errorCode === 'DAILY_LIMIT' ||
+      result.errorCode === 'COOLDOWN' ||
+      result.errorCode === 'RATE_LIMITED')
+
+  if (isAntiSpamRejection) {
+    return (
+      <div className="flex items-start gap-2 rounded-lg border border-red-500/45 bg-red-500/10 p-3 text-xs text-red-200">
+        <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
+        <div className="space-y-0.5">
+          <p className="font-semibold">{strings.supportSpamBlockedTitle}</p>
+          <p className="text-[11px] text-red-200/90">
+            {result.errorCode === 'DAILY_LIMIT'
+              ? strings.supportDailyLimitReached
+              : result.errorMessage ?? strings.supportCooldownHint}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   if (result && !result.ok) {
     return (
       <div className="space-y-2.5 rounded-lg border border-amber-500/45 bg-amber-500/10 p-3 text-xs">
@@ -89,7 +127,7 @@ export function SupportTicketResultBanner({
               type="button"
               size="sm"
               variant="secondary"
-              disabled={isSending || !canRetry || cooldownSec > 0}
+              disabled={isSending || !canRetry || cooldownSec > 0 || dailyRemaining <= 0}
               onClick={onRetry}
             >
               <RefreshCw className="h-3.5 w-3.5" />
@@ -109,7 +147,9 @@ export function SupportTicketResultBanner({
     <div className="flex items-center gap-1.5 rounded-md border border-border bg-secondary/40 px-3 py-2 text-[11px] tabular-nums text-muted-foreground">
       <Clock className="h-3.5 w-3.5 text-primary" />
       <span>
-        {strings.supportCooldownHint} {formatCooldown(cooldownSec)}
+        {dailyRemaining <= 0
+          ? `${strings.supportDailyLimitReached} (${formatCooldown(cooldownSec)})`
+          : `${strings.supportCooldownHint} ${formatCooldown(cooldownSec)}`}
       </span>
     </div>
   )

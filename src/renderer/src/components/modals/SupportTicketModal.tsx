@@ -39,6 +39,8 @@ export function SupportTicketModal(): React.JSX.Element {
   const [includeDiagnostics, setIncludeDiagnostics] = React.useState(true)
   const [isSending, setIsSending] = React.useState(false)
   const [cooldownSec, setCooldownSec] = React.useState(0)
+  const [dailyRemaining, setDailyRemaining] = React.useState(3)
+  const [dailyMax, setDailyMax] = React.useState(3)
   const [result, setResult] = React.useState<SupportTicketResult | null>(null)
 
   const language = settings.market.language
@@ -60,6 +62,8 @@ export function SupportTicketModal(): React.JSX.Element {
     if (!isOpen) return
     void ipcClient.support.getStatus().then((st) => {
       setCooldownSec(st.cooldownRemainingSec)
+      setDailyRemaining(st.dailyRemaining)
+      setDailyMax(st.dailyMax)
     })
   }, [isOpen])
 
@@ -75,7 +79,7 @@ export function SupportTicketModal(): React.JSX.Element {
 
   const handleSubmit = async (e?: React.FormEvent): Promise<void> => {
     e?.preventDefault()
-    if (!isValid || isSending || cooldownSec > 0) return
+    if (!isValid || isSending || cooldownSec > 0 || dailyRemaining <= 0) return
     setIsSending(true)
     setResult(null)
     try {
@@ -89,6 +93,7 @@ export function SupportTicketModal(): React.JSX.Element {
       })
       setResult(res)
       if (res.cooldownRemainingSec > 0) setCooldownSec(res.cooldownRemainingSec)
+      if (res.dailyRemaining !== undefined) setDailyRemaining(res.dailyRemaining)
       if (res.ok) {
         setSubject('')
         setMessage('')
@@ -237,6 +242,7 @@ export function SupportTicketModal(): React.JSX.Element {
           <SupportTicketResultBanner
             result={result}
             cooldownSec={cooldownSec}
+            dailyRemaining={dailyRemaining}
             strings={strings}
             isSending={isSending}
             canRetry={isValid}
@@ -245,22 +251,34 @@ export function SupportTicketModal(): React.JSX.Element {
             onOpenDiscordOnly={() => void ipcClient.window.openExternalUrl(DISCORD_INVITE_URL)}
           />
 
-          <div className="flex justify-end gap-2 pt-1">
-            <Button type="button" variant="outline" size="sm" onClick={() => setOpen(false)}>
-              ✕
-            </Button>
-            <Button
-              type="submit"
-              size="sm"
-              disabled={!isValid || isSending || cooldownSec > 0}
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <span
+              className={`rounded-full border px-2.5 py-0.5 font-mono text-[10px] font-semibold tabular-nums ${
+                dailyRemaining > 0
+                  ? 'border-primary/35 bg-primary/10 text-primary'
+                  : 'border-red-500/45 bg-red-500/10 text-red-300'
+              }`}
             >
-              {isSending ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Send className="h-3.5 w-3.5" />
-              )}
-              <span>{isSending ? strings.supportSendingBtn : strings.supportSendBtn}</span>
-            </Button>
+              {strings.supportDailyQuotaLabel}: {dailyRemaining} / {dailyMax}
+            </span>
+
+            <div className="flex items-center gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => setOpen(false)}>
+                ✕
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                disabled={!isValid || isSending || cooldownSec > 0 || dailyRemaining <= 0}
+              >
+                {isSending ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Send className="h-3.5 w-3.5" />
+                )}
+                <span>{isSending ? strings.supportSendingBtn : strings.supportSendBtn}</span>
+              </Button>
+            </div>
           </div>
         </form>
       </DialogContent>

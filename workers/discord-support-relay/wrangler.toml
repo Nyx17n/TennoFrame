@@ -2,7 +2,12 @@ name = "tennoframe-support"
 main = "worker.mjs"
 compatibility_date = "2025-01-01"
 
-# Les 3 secrets dédiés (jamais écrits en clair ici !) :
+[[kv_namespaces]]
+binding = "SUPPORT_KV"
+id = "fe6524ee0b914a4e8563fb0832ea1517"
+
+# Secrets chiffrés côté Cloudflare (jamais écrits en clair ici !) :
 # npx wrangler secret put DISCORD_WEBHOOK_BUG
 # npx wrangler secret put DISCORD_WEBHOOK_SUGGESTION
 # npx wrangler secret put DISCORD_WEBHOOK_HELP
+# npx wrangler secret put CHALLENGE_HMAC_SECRET

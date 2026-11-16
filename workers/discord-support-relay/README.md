@@ -1,21 +1,21 @@
-# Relais Support Discord TennoFrame — 3 Salons Dédiés (Cloudflare Worker — 0 €/mois)
+# Relais Support Discord TennoFrame — 5 Couches Anti-Spam (Cloudflare Worker + KV)
 
-Ce micro-worker gratuit redirige automatiquement chaque catégorie vers son **propre Webhook Discord** (tout en gardant les 3 URLs secrètes hors de `TennoFrame-Setup.exe`) :
-- **`🐛 Bug Report`** → `DISCORD_WEBHOOK_BUG`
-- **`💡 Suggestion`** → `DISCORD_WEBHOOK_SUGGESTION`
-- **`❓ Question / Help`** → `DISCORD_WEBHOOK_HELP`
+## Règles actives
+- **3 salons dédiés** : `DISCORD_WEBHOOK_BUG`, `DISCORD_WEBHOOK_SUGGESTION`, `DISCORD_WEBHOOK_HELP`.
+- **Quota strict (PC chiffré + Cloudflare KV)** : **1 message toutes les 10 minutes** et **maximum 3 messages par 24h** (par IP + par installation).
+- **Jeton HMAC anti-robots (`/v1/challenge`)** : usage unique + délai humain minimum de rédaction (`3,5 s`).
+- **Filtre anti-déchets & anti-pub** : bloque le charabia, les messages en doublon et les invitations Discord externes.
 
-## Déploiement en 3 minutes (gratuit sans carte bancaire)
+## Bannir ou débannir un utilisateur (`Sender ID`) en 1 commande
 
-1. Sur ton serveur Discord, crée un Webhook dans chacun de tes 3 salons (`#bugs`, `#suggestions`, `#help` — salons texte ou salons Forum).
-2. Ouvre PowerShell dans ce dossier (`workers/discord-support-relay`) et lance :
+Chaque ticket affiché dans ton Discord indique son identifiant anonyme (ex. `usr_8f3a1c2b`).
 
 ```powershell
-npx wrangler login
-npx wrangler deploy
-npx wrangler secret put DISCORD_WEBHOOK_BUG
-npx wrangler secret put DISCORD_WEBHOOK_SUGGESTION
-npx wrangler secret put DISCORD_WEBHOOK_HELP
-```
+cd workers/discord-support-relay
 
-3. Donne l'URL publique `https://tennoframe-support.<ton-pseudo>.workers.dev` affichée par `npx wrangler deploy` !
+# Bannir définitivement un troll :
+npx wrangler kv key put --remote --binding=SUPPORT_KV "ban:usr_8f3a1c2b" "banned"
+
+# Débannir :
+npx wrangler kv key delete --remote --binding=SUPPORT_KV "ban:usr_8f3a1c2b"
+```

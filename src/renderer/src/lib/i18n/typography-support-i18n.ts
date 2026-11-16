@@ -29,6 +29,9 @@ export interface FontAndSupportStrings {
   readonly supportSendingBtn: string
   readonly supportSuccessTitle: string
   readonly supportCooldownHint: string
+  readonly supportDailyQuotaLabel: string
+  readonly supportDailyLimitReached: string
+  readonly supportSpamBlockedTitle: string
   readonly supportFallbackHint: string
   readonly supportCopyOpenDiscordBtn: string
   readonly supportCopiedToast: string
@@ -67,6 +70,9 @@ const FR: FontAndSupportStrings = {
   supportSendingBtn: 'Transmission sécurisée…',
   supportSuccessTitle: 'Message transmis à l’équipe sur Discord !',
   supportCooldownHint: 'Anti-spam actif — prochain envoi possible dans',
+  supportDailyQuotaLabel: 'Quota 24h',
+  supportDailyLimitReached: 'Limite de 3 messages par 24h atteinte.',
+  supportSpamBlockedTitle: 'Message bloqué par le filtre anti-spam :',
   supportFallbackHint:
     'Relais direct indisponible ou non configuré — ton texte est conservé ! Tu peux le copier en 1 clic et le coller sur Discord :',
   supportCopyOpenDiscordBtn: 'Copier mon rapport & ouvrir Discord',
@@ -106,6 +112,9 @@ const EN: FontAndSupportStrings = {
   supportSendingBtn: 'Sending securely…',
   supportSuccessTitle: 'Ticket delivered to the TennoFrame Discord!',
   supportCooldownHint: 'Anti-spam cooldown — next ticket available in',
+  supportDailyQuotaLabel: '24h Quota',
+  supportDailyLimitReached: 'Daily limit of 3 tickets per 24h reached.',
+  supportSpamBlockedTitle: 'Message blocked by anti-spam protection:',
   supportFallbackHint:
     'Direct relay unavailable — your message is safely kept! Copy your formatted report in 1 click and paste it on Discord:',
   supportCopyOpenDiscordBtn: 'Copy Report & Open Discord',

@@ -486,7 +486,13 @@ export const ipcClient = {
     async getStatus(): Promise<SupportStatus> {
       const bridge = getBridge()
       if (!bridge.support) {
-        return { relayConfigured: false, cooldownRemainingSec: 0, lastTicketId: null }
+        return {
+          relayConfigured: false,
+          cooldownRemainingSec: 0,
+          dailyRemaining: 3,
+          dailyMax: 3,
+          lastTicketId: null
+        }
       }
       return SupportStatusSchema.parse(await bridge.support.getStatus())
     },

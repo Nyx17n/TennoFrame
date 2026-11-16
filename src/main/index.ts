@@ -95,7 +95,7 @@ async function bootstrap(): Promise<void> {
   )
   const codexRepository = new CodexRepository(marketApi)
   const updaterService = new UpdaterService(windowService)
-  const supportService = new SupportService(httpClient, storageService, windowService)
+  const supportService = new SupportService(httpClient, storageService, windowService, userDataPath)
   const alertScheduler = new AlertSchedulerService(
     marketApi,
     storageService,
