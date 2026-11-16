@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { BackgroundGradientSection } from '@/components/settings/BackgroundGradientSection'
 import { ColorSwatchPicker } from '@/components/settings/ColorSwatchPicker'
+import { FontSelectorSection } from '@/components/settings/FontSelectorSection'
 import { GlassModeSection } from '@/components/settings/GlassModeSection'
 import { MotionSettingsSection } from '@/components/settings/MotionSettingsSection'
 import { ACCENT_SWATCH_GROUPS, BACKGROUND_SWATCH_GROUPS } from '@/lib/color-swatches'
@@ -16,6 +17,8 @@ export function AppearanceSettingsTab(): React.JSX.Element {
   return (
     <div className="space-y-4">
       <GlassModeSection />
+
+      <FontSelectorSection />
 
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>

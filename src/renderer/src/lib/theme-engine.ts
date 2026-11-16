@@ -6,6 +6,7 @@ import {
   type ThemePresetId,
   type UserSettings
 } from '@shared/schemas/settings.schema'
+import { resolveFontStacks } from '@/lib/font-catalog'
 import { buildGradientCssImage, normalizeGradientSettings } from '@/lib/gradient-engine'
 
 export interface ThemePresetDefinition {
@@ -391,4 +392,10 @@ export function applyThemeToDocument(appearance: UserSettings['appearance']): vo
   root.style.setProperty('--wf-glass-card-alpha', (clamp(glassPct - 6, 18, 82) / 100).toFixed(3))
   root.style.setProperty('--wf-glass-modal-alpha', (clamp(glassPct + 18, 40, 93) / 100).toFixed(3))
   root.style.setProperty('--wf-glass-pill-alpha', (clamp(glassPct - 2, 20, 84) / 100).toFixed(3))
+
+  const resolvedFont = resolveFontStacks(appearance.fontFamily ?? 'auto', isMedievalActive)
+  root.dataset.font = resolvedFont.effectiveId
+  root.style.setProperty('--wf-font-sans', resolvedFont.definition.bodyStack)
+  root.style.setProperty('--wf-font-heading', resolvedFont.definition.headingStack)
+  root.style.setProperty('--wf-font-mono', resolvedFont.definition.monoStack)
 }

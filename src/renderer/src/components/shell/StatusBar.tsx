@@ -1,7 +1,15 @@
 import * as React from 'react'
-import { Activity, Database, Keyboard, ShieldCheck, Sparkles } from 'lucide-react'
+import {
+  Activity,
+  Database,
+  Keyboard,
+  MessageSquarePlus,
+  ShieldCheck,
+  Sparkles
+} from 'lucide-react'
 import { CommunityCounterPill } from '@/components/shell/CommunityCounterPill'
 import { useUiTranslations } from '@/lib/i18n'
+import { getFontAndSupportStrings } from '@/lib/i18n/typography-support-i18n'
 import { useAppStore } from '@/stores/useAppStore'
 
 export function StatusBar(): React.JSX.Element {
@@ -11,7 +19,9 @@ export function StatusBar(): React.JSX.Element {
   const settings = useAppStore((s) => s.settings)
   const windowState = useAppStore((s) => s.windowState)
   const setChangelogOpen = useAppStore((s) => s.setChangelogOpen)
+  const setSupportOpen = useAppStore((s) => s.setSupportOpen)
   const openSettingsModal = useAppStore((s) => s.openSettingsModal)
+  const supportStrings = getFontAndSupportStrings(settings.market.language)
 
   return (
     <footer className="wf-shell-bar flex h-6 shrink-0 select-none items-center justify-between border-t border-border bg-card/90 px-3 text-[11px] text-muted-foreground">
@@ -62,6 +72,18 @@ export function StatusBar(): React.JSX.Element {
             </span>
           </span>
         )}
+        {windowState.isCompactMode && (
+          <button
+            type="button"
+            title={supportStrings.supportModalTitle}
+            aria-label={supportStrings.supportModalTitle}
+            onClick={() => setSupportOpen(true)}
+            className="inline-flex items-center justify-center text-foreground/85 transition-colors hover:text-primary"
+          >
+            <MessageSquarePlus className="h-3.5 w-3.5 text-primary" />
+          </button>
+        )}
+
         <button
           type="button"
           title={t.shell.patchNotes}

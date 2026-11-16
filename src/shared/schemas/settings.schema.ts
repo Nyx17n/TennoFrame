@@ -118,6 +118,22 @@ export const GLASS_OPACITY_DEFAULT = 48
 export const GlassStyleSchema = z.enum(['liquid-glass', 'simple', 'medieval'])
 export type GlassStyle = z.infer<typeof GlassStyleSchema>
 
+export const FontFamilyIdSchema = z.enum([
+  'auto',
+  'system',
+  'inter',
+  'roboto',
+  'poppins',
+  'montserrat',
+  'rajdhani',
+  'orbitron',
+  'medieval',
+  'georgia',
+  'jetbrains-mono',
+  'comic'
+])
+export type FontFamilyId = z.infer<typeof FontFamilyIdSchema>
+
 export const CompactTimersSettingsSchema = z.object({
   enabled: z.boolean().default(true),
   showOnDesktop: z.boolean().default(false),
@@ -145,6 +161,7 @@ export const UserSettingsSchema = z.object({
       .min(GLASS_OPACITY_MIN)
       .max(GLASS_OPACITY_MAX)
       .default(GLASS_OPACITY_DEFAULT),
+    fontFamily: FontFamilyIdSchema.default('auto'),
     startupAnimationEnabled: z.boolean().default(true),
     animationLevel: AnimationLevelSchema.default('full'),
     respectOsReducedMotion: z.boolean().default(true),

@@ -14,6 +14,8 @@ const DISCORD_INVITE_COUNTS_URL = `https://discord.com/api/v10/invites/${DISCORD
 
 const MEMORY_CACHE_TTL_MS = 15 * 60_000
 const MANUAL_REFRESH_COOLDOWN_MS = 10_000
+/** Temporary historical installs offset (compensating pruned legacy GitHub releases). */
+const TEMPORARY_HISTORICAL_INSTALLS_OFFSET = 140
 
 const GitHubReleaseAssetSchema = z.object({
   name: z.string(),
@@ -82,11 +84,13 @@ export class CommunityStatsService {
     const previous = this.memorySnapshot
     const discordMemberCount = dc?.memberCount ?? previous?.discordMemberCount ?? 0
     const onlineCount = Math.max(1, dc?.onlineCount ?? previous?.onlineCount ?? 1)
-    const installedUsersCount = Math.max(
-      1,
-      ghInstalled ?? previous?.installedUsersCount ?? 1,
-      discordMemberCount
-    )
+    const installedUsersCount =
+      ghInstalled !== null
+        ? Math.max(1, ghInstalled, discordMemberCount) + TEMPORARY_HISTORICAL_INSTALLS_OFFSET
+        : Math.max(
+            previous?.installedUsersCount ?? 0,
+            Math.max(1, discordMemberCount) + TEMPORARY_HISTORICAL_INSTALLS_OFFSET
+          )
 
     const snapshot: CommunityStatsSnapshot = CommunityStatsSnapshotSchema.parse({
       installedUsersCount,
@@ -146,7 +150,7 @@ export class CommunityStatsService {
 
   private buildBootstrapFallback(): CommunityStatsSnapshot {
     return {
-      installedUsersCount: 1,
+      installedUsersCount: 1 + TEMPORARY_HISTORICAL_INSTALLS_OFFSET,
       onlineCount: 1,
       discordMemberCount: 0,
       updatedAt: new Date().toISOString(),

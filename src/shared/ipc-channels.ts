@@ -24,6 +24,11 @@ import type {
   MarketFacetedSearchResult
 } from './schemas/market-search.schema'
 import type { UserSettings, UserSettingsPatch } from './schemas/settings.schema'
+import type {
+  SupportStatus,
+  SupportTicketInput,
+  SupportTicketResult
+} from './schemas/support.schema'
 import type { CommunityStatsSnapshot, SystemStatus } from './schemas/system.schema'
 import type {
   CartBundleAnalysis,
@@ -121,7 +126,9 @@ export const IPC_CHANNELS = {
   UPDATER_GET_STATUS: 'updater:getStatus',
   UPDATER_CHECK: 'updater:check',
   UPDATER_INSTALL: 'updater:downloadAndInstall',
-  UPDATER_ON_STATUS: 'updater:onStatus'
+  UPDATER_ON_STATUS: 'updater:onStatus',
+  SUPPORT_GET_STATUS: 'support:getStatus',
+  SUPPORT_SEND_TICKET: 'support:sendTicket'
 } as const
 
 export interface TennoFrameBridgeApi {
@@ -214,5 +221,9 @@ export interface TennoFrameBridgeApi {
     check: () => Promise<UpdaterStatus>
     downloadAndInstall: () => Promise<UpdaterStatus>
     onStatus: (listener: (status: UpdaterStatus) => void) => () => void
+  }
+  readonly support: {
+    getStatus: () => Promise<SupportStatus>
+    sendTicket: (input: SupportTicketInput) => Promise<SupportTicketResult>
   }
 }

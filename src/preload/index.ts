@@ -8,6 +8,7 @@ import type {
 } from '@shared/schemas/extensions.schema'
 import type { MarketFacetedSearchInput } from '@shared/schemas/market-search.schema'
 import type { UserSettingsPatch } from '@shared/schemas/settings.schema'
+import type { SupportTicketInput } from '@shared/schemas/support.schema'
 import type { RivenSearchParams } from '@shared/schemas/tools.schema'
 import type { UpdaterStatus } from '@shared/schemas/updater.schema'
 import type {
@@ -191,6 +192,11 @@ const tennoframeApi: TennoFrameBridgeApi = Object.freeze({
         ipcRenderer.removeListener(IPC_CHANNELS.UPDATER_ON_STATUS, wrapped)
       }
     }
+  }),
+  support: Object.freeze({
+    getStatus: () => ipcRenderer.invoke(IPC_CHANNELS.SUPPORT_GET_STATUS),
+    sendTicket: (input: SupportTicketInput) =>
+      ipcRenderer.invoke(IPC_CHANNELS.SUPPORT_SEND_TICKET, input)
   })
 })
 

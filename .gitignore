@@ -58,6 +58,9 @@ obj/
 .stylelintcache
 .vite/
 .cache/
+.wrangler/
+.dev.vars
+.dev.vars.*
 coverage/
 *.lcov
 playwright-report/
