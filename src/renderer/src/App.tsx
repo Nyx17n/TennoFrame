@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { WhisperBar } from '@/components/market/WhisperBar'
 import { ChangelogModal } from '@/components/modals/ChangelogModal'
+import { SupportTicketModal } from '@/components/modals/SupportTicketModal'
 import { NotificationViewport } from '@/components/notifications/NotificationViewport'
 import { SettingsModal } from '@/components/settings/SettingsModal'
 import { BookmarksBar } from '@/components/shell/BookmarksBar'
@@ -188,6 +189,7 @@ export function App(): React.JSX.Element {
       <CreateWfmOrderModal />
       <SettingsModal />
       <ChangelogModal />
+      <SupportTicketModal />
       <StartupSplashOverlay />
       <WindowResizeHandles />
     </div>

@@ -2,6 +2,7 @@ import * as React from 'react'
 import {
   Download,
   FileText,
+  MessageSquarePlus,
   RefreshCw,
   RotateCcw,
   ShieldCheck,
@@ -20,6 +21,7 @@ export function SystemDataSettingsTab(): React.JSX.Element {
   const checkForUpdates = useAppStore((s) => s.checkForUpdates)
   const installUpdate = useAppStore((s) => s.installUpdate)
   const setChangelogOpen = useAppStore((s) => s.setChangelogOpen)
+  const setSupportOpen = useAppStore((s) => s.setSupportOpen)
   const setSettingsOpen = useAppStore((s) => s.setSettingsOpen)
   const exportSettingsJson = useAppStore((s) => s.exportSettingsJson)
   const importSettingsJson = useAppStore((s) => s.importSettingsJson)
@@ -48,6 +50,17 @@ export function SystemDataSettingsTab(): React.JSX.Element {
             <Badge variant="default">v{systemStatus?.appVersion ?? '2.0.0'}</Badge>
           </div>
           <div className="flex items-center gap-1.5">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setSettingsOpen(false)
+                setSupportOpen(true)
+              }}
+            >
+              <MessageSquarePlus className="h-3.5 w-3.5 text-primary" />
+              <span>Support / Bug</span>
+            </Button>
             <Button
               size="sm"
               variant="outline"

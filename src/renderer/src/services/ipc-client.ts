@@ -45,6 +45,13 @@ import {
   type UserSettingsPatch
 } from '@shared/schemas/settings.schema'
 import {
+  SupportStatusSchema,
+  SupportTicketResultSchema,
+  type SupportStatus,
+  type SupportTicketInput,
+  type SupportTicketResult
+} from '@shared/schemas/support.schema'
+import {
   CommunityStatsSnapshotSchema,
   SystemStatusSchema,
   type CommunityStatsSnapshot,
@@ -473,6 +480,27 @@ export const ipcClient = {
         const parsed = UpdaterStatusSchema.safeParse(raw)
         if (parsed.success) listener(parsed.data)
       })
+    }
+  },
+  support: {
+    async getStatus(): Promise<SupportStatus> {
+      const bridge = getBridge()
+      if (!bridge.support) {
+        return { relayConfigured: false, cooldownRemainingSec: 0, lastTicketId: null }
+      }
+      return SupportStatusSchema.parse(await bridge.support.getStatus())
+    },
+    async sendTicket(input: SupportTicketInput): Promise<SupportTicketResult> {
+      const bridge = getBridge()
+      if (!bridge.support) {
+        return {
+          ok: false,
+          ticketId: null,
+          cooldownRemainingSec: 0,
+          errorCode: 'NOT_CONFIGURED'
+        }
+      }
+      return SupportTicketResultSchema.parse(await bridge.support.sendTicket(input))
     }
   }
 } as const

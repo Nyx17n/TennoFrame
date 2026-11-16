@@ -6,6 +6,7 @@ import { registerCodexAndUpdaterHandlers } from './ipc/registerCodexAndUpdaterHa
 import { registerIpcHandlers } from './ipc/registerIpcHandlers'
 import { registerMarketHandlers } from './ipc/registerMarketHandlers'
 import { registerOverlayHandlers } from './ipc/registerOverlayHandlers'
+import { registerSupportHandlers } from './ipc/registerSupportHandlers'
 import { registerToolsAndAlertsHandlers } from './ipc/registerToolsAndAlertsHandlers'
 import { registerWfmAccountHandlers } from './ipc/registerWfmAccountHandlers'
 import { registerWorldstateHandlers } from './ipc/registerWorldstateHandlers'
@@ -19,6 +20,7 @@ import { MarketApiService } from './services/MarketApiService'
 import { MarketFacetedSearchService } from './services/MarketFacetedSearchService'
 import { SetCalculatorService } from './services/SetCalculatorService'
 import { StorageService } from './services/StorageService'
+import { SupportService } from './services/SupportService'
 import { migrateLegacyWireFrameUserData } from './services/migrateLegacyUserData'
 import { TradingToolsService } from './services/TradingToolsService'
 import { UpdaterService } from './services/UpdaterService'
@@ -93,6 +95,7 @@ async function bootstrap(): Promise<void> {
   )
   const codexRepository = new CodexRepository(marketApi)
   const updaterService = new UpdaterService(windowService)
+  const supportService = new SupportService(httpClient, storageService, windowService)
   const alertScheduler = new AlertSchedulerService(
     marketApi,
     storageService,
@@ -125,7 +128,7 @@ async function bootstrap(): Promise<void> {
         responseHeaders: {
           ...details.responseHeaders,
           'Content-Security-Policy': [
-            "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' wf-asset: data:; media-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
+            "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' wf-asset: data:; media-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
           ]
         }
       })
@@ -201,6 +204,10 @@ async function bootstrap(): Promise<void> {
     windowService,
     codexRepository,
     updaterService
+  })
+  registerSupportHandlers({
+    supportService,
+    windowService
   })
 
   const iconPath = resolveAppIconPath()

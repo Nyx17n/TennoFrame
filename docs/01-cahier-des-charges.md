@@ -842,6 +842,71 @@ Pour épurer l'interface tout en accélérant les actions fréquentes à la sour
      3. *Nominal Donjon Sombre, Parchemin Clair & Mode Vitrail* (bascule instantanée à chaud entre `Liquid Glass`, `Simple` et `Médiéval` sur les **15 langues Warframe**),
      4. *Erreur réseau* (bannière d'alerte encadrée avec bouton ciselé `Réessayer`).
 
+### 3.19. Module 19 — Système de Changement de Police d'Écriture & Catalogue Typographique Hors-Ligne
+
+1. **Objectif Métier & Catalogue des 12 Polices Iconiques (Classiques, Modernes, Gaming/Sci-Fi, Médiévale & Monospace)** :
+   - Permettre au joueur de personnaliser à chaud, depuis **`Paramètres → Apparence`**, la **police d'écriture globale** de toute l'application **TennoFrame** (fenêtre principale `1440×900`, Mode Compact `460×660` et fenêtre secondaire `Codex Farm Overlay` en jeu), indépendamment ou en synergie avec son thème et son style visuel (*Liquid Glass*, *Simple*, *Médiéval*).
+   - **Catalogue de 12 options typographiques classées par univers** :
+     1. **`auto`** — **Automatique *(Recommandé, défaut)* :** s'adapte intelligemment au style actif (*Segoe UI / Inter* par défaut, et bascule automatiquement sur *Cinzel & Palatino Médiéval* lorsque `glassStyle === 'medieval'` est actif).
+     2. **`system`** — **Segoe UI *(Windows Natif)* :** police système officielle de Windows 10/11 (rendu ClearType natif ultra-net, 0 octets supplémentaires).
+     3. **`inter`** — **Inter *(UI Moderne)* :** standard mondial des interfaces modernes (*Discord, GitHub, Linear*).
+     4. **`roboto`** — **Roboto *(Classique Web/Mobile)* :** la police sans-serif la plus connue et universelle (*Google / Android / YouTube*).
+     5. **`poppins`** — **Poppins *(Géométrique Douce)* :** police arrondie moderne, chaleureuse et très populaire.
+     6. **`montserrat`** — **Montserrat *(Élégante & Gaming)* :** sans-serif urbaine affirmée, très lisible sur les titres et cartes.
+     7. **`rajdhani`** — **Rajdhani *(HUD Sci-Fi / Warframe)* :** police tactique angulaire emblématique des interfaces Sci-Fi et de l'univers Tenno.
+     8. **`orbitron`** — **Orbitron *(Futuriste Céphalon / Corpus)* :** police futuriste haute-technologie (appliquée aux titres, onglets et en-têtes avec corps lisible assorti pour ne jamais fatiguer l'œil sur les longues tables du Codex).
+     9. **`medieval`** — **Cinzel & Palatino *(Médiéval / Grimoire Duviri)* :** capitales gravées *Cinzel* sur les titres/barres et Serif *Palatino / Book Antiqua / Georgia* sur les contenus — utilisable **même sans activer les bordures du Style Médiéval** !
+     10. **`georgia`** — **Georgia & Times *(Roman Classique)* :** grand classique Serif éditorial intemporel (livre / presse).
+     11. **`jetbrains-mono`** — **JetBrains Mono *(Code / Terminal)* :** police monospace célèbre des développeurs, offrant un alignement millimétré sur les tableaux d'ordres et statistiques.
+     12. **`comic`** — **Comic Sans MS / Comic Neue *(Décontractée & Lecture Facile)* :** police manuscrite célèbre, également reconnue pour faciliter la lecture rapide (lettres fortement différenciées).
+2. **Sécurité CSP Stricte (`font-src 'self'`), 100 % Hors-Ligne & Règles de Lisibilité Trading** :
+   - **Zéro appel CDN externe (`fonts.googleapis.com` interdit)** : afin de respecter strictement `connect-src 'none'` (aucune fuite d'IP vers un tiers, fonctionnement 100 % hors-ligne du Codex, zéro clignotement FOUT au démarrage), toutes les polices non natives de Windows (*Inter, Roboto, Poppins, Montserrat, Rajdhani, Orbitron, Cinzel, JetBrains Mono*) sont **embarquées localement en `.woff2` (`@fontsource/*`)** dans le bundle applicatif et servies via `font-src 'self' data:`.
+   - **Protection des chiffres de Trading & Commandes `/w`** : quelle que soit la police choisie, tous les **prix Platinum, Ducats, pourcentages de drop (`%`), minuteurs Worldstate et compteurs** conservent `font-variant-numeric: tabular-nums` afin qu'aucune colonne de chiffres ne saute lors des rafraîchissements temps réel, et les commandes `/w` copiables restent parfaitement lisibles.
+   - **Compatibilité 15 Langues Officielles Warframe** : chaque pile CSS (`font-family`) inclut une chaîne de repli internationale propre (*Cyrillique, Japonais Yu Gothic/Meiryo, Coréen Malgun Gothic, Chinois Microsoft YaHei/JhengHei, Thaï Leelawadee UI*) pour garantir zéro carré vide (`□`) dans les 15 langues.
+3. **Contrat `zod`, Moteur CSS & Ergonomie UX (`Paramètres → Apparence` + 4 États UI)** :
+   - **Contrat `UserSettingsSchema.shape.appearance`** (`src/shared/schemas/settings.schema.ts`) :
+     - `fontFamily: FontFamilyIdSchema.default('auto')` où `FontFamilyIdSchema = z.enum(['auto', 'system', 'inter', 'roboto', 'poppins', 'montserrat', 'rajdhani', 'orbitron', 'medieval', 'georgia', 'jetbrains-mono', 'comic'])`.
+   - **Moteur CSS (`theme-engine.ts` + `globals.css`)** :
+     - Pose de `data-font="<resolvedFontId>"` et des variables `--wf-font-sans`, `--wf-font-heading` et `--wf-font-mono` sur `<html>` (fenêtre principale + `Codex Farm Overlay`), pour un changement instantané à `0 ms` de re-rendu React.
+   - **Composant `FontSelectorSection` dans `AppearanceSettingsTab`** (traduit dans les **15 langues**) :
+     - Filtre rapide par catégorie (*Toutes · Sans-Serif · Sci-Fi · Médiéval & Serif · Mono & Fun*) + grille de cartes où **chaque carte affiche son nom et un échantillon `Aa · 145p` directement dans sa propre police réelle**, + **Bandeau d'aperçu en direct** (*Titre Warframe, badge Platinum `145p`, commande `/w`*) + bouton `Réinitialiser (Auto)`.
+   - **Adaptation Mode Compact (`460×660`)** : grille condensée sur 2 colonnes avec aperçu compact empilé sans débordement horizontal.
+   - **4 États UI Obligatoires** :
+     1. *Chargement initial sans FOUT* (polices `.woff2` locales pré-packagées + variables appliquées dès l'hydratation),
+     2. *Mode `Auto` par défaut* (badge indiquant clairement la police effective résolue : *Segoe UI* ou *Cinzel Médiéval*),
+     3. *Nominal Actif* (bascule instantanée entre les 12 polices sur Desktop, Compact et Farm Overlay),
+     4. *Repli gracieux multi-alphabet* (bascule propre vers la police système CJK/Thaï/Cyrillique si un glyphe non-latin n'est pas présent dans une police d'affichage comme *Orbitron* ou *Cinzel*).
+
+### 3.20. Module 20 — Système de Support & Signalement de Bug In-App vers Discord (Relais Sécurisé Sans Webhook Exposé)
+
+1. **Objectif Métier & Parcours Joueur (1 Clic depuis TennoFrame → Salon Discord `#support`)** :
+   - Offrir à tout utilisateur de **TennoFrame** la possibilité d'envoyer directement depuis l'application un **signalement de bug**, une **suggestion d'amélioration** ou une **demande d'aide**, sans avoir besoin d'ouvrir un navigateur ni de chercher où poster, avec réception instantanée sous forme d'**Embed structuré (ou Fil de Forum)** dans le serveur Discord officiel de Maxime.
+   - **Points d'entrée ergonomiques** :
+     1. Bouton discret **`💬 Support / Bug`** à côté du badge Discord en bas de l'interface (`DiscordCornerBadge` / `StatusBar`) et dans **`Paramètres → Système & Mises à jour`**.
+     2. Ouverture d'une modale dédiée **`SupportTicketModal`** traduite dans les **15 langues officielles de Warframe** :
+        - **Catégorie obligatoire** : `🐛 Signaler un bug` (`bug`), `💡 Suggestion / Idée` (`feature`), `❓ Question / Aide` (`help`).
+        - **Sujet court** (`5` à `90` caractères, validé par `zod`).
+        - **Message détaillé** (`15` à `1 500` caractères, compteur en direct, validé par `zod`).
+        - **Contact optionnel** (`Pseudo Discord` ex. `@nyxo` ou `Pseudo Warframe IGN`, `0` à `48` caractères — pour permettre à Maxime de recontacter l'auteur s'il le souhaite).
+        - **Case à cocher transparente « Joindre le diagnostic technique anonyme »** *(cochée par défaut, désactivable)* : joint uniquement la version (`v2.12.0`), l'OS (`win32 x64`), la langue active, la vue/URL interne courante (`wf://...`), le style visuel (`liquid-glass / simple / medieval`) et le mode (`Desktop / Compact`). **Zéro** jeton, **zéro** chemin de dossier personnel Windows (`C:\Users\...`), **zéro** donnée privée.
+2. **Architecture de Sécurité Intransigeante (« Zéro Webhook Discord dans le Client `.exe` »)** :
+   - **Interdiction absolue** de stocker une URL `https://discord.com/api/webhooks/...` dans le code source ou le binaire `.exe` / `.asar` de TennoFrame (toute archive cliente pouvant être extraite par un tiers malveillant).
+   - **Flux sécurisé en 3 maillons (`Renderer` → `IPC Main` → `Cloudflare Worker Gratuit` → `Discord`)** :
+     1. **`Renderer` (`SupportTicketModal`)** : ne fait aucun appel réseau (`connect-src 'none'`), invoque uniquement `window.tennoframeApi.support.sendTicket(payload)`.
+     2. **`Main Process` (`SupportService`)** :
+        - Valide strictement l'entrée avec `SupportTicketInputSchema` (`zod`), vérifie `event.senderFrame`, applique un **cooldown local de 3 minutes** entre deux envois (persisté en mémoire + horodatage) et envoie une requête `POST` HTTPS stricte (`net.fetch`, TLS vérifié par l'OS, timeout `10 s`) vers l'endpoint public du relais Cloudflare Worker (`https://tennoframe-support.<domaine>.workers.dev/v1/ticket`).
+     3. **`Relais Serverless Cloudflare Worker` (`workers/discord-support-relay/`, 100 % gratuit `0 €/mois`, `100 000 req/j`)** :
+        - Conserve **`DISCORD_SUPPORT_WEBHOOK_URL` exclusivement en secret chiffré côté serveur Cloudflare** (`wrangler secret put DISCORD_SUPPORT_WEBHOOK_URL`).
+        - Applique un **Rate-Limiting serveur par IP** (ex. max **1 ticket / 3 min** et **4 tickets / heure** par adresse IP hachée en SHA-256 salé — aucune IP brute stockée), rejette les payloads invalides ou trop volumineux (`> 4 Ko`), neutralise toute injection Markdown abusive, et force **`allowed_mentions: { parse: [] }`** pour garantir à 100 % qu'aucun `@everyone`, `@here` ou mention de rôle ne puisse jamais être déclenché.
+        - Supporte nativement les **salons texte classiques** ET les **salons Forum Discord** (`thread_name` automatique : `[BUG] Sujet...`).
+3. **Ergonomie Mode Compact (`460×660`), Historique Local de Session & 4 États UI Obligatoires** :
+   - **Mode Compact (`460×660`)** : modale plein-cadre condensée sur une colonne avec sélecteur de catégorie en 3 pilules compactes et zone de texte redimensionnée proprement sans ascenseur horizontal.
+   - **4 États UI Obligatoires** :
+     1. *Chargement / Envoi en cours* (bouton verrouillé avec spinner `Envoi sécurisé vers Discord…`, champs en lecture seule pendant la requête),
+     2. *État Initial / Vide guidé* (placeholders pédagogiques adaptés à la catégorie choisie : étapes pour reproduire un bug vs description d'idée + aperçu repliable des infos techniques),
+     3. *Nominal Succès + Cooldown actif* (confirmation verte avec numéro court de ticket `#TF-8F2A`, compteur de cooldown `Prochain envoi possible dans 2m 58s` et lien optionnel `Rejoindre le Discord pour suivre la réponse`),
+     4. *Erreur Réseau / Relais indisponible / Rate-Limit `429`* (bannière explicite conservant 100 % du texte saisi par le joueur — zéro perte de frappe — avec bouton `Réessayer` et bouton de secours `Copier mon message & ouvrir Discord`).
+
 ---
 
 ## 4. Architecture Technique, Contrats IPC & Sécurité
@@ -912,13 +977,14 @@ Tous les paramètres d'entrée et toutes les réponses API passent par une valid
 | **`window`** | `window:minimize`, `window:toggleMaximize`, `window:close`, `window:setAlwaysOnTop`, `window:setCompactMode`, `window:setZoom`, `window:openExternalUrl`, `window:onStateChanged` *(event)* | Pilotage natif de la fenêtre, du mode Overlay et ouverture sécurisée de liens externes |
 | **`overlay`** | `overlay:getState`, `overlay:setEnabled`, `overlay:updateState`, `overlay:setClickThrough`, `overlay:onStateChanged` *(event)* | Pilotage temps réel de la fenêtre secondaire *Codex Farm Overlay* en jeu et synchronisation de la sélection d'objets/pièces |
 | **`updater`** | `updater:check`, `updater:downloadAndInstall`, `updater:getChangelog`, `updater:onStatus` *(event)* | Cycle de mise à jour `electron-updater` |
+| **`support`** | `support:getStatus`, `support:sendTicket` | Envoi sécurisé de tickets Support / Bug vers Discord via le relais Cloudflare Worker (zéro Webhook dans le client, validation `zod`, cooldown anti-spam & diagnostic anonyme optionnel) |
 | **`system`** | `system:getStatus`, `system:clearCache`, `system:getCommunityStats` | Diagnostic technique du client, purge du cache et compteur communautaire permanent (utilisateurs installés & présence en ligne) |
 
 ### 4.4. Exigences Non-Fonctionnelles & Sécurité Intransigeante
 
 1. **Durcissement Electron obligatoire** :
    - `nodeIntegration: false`, `contextIsolation: true`, `sandbox: true`, `webSecurity: true`.
-   - **Content-Security-Policy (CSP)** stricte : `default-src 'self'; img-src 'self' wf-asset: data:; media-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'none'` (le Renderer ne fait **aucune** connexion Internet directe : `connect-src 'none'`, 100 % passe par le Main Process !).
+   - **Content-Security-Policy (CSP)** stricte : `default-src 'self'; img-src 'self' wf-asset: data:; font-src 'self' data:; media-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'none'` (le Renderer ne fait **aucune** connexion Internet directe : `connect-src 'none'`, 100 % passe par le Main Process, polices `.woff2` 100 % locales !).
    - **TLS strict** : validation systématique des certificats HTTPS du système d'exploitation.
    - **Chiffrement OS des jetons (`safeStorage`)** : tout jeton de session optionnel (`warframe.market`) est chiffré via DPAPI Windows dans le Main Process et n'est jamais exposé au Renderer ni inclus dans les exports JSON.
    - **Ouverture de liens externes filtrée** : seuls les domaines explicitement autorisés (`https://warframe.market/...`, `https://www.warframe.com/...`, `https://wiki.warframe.com/...`) peuvent être ouverts dans le navigateur par défaut de Windows via `shell.openExternal`.
@@ -932,7 +998,7 @@ Tous les paramètres d'entrée et toutes les réponses API passent par une valid
 
 ## 5. Plan des Maquettes Excalidraw (`docs/02-tennoframe/` — Synchronisées `v2.10+`)
 
-L'ensemble des **19 planches Excalidraw** dans `docs/02-tennoframe/` documente fidèlement l'architecture de **TennoFrame**, chacune présentant côte à côte la version **Desktop (`1440×900`)**, son adaptation **Compact Overlay (`460×660`)**, et **les 4 états UI obligatoires** (*Chargement / Skeleton*, *Vide*, *Nominal*, *Erreur*) :
+L'ensemble des **21 planches Excalidraw** dans `docs/02-tennoframe/` documente fidèlement l'architecture de **TennoFrame**, chacune présentant côte à côte la version **Desktop (`1440×900`)**, son adaptation **Compact Overlay (`460×660`)**, et **les 4 états UI obligatoires** (*Chargement / Skeleton*, *Vide*, *Nominal*, *Erreur*) :
 
 1. `01-app-shell-navigation.excalidraw` : Fenêtre *Frameless* `v2.6.0`, `TitleTabsBar` (défilement molette + chevrons `‹ / ›` + fermeture clic molette), `ClickThroughBanner` (`👻` `Alt+G` + maintien `0.5s`), `CommandNavBar` (`Ctrl+K`, cloche `🔔`, `PC · Cross · FR ▾`, Zoom, `📌`, `👻`, `🗖`, `⚙`), `BookmarksBar` centrée + `Historique` (`Ctrl+H`), Omnibox, Organisateur d'onglets, bandeau `/w`, `CompactTimersBar`, bouton Discord et `StatusBar v2.6.0`.
 2. `02-market-home-catalog-item.excalidraw` : Accueil Marché (flux d'annonces récentes en direct, `ViewModeToggle` `[⊞|▭|☰] + [S|M|L]`, badges `Min · Moy · Max` Platinum), Catalogue, Favoris, Profil joueur, et **Fiche Item complète** (Ordres Vente/Achat, Comparateur *Set vs Pièces*, Pont bidirectionnel *Codex*, Statistiques 48h/90j + pagination *Afficher plus*).
@@ -953,6 +1019,8 @@ L'ensemble des **19 planches Excalidraw** dans `docs/02-tennoframe/` documente f
 17. `17-multilang-15-warframe-languages.excalidraw` *(Module 16 — Internationalisation Complète 15 Langues Officielles Warframe)* : **Grille des 15 langues Warframe (`FR, EN, DE, ES, IT, PT, RU, PL, UK, TR, JA, KO, ZH, TC, TH`)** dans `QuickMarketPopover` (`CommandNavBar`) et `SettingsModal → Marché & Échanges`, **dissociation Langue d'affichage vs Langue `/w`** avec aperçu en direct dans `WhisperBar`, **repli intelligent `EN` sur Codex/WFM**, **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
 18. `18-liquid-glass-transparent-mode.excalidraw` *(Module 17 — Mode Transparent « Liquid Glass » & « Transparence Simple » + Visibilité Bureau — validé)* : **Carte dans `SettingsModal → Apparence`** (interrupteur Activer/Désactiver, sélecteur à 2 styles `✨ Liquid Glass` vs `◻ Transparence simple`, bouton `🖥 Voir le bureau en arrière-plan` ON/OFF, curseur d'opacité `20 % – 85 %`, préréglages rapides et capsule d'aperçu en direct), **anatomie optique comparée Verre Spéculaire vs Alpha Plat**, **rendu Desktop `1440×900`, Mode Compact `460×660` & `Codex Farm Overlay` en jeu**, et **les 4 états UI obligatoires**.
 19. `19-medieval-ui-style.excalidraw` *(Module 18 — Style d'Interface « Médiéval » : Grimoire de Duviri, Parchemin & Fer Forgé Doré)* : **Sélecteur à 3 styles dans `SettingsModal → Apparence`** (`✨ Liquid Glass` | `◻ Transparence simple` | `🏰 Style Médiéval`), **3 Palettes Médiévales Rapides** (`Donjon & Or Forgé`, `Parchemin Royal`, `Ordre Écarlate` + conservation libre du thème actif), **synergie Grimoire Opaque vs Vitrail Transparent** (`Voir le bureau` ON/OFF), **anatomie CSS 100 % vectorielle** (doubles cadres ciselés en fer forgé/laiton, rivets `◆`, titres Serif nobles + prix Platinum tabulaires, boutons biseautés & sceaux de cire), **rendu Desktop `1440×900` (Donjon sombre + échantillon Parchemin clair), Mode Compact `460×660` & `Parchemin Farm Overlay` en jeu**, et **les 4 états UI obligatoires**.
+20. `20-typography-font-selector.excalidraw` *(Module 19 — Système de Changement de Police d'Écriture & Catalogue Typographique Hors-Ligne)* : **Composant `FontSelectorSection` dans `SettingsModal → Apparence`** avec filtres par univers (*Toutes · Sans-Serif · Sci-Fi · Médiéval & Serif · Mono & Fun*), **grille des 12 polices iconiques** (`Auto`, `Segoe UI`, `Inter`, `Roboto`, `Poppins`, `Montserrat`, `Rajdhani Sci-Fi`, `Orbitron`, `Cinzel Médiéval`, `Georgia`, `JetBrains Mono`, `Comic Sans`) rendues chacune dans leur propre typographie (`Aa · 145p`), **bandeau d'aperçu temps réel** (*Titre, prix Platinum tabulaire `145p` et commande `/w`*), **rendu comparé Desktop `1440×900`, Mode Compact `460×660` & `Codex Farm Overlay`**, architecture `.woff2` 100 % locale (`font-src 'self'`, zéro Google CDN) et **les 4 états UI obligatoires**.
+21. `21-in-app-discord-support.excalidraw` *(Module 20 — Système de Support & Signalement de Bug In-App vers Discord via Relais Sécurisé)* : **Schéma d'architecture de sécurité bout-en-bout** (`TennoFrame IPC Main` → `Cloudflare Worker Gratuit` avec secret Webhook isolé, anti-spam IP & `allowed_mentions: []` → `Salon Discord #tickets-support` Embed / Forum), **Vue Desktop `1440×900` avec `SupportTicketModal`** (3 catégories `🐛 Bug` / `💡 Suggestion` / `❓ Aide`, sujet, message `15–1500` car., pseudo Discord/IGN optionnel, aperçu transparent du diagnostic technique anonyme), **Aperçu du rendu réel reçu côté Discord par Maxime**, **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires** (*Envoi en cours*, *Formulaire guidé vide*, *Succès `#TF-8F2A` + Cooldown*, *Erreur réseau sans perte de texte + bouton Copier secours*).
 
 ---
 

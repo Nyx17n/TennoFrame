@@ -1,6 +1,7 @@
 import * as React from 'react'
-import { Check } from 'lucide-react'
+import { Check, MessageSquarePlus } from 'lucide-react'
 import { DISCORD_INVITE_URL } from '@shared/constants'
+import { getFontAndSupportStrings } from '@/lib/i18n/typography-support-i18n'
 import { ipcClient } from '@/services/ipc-client'
 import { useAppStore } from '@/stores/useAppStore'
 import { notify } from '@/stores/useNotificationStore'
@@ -20,7 +21,10 @@ function DiscordLogoIcon({ className }: { className?: string }): React.JSX.Eleme
 
 export function DiscordCornerButton(): React.JSX.Element | null {
   const isCompactMode = useAppStore((s) => s.windowState.isCompactMode)
+  const language = useAppStore((s) => s.settings.market.language)
+  const setSupportOpen = useAppStore((s) => s.setSupportOpen)
   const [copiedFallback, setCopiedFallback] = React.useState(false)
+  const strings = React.useMemo(() => getFontAndSupportStrings(language), [language])
 
   React.useEffect(() => {
     if (!copiedFallback) return
@@ -46,18 +50,30 @@ export function DiscordCornerButton(): React.JSX.Element | null {
   }
 
   return (
-    <button
-      type="button"
-      onClick={() => void handleOpenDiscord()}
-      title={copiedFallback ? 'Lien Discord copié !' : 'Rejoindre le serveur Discord TennoFrame'}
-      aria-label="Rejoindre le serveur Discord officiel TennoFrame"
-      className="wf-interactive-btn group absolute bottom-3.5 right-5 z-30 inline-flex h-10 w-10 select-none items-center justify-center rounded-full border border-[#5865F2]/45 bg-card/90 shadow-lg backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-[#5865F2] hover:bg-[#5865F2] hover:shadow-[0_6px_20px_rgba(88,101,242,0.4)] active:translate-y-0"
-    >
-      {copiedFallback ? (
-        <Check className="h-5 w-5 text-emerald-400 group-hover:text-white" />
-      ) : (
-        <DiscordLogoIcon className="h-5 w-5 text-[#5865F2] transition-colors group-hover:text-white" />
-      )}
-    </button>
+    <div className="absolute bottom-3.5 right-5 z-30 flex select-none items-center gap-2">
+      <button
+        type="button"
+        onClick={() => setSupportOpen(true)}
+        title={strings.supportModalTitle}
+        className="wf-interactive-btn wf-glass-pill inline-flex h-9 items-center gap-1.5 rounded-full border border-primary/40 bg-card/90 px-3 text-xs font-semibold text-foreground shadow-lg backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:bg-primary/15 hover:text-primary active:translate-y-0"
+      >
+        <MessageSquarePlus className="h-3.5 w-3.5 text-primary" />
+        <span>{strings.supportBtnLabel}</span>
+      </button>
+
+      <button
+        type="button"
+        onClick={() => void handleOpenDiscord()}
+        title={copiedFallback ? 'Lien Discord copié !' : 'Rejoindre le serveur Discord TennoFrame'}
+        aria-label="Rejoindre le serveur Discord officiel TennoFrame"
+        className="wf-interactive-btn group inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#5865F2]/45 bg-card/90 shadow-lg backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-[#5865F2] hover:bg-[#5865F2] hover:shadow-[0_6px_20px_rgba(88,101,242,0.4)] active:translate-y-0"
+      >
+        {copiedFallback ? (
+          <Check className="h-5 w-5 text-emerald-400 group-hover:text-white" />
+        ) : (
+          <DiscordLogoIcon className="h-5 w-5 text-[#5865F2] transition-colors group-hover:text-white" />
+        )}
+      </button>
+    </div>
   )
 }
