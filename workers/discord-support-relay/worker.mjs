@@ -1,8 +1,13 @@
 /**
  * TennoFrame — Cloudflare Worker Support Relay (100% Free Tier · Zero Dependencies)
  *
+ * Routes each ticket category to its dedicated Discord channel Webhook:
+ *   - `bug`     -> env.DISCORD_WEBHOOK_BUG        (fallback: env.DISCORD_SUPPORT_WEBHOOK_URL)
+ *   - `feature` -> env.DISCORD_WEBHOOK_SUGGESTION (fallback: env.DISCORD_SUPPORT_WEBHOOK_URL)
+ *   - `help`    -> env.DISCORD_WEBHOOK_HELP       (fallback: env.DISCORD_SUPPORT_WEBHOOK_URL)
+ *
  * Security guarantees:
- * 1. Keeps `DISCORD_SUPPORT_WEBHOOK_URL` strictly server-side (never exposed in TennoFrame.exe).
+ * 1. All Discord Webhook URLs stay strictly server-side (never exposed in TennoFrame.exe).
  * 2. Enforces per-IP rate limiting (salted SHA-256 hash — raw IP is never persisted).
  * 3. Hardcodes `allowed_mentions: { parse: [] }` so `@everyone` / `@here` / role pings are impossible.
  * 4. Supports both classic Discord Text channels and Discord Forum channels automatically.
@@ -16,9 +21,27 @@ const ALLOWED_DISCORD_HOSTS = new Set([
 ])
 
 const CATEGORY_META = {
-  bug: { label: '🐛 BUG REPORT', color: 0xef4444, forumPrefix: 'BUG' },
-  feature: { label: '💡 SUGGESTION', color: 0xf59e0b, forumPrefix: 'IDEA' },
-  help: { label: '❓ SUPPORT / QUESTION', color: 0x5865f2, forumPrefix: 'HELP' }
+  bug: {
+    secretKey: 'DISCORD_WEBHOOK_BUG',
+    botName: 'TennoFrame — Bug Report',
+    label: '🐛 BUG REPORT',
+    color: 0xef4444,
+    forumPrefix: 'BUG'
+  },
+  feature: {
+    secretKey: 'DISCORD_WEBHOOK_SUGGESTION',
+    botName: 'TennoFrame — Suggestion',
+    label: '💡 SUGGESTION',
+    color: 0xf59e0b,
+    forumPrefix: 'IDEA'
+  },
+  help: {
+    secretKey: 'DISCORD_WEBHOOK_HELP',
+    botName: 'TennoFrame — Question / Help',
+    label: '❓ QUESTION / HELP',
+    color: 0x5865f2,
+    forumPrefix: 'HELP'
+  }
 }
 
 const ipWindowMap = new Map()
@@ -90,7 +113,15 @@ export default {
     const url = new URL(request.url)
 
     if (request.method === 'GET' && url.pathname === '/health') {
-      return jsonResponse(200, { ok: true, service: 'tennoframe-support-relay' })
+      return jsonResponse(200, {
+        ok: true,
+        service: 'tennoframe-support-relay',
+        channelsConfigured: {
+          bug: Boolean(env.DISCORD_WEBHOOK_BUG || env.DISCORD_SUPPORT_WEBHOOK_URL),
+          suggestion: Boolean(env.DISCORD_WEBHOOK_SUGGESTION || env.DISCORD_SUPPORT_WEBHOOK_URL),
+          help: Boolean(env.DISCORD_WEBHOOK_HELP || env.DISCORD_SUPPORT_WEBHOOK_URL)
+        }
+      })
     }
 
     if (request.method !== 'POST' || url.pathname !== '/v1/ticket') {
@@ -100,17 +131,6 @@ export default {
     const contentLength = Number(request.headers.get('content-length') || '0')
     if (contentLength > 8192) {
       return jsonResponse(413, { ok: false, error: 'Payload too large' })
-    }
-
-    const webhookRaw = String(env.DISCORD_SUPPORT_WEBHOOK_URL || '').trim()
-    if (!webhookRaw) {
-      return jsonResponse(503, { ok: false, error: 'Support webhook secret not configured' })
-    }
-
-    const clientIp = request.headers.get('CF-Connecting-IP') || 'unknown'
-    const ipHash = await hashClientIp(clientIp, webhookRaw.slice(-16))
-    if (!checkRateLimit(ipHash)) {
-      return jsonResponse(429, { ok: false, error: 'Too many tickets, please wait a few minutes.' })
     }
 
     let body
@@ -123,6 +143,19 @@ export default {
     const category = Object.prototype.hasOwnProperty.call(CATEGORY_META, body?.category)
       ? body.category
       : null
+    if (!category) {
+      return jsonResponse(400, { ok: false, error: 'Invalid category' })
+    }
+
+    const meta = CATEGORY_META[category]
+    const webhookRaw = String(env[meta.secretKey] || env.DISCORD_SUPPORT_WEBHOOK_URL || '').trim()
+    if (!webhookRaw) {
+      return jsonResponse(503, {
+        ok: false,
+        error: `Webhook secret ${meta.secretKey} not configured`
+      })
+    }
+
     const subject = sanitizeField(body?.subject, 90)
     const message = sanitizeField(body?.message, 1500)
     const contact = sanitizeField(body?.contact, 48)
@@ -131,15 +164,20 @@ export default {
       ? rawId.toUpperCase()
       : `TF-${Math.random().toString(16).slice(2, 6).toUpperCase()}`
 
-    if (!category || subject.length < 5 || message.length < 15) {
+    if (subject.length < 5 || message.length < 15) {
       return jsonResponse(400, { ok: false, error: 'Validation failed' })
     }
 
-    const meta = CATEGORY_META[category]
+    const clientIp = request.headers.get('CF-Connecting-IP') || 'unknown'
+    const ipHash = await hashClientIp(clientIp, webhookRaw.slice(-16))
+    if (!checkRateLimit(ipHash)) {
+      return jsonResponse(429, { ok: false, error: 'Too many tickets, please wait a few minutes.' })
+    }
+
     const fields = [
       {
         name: '👤 Contact',
-        value: contact || '*Anonyme (non renseigné)*',
+        value: contact || '*Anonymous (not provided)*',
         inline: true
       }
     ]
@@ -160,15 +198,19 @@ export default {
 
       if (diagSummary) {
         fields.push({
-          name: '⚙ Diagnostic Technique',
+          name: '⚙ Technical Diagnostics',
           value: `\`${diagSummary.slice(0, 240)}\``,
           inline: false
         })
       }
     }
 
+    const avatarUrl =
+      'https://raw.githubusercontent.com/Nyx17n/TennoFrame/main/src/renderer/public/images/logo.png'
+
     const discordPayload = {
-      username: 'TennoFrame — Support',
+      username: meta.botName,
+      avatar_url: avatarUrl,
       allowed_mentions: { parse: [] },
       embeds: [
         {

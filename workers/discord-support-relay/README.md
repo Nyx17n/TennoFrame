@@ -1,20 +1,21 @@
-# Relais Support Discord TennoFrame (Cloudflare Worker — 0 €/mois)
+# Relais Support Discord TennoFrame — 3 Salons Dédiés (Cloudflare Worker — 0 €/mois)
 
-Ce micro-worker gratuit protège ton **Webhook Discord** : l'URL secrète du Webhook reste chiffrée chez Cloudflare et n'est **jamais** incluse dans `TennoFrame-Setup.exe`.
+Ce micro-worker gratuit redirige automatiquement chaque catégorie vers son **propre Webhook Discord** (tout en gardant les 3 URLs secrètes hors de `TennoFrame-Setup.exe`) :
+- **`🐛 Bug Report`** → `DISCORD_WEBHOOK_BUG`
+- **`💡 Suggestion`** → `DISCORD_WEBHOOK_SUGGESTION`
+- **`❓ Question / Help`** → `DISCORD_WEBHOOK_HELP`
 
-## Déploiement en 3 commandes (2 minutes, gratuit sans carte bancaire)
+## Déploiement en 3 minutes (gratuit sans carte bancaire)
 
-1. Crée un Webhook dans ton salon Discord `#support` (salon texte ou salon Forum) et copie son URL.
-2. Ouvre un terminal dans ce dossier (`workers/discord-support-relay`) et exécute :
+1. Sur ton serveur Discord, crée un Webhook dans chacun de tes 3 salons (`#bugs`, `#suggestions`, `#help` — salons texte ou salons Forum).
+2. Ouvre PowerShell dans ce dossier (`workers/discord-support-relay`) et lance :
 
 ```powershell
 npx wrangler login
-npx wrangler secret put DISCORD_SUPPORT_WEBHOOK_URL
 npx wrangler deploy
+npx wrangler secret put DISCORD_WEBHOOK_BUG
+npx wrangler secret put DISCORD_WEBHOOK_SUGGESTION
+npx wrangler secret put DISCORD_WEBHOOK_HELP
 ```
 
-3. Cloudflare t'affiche ton URL publique du type :
-   `https://tennoframe-support.<ton-sous-domaine>.workers.dev`
-4. Ajoute `https://tennoframe-support.<ton-sous-domaine>.workers.dev/v1/ticket` :
-   - soit dans `DEFAULT_SUPPORT_RELAY_URL` (`src/shared/constants.ts`),
-   - soit dans **GitHub → Settings → Secrets and variables → Actions → Variables** sous le nom `TENNOFRAME_SUPPORT_RELAY_URL`.
+3. Donne l'URL publique `https://tennoframe-support.<ton-pseudo>.workers.dev` affichée par `npx wrangler deploy` !

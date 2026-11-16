@@ -2,5 +2,7 @@ name = "tennoframe-support"
 main = "worker.mjs"
 compatibility_date = "2025-01-01"
 
-# Secret requis (jamais écrit en clair ici !) :
-# npx wrangler secret put DISCORD_SUPPORT_WEBHOOK_URL
+# Les 3 secrets dédiés (jamais écrits en clair ici !) :
+# npx wrangler secret put DISCORD_WEBHOOK_BUG
+# npx wrangler secret put DISCORD_WEBHOOK_SUGGESTION
+# npx wrangler secret put DISCORD_WEBHOOK_HELP
