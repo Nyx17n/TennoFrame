@@ -1,5 +1,17 @@
 [
   {
+    "version": "2.13.0",
+    "date": "November 2026",
+    "title": "12 Built-In Offline UI Fonts & Direct In-App Discord Support",
+    "badge": "New in v2.13.0",
+    "highlights": [
+      "12 Built-In Offline UI Fonts (`Settings → Appearance`, localized across all 15 Warframe languages): customize your entire TennoFrame interface and in-game Codex Farm Overlay (`Alt+O`) with **Auto**, **Segoe UI**, **Inter**, **Roboto**, **Poppins**, **Montserrat**, **Rajdhani (Sci-Fi HUD)**, **Orbitron (Cephalon)**, **Cinzel & Palatino (Medieval Grimoire)**, **Georgia**, **JetBrains Mono**, or **Comic Sans / Neue**.",
+      "100% Offline `.woff2` Typography Engine & Tabular Trading Numbers: zero external CDN requests (strict CSP `font-src 'self'`), instant startup with zero font flash, multi-script fallback (Latin, Cyrillic, CJK, Thai), and guaranteed `tabular-nums` alignment on all Platinum prices and live timers.",
+      "Direct In-App Support & Bug Reporting to Discord: click the circular Support icon in the bottom-right corner (or inside `Settings → System`) to send a **Bug Report**, **Suggestion**, or **Question / Help** straight to the dedicated TennoFrame Discord channels — no Discord account required, with dynamic category header (`In-App Support - Bug Report / Suggestion / Question`) and optional anonymous diagnostics.",
+      "5-Layer Anti-Spam & Privacy-First Relay Architecture: encrypted Windows DPAPI & Cloudflare KV 24-hour quota (`3 tickets / day`), single-use HMAC challenge verification, smart anti-spam content filtering, and zero exposed webhooks in the desktop client."
+    ]
+  },
+  {
     "version": "2.12.0",
     "date": "November 2026",
     "title": "Glass, Simple & Medieval UI Styles, 120 Hz Aero Snap Window Engine & Seamless WFM Sign-In",
