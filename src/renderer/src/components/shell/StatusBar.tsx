@@ -72,15 +72,17 @@ export function StatusBar(): React.JSX.Element {
             </span>
           </span>
         )}
-        <button
-          type="button"
-          title={supportStrings.supportModalTitle}
-          onClick={() => setSupportOpen(true)}
-          className="inline-flex items-center gap-1 text-[10px] font-medium text-foreground/85 transition-colors hover:text-primary"
-        >
-          <MessageSquarePlus className="h-3 w-3 text-primary" />
-          <span>{supportStrings.supportBtnLabel}</span>
-        </button>
+        {windowState.isCompactMode && (
+          <button
+            type="button"
+            title={supportStrings.supportModalTitle}
+            aria-label={supportStrings.supportModalTitle}
+            onClick={() => setSupportOpen(true)}
+            className="inline-flex items-center justify-center text-foreground/85 transition-colors hover:text-primary"
+          >
+            <MessageSquarePlus className="h-3.5 w-3.5 text-primary" />
+          </button>
+        )}
 
         <button
           type="button"
