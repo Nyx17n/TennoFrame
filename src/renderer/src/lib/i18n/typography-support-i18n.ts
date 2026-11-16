@@ -45,8 +45,8 @@ const FR: FontAndSupportStrings = {
   fontCatMedieval: 'Médiéval & Serif',
   fontCatMonoFun: 'Mono & Fun',
   fontPreviewTitle: 'Aperçu en direct de la police active',
-  supportBtnLabel: 'Support / Bug',
-  supportModalTitle: 'Support & Signalement de Bug (Discord)',
+  supportBtnLabel: 'In-App Support',
+  supportModalTitle: 'In-App Support',
   supportModalSubtitle:
     'Ton message est envoyé directement sur le serveur Discord officiel TennoFrame (aucun compte requis).',
   supportCatBug: 'Signaler un bug',
@@ -84,8 +84,8 @@ const EN: FontAndSupportStrings = {
   fontCatMedieval: 'Medieval & Serif',
   fontCatMonoFun: 'Mono & Casual',
   fontPreviewTitle: 'Live Font Preview',
-  supportBtnLabel: 'Support / Bug',
-  supportModalTitle: 'In-App Support & Bug Report (Discord)',
+  supportBtnLabel: 'In-App Support',
+  supportModalTitle: 'In-App Support',
   supportModalSubtitle:
     'Your message is delivered straight to the official TennoFrame Discord server (no account required).',
   supportCatBug: 'Bug Report',

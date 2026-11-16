@@ -116,6 +116,13 @@ export function SupportTicketModal(): React.JSX.Element {
     await ipcClient.window.openExternalUrl(DISCORD_INVITE_URL)
   }
 
+  const activeCategoryLabel =
+    category === 'bug'
+      ? strings.supportCatBug
+      : category === 'feature'
+        ? strings.supportCatFeature
+        : strings.supportCatHelp
+
   const placeholder =
     category === 'bug'
       ? strings.supportBugPlaceholder
@@ -129,7 +136,9 @@ export function SupportTicketModal(): React.JSX.Element {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base font-bold">
             <MessageSquarePlus className="h-4 w-4 text-primary" />
-            <span>{strings.supportModalTitle}</span>
+            <span>
+              {strings.supportModalTitle} - {activeCategoryLabel}
+            </span>
           </DialogTitle>
           <DialogDescription className="text-xs">{strings.supportModalSubtitle}</DialogDescription>
         </DialogHeader>
