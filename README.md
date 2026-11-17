@@ -7,7 +7,7 @@
 
 > Conçu par **Maxime (`Nyxo17`)** — Architecture **Electron 35 · Node.js · React 19 · `shadcn/ui` · TypeScript strict (`strict: true`) · Validation `zod`**.
 
-**TennoFrame v2** (`v2.13.0`) est un compagnon bureau tout-en-un pour **Warframe** traduit dans les **15 langues officielles de Warframe**, combinant un navigateur de trading multi-onglets connecté à **Warframe Market** (avec connexion compte automatique par navigateur intégré, mise en vente, recherche cumulative à pastilles & messages `/w` multilingues), un **Hub Worldstate temps réel** (avec règles d’alertes sur mesure et minuteurs épinglés), une **Encyclopédie de Farm, Bestiaire des Mobs, Annuaire des Marchands & Helminth** hors-ligne complète en FR/EN, **3 Styles d’Interface Visuels + 12 Polices d’Écriture hors-ligne**, un **Support In-App relié directement à Discord** et un **Système d’Extensions modulaires** incluant le **Codex Farm Overlay en jeu (`Alt+O`)**.
+**TennoFrame v2** (`v2.13.1`) est un compagnon bureau tout-en-un pour **Warframe** traduit dans les **15 langues officielles de Warframe**, combinant un navigateur de trading multi-onglets connecté à **Warframe Market** (avec connexion compte automatique par navigateur intégré, mise en vente, recherche cumulative à pastilles & messages `/w` multilingues), un **Hub Worldstate temps réel** (avec règles d’alertes sur mesure et minuteurs épinglés), une **Encyclopédie de Farm, Bestiaire des Mobs, Annuaire des Marchands & Helminth** hors-ligne complète en FR/EN, **3 Styles d’Interface Visuels + 12 Polices d’Écriture hors-ligne**, un **Support In-App relié directement à Discord** et un **Système d’Extensions modulaires** incluant le **Codex Farm Overlay en jeu (`Alt+O`)**.
 
 ---
 

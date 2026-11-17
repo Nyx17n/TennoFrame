@@ -78,8 +78,8 @@ export const JA_MESSAGES: UiMessages = {
     weapons: '武器',
     mods: 'MOD',
     relics: 'レリック',
-    mobs: '👾 エネミー',
-    vendors: '🏪 ベンダー',
+    mobs: 'エネミー',
+    vendors: 'ベンダー',
     helminth: 'Helminth',
     englishFallbackBadge: 'オフラインコーデックス (英語表示)'
   }
@@ -163,8 +163,8 @@ export const KO_MESSAGES: UiMessages = {
     weapons: '무기',
     mods: '모드',
     relics: '성유물',
-    mobs: '👾 적',
-    vendors: '🏪 상인',
+    mobs: '적',
+    vendors: '상인',
     helminth: '헬민스',
     englishFallbackBadge: '오프라인 코덱스 (영어)'
   }
