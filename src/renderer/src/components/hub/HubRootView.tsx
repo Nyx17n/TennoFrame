@@ -3,6 +3,7 @@ import {
   AlertTriangle,
   Compass,
   Flame,
+  Gift,
   Globe,
   Newspaper,
   RefreshCw,
@@ -20,6 +21,7 @@ import { useTabsStore } from '@/stores/useTabsStore'
 import { HubBaroTraderTab } from './HubBaroTraderTab'
 import { HubDuviriCircuitTab } from './HubDuviriCircuitTab'
 import { HubFissuresMissionsTab } from './HubFissuresMissionsTab'
+import { HubHexGiftsTab } from './HubHexGiftsTab'
 import { HubInvasionsSteelTab } from './HubInvasionsSteelTab'
 import { HubNewsDarvoTab } from './HubNewsDarvoTab'
 import { HubPlanetsBountiesTab } from './HubPlanetsBountiesTab'
@@ -85,7 +87,7 @@ export function HubRootView(): React.JSX.Element {
     }
   }, [fetchWorldstate, lang])
 
-  if (loading && !data) {
+  if (loading && !data && section !== 'hex-gifts') {
     return (
       <div className="mx-auto max-w-6xl space-y-4 p-4">
         <Skeleton className="h-10 w-full" />
@@ -99,21 +101,25 @@ export function HubRootView(): React.JSX.Element {
     )
   }
 
-  if (error && !data) {
+  if (error && !data && section !== 'hex-gifts') {
     return (
       <div className="mx-auto flex max-w-md flex-col items-center gap-3 p-8 text-center">
         <AlertTriangle className="h-8 w-8 text-destructive" />
         <h2 className="text-sm font-bold">{t.hub.unavailableTitle}</h2>
         <p className="text-xs text-muted-foreground">{error}</p>
-        <Button onClick={() => void fetchWorldstate(true, false)}>
-          <RefreshCw className="h-3.5 w-3.5" />
-          <span>{t.shell.retry}</span>
-        </Button>
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <Button onClick={() => void fetchWorldstate(true, false)}>
+            <RefreshCw className="h-3.5 w-3.5" />
+            <span>{t.shell.retry}</span>
+          </Button>
+          <Button variant="secondary" onClick={() => setSection('hex-gifts')}>
+            <Gift className="h-3.5 w-3.5 text-primary" />
+            <span>{t.hub.hexGifts}</span>
+          </Button>
+        </div>
       </div>
     )
   }
-
-  if (!data) return <div />
 
   const navItems: Array<{
     id: HubSectionId
@@ -126,22 +132,23 @@ export function HubRootView(): React.JSX.Element {
       id: 'fissures',
       label: t.hub.fissures,
       icon: Flame,
-      badge: String(data.fissures.length)
+      ...(data ? { badge: String(data.fissures.length) } : {})
     },
     {
       id: 'invasions',
       label: t.hub.invasions,
       icon: Swords,
-      badge: String(data.invasions.length)
+      ...(data ? { badge: String(data.invasions.length) } : {})
     },
     { id: 'duviri', label: t.hub.duviri, icon: Sparkles },
     {
       id: 'baro',
       label: t.hub.baro,
       icon: Compass,
-      ...(data.voidTrader.active ? { badge: t.hub.activeBadge } : {})
+      ...(data?.voidTrader.active ? { badge: t.hub.activeBadge } : {})
     },
-    { id: 'news', label: t.hub.news, icon: Newspaper }
+    { id: 'news', label: t.hub.news, icon: Newspaper },
+    { id: 'hex-gifts', label: t.hub.hexGifts, icon: Gift }
   ]
 
   return (
@@ -186,10 +193,11 @@ export function HubRootView(): React.JSX.Element {
       </div>
 
       <div key={section} className="wf-view-enter">
-        {section === 'planets' && (
+        {section === 'hex-gifts' && <HubHexGiftsTab nowMs={nowMs} />}
+        {data && section === 'planets' && (
           <HubPlanetsBountiesTab cycles={data.cycles} bounties={data.bounties} nowMs={nowMs} />
         )}
-        {section === 'fissures' && (
+        {data && section === 'fissures' && (
           <HubFissuresMissionsTab
             fissures={data.fissures}
             archonHunt={data.archonHunt}
@@ -197,7 +205,7 @@ export function HubRootView(): React.JSX.Element {
             nowMs={nowMs}
           />
         )}
-        {section === 'invasions' && (
+        {data && section === 'invasions' && (
           <HubInvasionsSteelTab
             invasions={data.invasions}
             steelPath={data.steelPath}
@@ -208,9 +216,13 @@ export function HubRootView(): React.JSX.Element {
             nowMs={nowMs}
           />
         )}
-        {section === 'duviri' && <HubDuviriCircuitTab circuit={data.duviriCircuit} nowMs={nowMs} />}
-        {section === 'baro' && <HubBaroTraderTab voidTrader={data.voidTrader} nowMs={nowMs} />}
-        {section === 'news' && (
+        {data && section === 'duviri' && (
+          <HubDuviriCircuitTab circuit={data.duviriCircuit} nowMs={nowMs} />
+        )}
+        {data && section === 'baro' && (
+          <HubBaroTraderTab voidTrader={data.voidTrader} nowMs={nowMs} />
+        )}
+        {data && section === 'news' && (
           <HubNewsDarvoTab
             news={data.news}
             globalBoosters={data.globalBoosters}

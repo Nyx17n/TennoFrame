@@ -69,6 +69,7 @@ export const ZH_HANS_MESSAGES: UiMessages = {
     duviri: '双衍王境无尽回廊',
     baro: '虚空商人 Baro',
     news: '新闻与每日特惠',
+    hexGifts: '1999 六人组礼物',
     activeBadge: '已到来',
     unavailableTitle: '实时世界状态暂不可用'
   },
@@ -154,6 +155,7 @@ export const ZH_HANT_MESSAGES: UiMessages = {
     duviri: '渡域無盡巡迴',
     baro: '虛空商人 Baro',
     news: '新聞與每日特惠',
+    hexGifts: '1999 六人組禮物',
     activeBadge: '進行中',
     unavailableTitle: '即時世界狀態暫不可用'
   },
@@ -239,6 +241,7 @@ export const TH_MESSAGES: UiMessages = {
     duviri: 'เซอร์กิต Duviri',
     baro: "Baro Ki'Teer",
     news: 'ข่าวสารและ Darvo',
+    hexGifts: 'ของขวัญ 1999 (Hex)',
     activeBadge: 'เปิดใช้งาน',
     unavailableTitle: 'ไม่สามารถโหลดสถานะโลกได้'
   },

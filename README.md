@@ -43,6 +43,7 @@
    - **Circuit de Duviri** (Warframes Normales + Adaptateurs Genesis Incarnon avec miniatures).
    - **Baro Ki’Teer** (inventaire enrichi en Platinum ou aperçu des classiques hors visite) & **Résurgence Prime (Varzia)**.
    - **Actualités, Événements & Offre du jour de Darvo**.
+   - **Guide des Cadeaux 1999 — L’Hexagone (`DIRECTGIFTZ`)** : portraits officiels des 6 membres (*Arthur, Eleanor, Lettie, Amir, Aoi, Quincy*), photos de tous les cadeaux, traduction FR/EN, coût Höllars, Chimie (`❤️`) et checklist quotidienne auto-reset à `00:00 UTC`.
 
 4. **Codex FR/EN Exhaustif (3 810 Fiches), Bestiaire Mobs, Marchands, Overlay Farm en Jeu & Helminth**
    - **Ressources (365)**, **Warframes (122)**, **Armes (607)**, **Mods (1 402)**, **Reliques (799)**, **Mobs (481)** et **Marchands (33 — 3 228 articles vendus)**.

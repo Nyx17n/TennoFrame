@@ -69,6 +69,7 @@ export const IT_MESSAGES: UiMessages = {
     duviri: 'Circuito di Duviri',
     baro: "Baro Ki'Teer",
     news: 'Notizie e Darvo',
+    hexGifts: 'Regali 1999 (Hex)',
     activeBadge: 'ATTIVO',
     unavailableTitle: 'Hub Worldstate non disponibile'
   },
@@ -154,6 +155,7 @@ export const PT_MESSAGES: UiMessages = {
     duviri: 'Circuito de Duviri',
     baro: "Baro Ki'Teer",
     news: 'Notícias e Darvo',
+    hexGifts: 'Presentes 1999 (Hex)',
     activeBadge: 'ATIVO',
     unavailableTitle: 'Hub Worldstate indisponível'
   },
