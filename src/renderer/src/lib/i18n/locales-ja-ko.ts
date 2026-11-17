@@ -69,6 +69,7 @@ export const JA_MESSAGES: UiMessages = {
     duviri: 'デュヴィリ・サーキット',
     baro: "Baro Ki'Teer",
     news: 'ニュースとDarvo',
+    hexGifts: '1999 ギフト (Hex)',
     activeBadge: '出現中',
     unavailableTitle: 'ワールドステートを取得できません'
   },
@@ -154,6 +155,7 @@ export const KO_MESSAGES: UiMessages = {
     duviri: '두비리 순환로',
     baro: "Baro Ki'Teer",
     news: '뉴스 및 다르보',
+    hexGifts: '1999 선물 (Hex)',
     activeBadge: '활성',
     unavailableTitle: '월드스테이트 허브 사용 불가'
   },

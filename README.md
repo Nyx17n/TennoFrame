@@ -7,7 +7,7 @@
 
 > Conçu par **Maxime (`Nyxo17`)** — Architecture **Electron 35 · Node.js · React 19 · `shadcn/ui` · TypeScript strict (`strict: true`) · Validation `zod`**.
 
-**TennoFrame v2** (`v2.13.1`) est un compagnon bureau tout-en-un pour **Warframe** traduit dans les **15 langues officielles de Warframe**, combinant un navigateur de trading multi-onglets connecté à **Warframe Market** (avec connexion compte automatique par navigateur intégré, mise en vente, recherche cumulative à pastilles & messages `/w` multilingues), un **Hub Worldstate temps réel** (avec règles d’alertes sur mesure et minuteurs épinglés), une **Encyclopédie de Farm, Bestiaire des Mobs, Annuaire des Marchands & Helminth** hors-ligne complète en FR/EN, **3 Styles d’Interface Visuels + 12 Polices d’Écriture hors-ligne**, un **Support In-App relié directement à Discord** et un **Système d’Extensions modulaires** incluant le **Codex Farm Overlay en jeu (`Alt+O`)**.
+**TennoFrame v2** (`v2.14.0`) est un compagnon bureau tout-en-un pour **Warframe** traduit dans les **15 langues officielles de Warframe**, combinant un navigateur de trading multi-onglets connecté à **Warframe Market** (avec connexion compte automatique par navigateur intégré, mise en vente, recherche cumulative à pastilles & messages `/w` multilingues), un **Hub Worldstate temps réel** (incluant le **Guide des Cadeaux 1999 — L’Hexagone**, les règles d’alertes sur mesure et les minuteurs épinglés), une **Encyclopédie de Farm, Bestiaire des Mobs, Annuaire des Marchands & Helminth** hors-ligne complète en FR/EN, **3 Styles d’Interface Visuels + 12 Polices d’Écriture hors-ligne**, un **Support In-App relié directement à Discord** et un **Système d’Extensions modulaires** incluant le **Codex Farm Overlay en jeu (`Alt+O`)**.
 
 ---
 
@@ -43,6 +43,7 @@
    - **Circuit de Duviri** (Warframes Normales + Adaptateurs Genesis Incarnon avec miniatures).
    - **Baro Ki’Teer** (inventaire enrichi en Platinum ou aperçu des classiques hors visite) & **Résurgence Prime (Varzia)**.
    - **Actualités, Événements & Offre du jour de Darvo**.
+   - **Guide des Cadeaux 1999 — L’Hexagone (`DIRECTGIFTZ`)** : portraits officiels des 6 membres (*Arthur, Eleanor, Lettie, Amir, Aoi, Quincy*), photos de tous les cadeaux, traduction FR/EN, coût Höllars, Chimie (`❤️`) et checklist quotidienne auto-reset à `00:00 UTC`.
 
 4. **Codex FR/EN Exhaustif (3 810 Fiches), Bestiaire Mobs, Marchands, Overlay Farm en Jeu & Helminth**
    - **Ressources (365)**, **Warframes (122)**, **Armes (607)**, **Mods (1 402)**, **Reliques (799)**, **Mobs (481)** et **Marchands (33 — 3 228 articles vendus)**.

@@ -67,6 +67,7 @@ export interface UiMessages {
     readonly duviri: string
     readonly baro: string
     readonly news: string
+    readonly hexGifts: string
     readonly activeBadge: string
     readonly unavailableTitle: string
   }

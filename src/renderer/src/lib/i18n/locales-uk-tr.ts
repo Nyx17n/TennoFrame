@@ -69,6 +69,7 @@ export const UK_MESSAGES: UiMessages = {
     duviri: 'Ланцюг Дувірі',
     baro: 'Баро Кі’Тір',
     news: 'Новини й Дарво',
+    hexGifts: 'Подарунки 1999 (Hex)',
     activeBadge: 'АКТИВНИЙ',
     unavailableTitle: 'Хаб Worldstate недоступний'
   },
@@ -154,6 +155,7 @@ export const TR_MESSAGES: UiMessages = {
     duviri: 'Duviri Döngüsü',
     baro: "Baro Ki'Teer",
     news: 'Haberler ve Darvo',
+    hexGifts: '1999 Hediyeler (Hex)',
     activeBadge: 'AKTİF',
     unavailableTitle: 'Worldstate Merkezi kullanılamıyor'
   },

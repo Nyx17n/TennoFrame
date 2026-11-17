@@ -69,6 +69,7 @@ export const RU_MESSAGES: UiMessages = {
     duviri: 'Цепь Дувири',
     baro: 'Баро Ки’Тиир',
     news: 'Новости и Дарво',
+    hexGifts: 'Подарки 1999 (Hex)',
     activeBadge: 'АКТИВЕН',
     unavailableTitle: 'Хаб временно недоступен'
   },
@@ -154,6 +155,7 @@ export const PL_MESSAGES: UiMessages = {
     duviri: 'Wielobój Duviri',
     baro: "Baro Ki'Teer",
     news: 'Aktualności i Darvo',
+    hexGifts: 'Prezenty 1999 (Hex)',
     activeBadge: 'AKTYWNY',
     unavailableTitle: 'Hub Worldstate niedostępny'
   },
