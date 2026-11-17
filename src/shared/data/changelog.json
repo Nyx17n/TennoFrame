@@ -1,5 +1,14 @@
 [
   {
+    "version": "2.13.1",
+    "date": "November 2026",
+    "title": "Codex Navigation Bar Visual Cleanup",
+    "badge": "Hotfix v2.13.1",
+    "highlights": [
+      "Cleaned up the Codex category bar across all 15 official Warframe languages by removing duplicate emojis and icons on **Enemies**, **Vendors**, and **Helminth** for a uniform, streamlined layout."
+    ]
+  },
+  {
     "version": "2.13.0",
     "date": "November 2026",
     "title": "12 Built-In Offline UI Fonts & Direct In-App Discord Support",
