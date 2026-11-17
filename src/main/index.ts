@@ -45,6 +45,12 @@ protocol.registerSchemesAsPrivileged([
 
 const gotSingleInstanceLock = app.requestSingleInstanceLock()
 if (!gotSingleInstanceLock) {
+  if (!app.isPackaged) {
+    console.warn(
+      '\n[TennoFrame Dev] Une instance installée de TennoFrame.exe tourne déjà en arrière-plan (icône dans la barre des tâches / zone de notification).\n' +
+        '-> Faites un clic droit sur l’icône TennoFrame près de l’horloge Windows puis « Quitter complètement TennoFrame » avant de relancer npm.cmd run dev.\n'
+    )
+  }
   app.quit()
 }
 
