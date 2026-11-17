@@ -77,9 +77,11 @@ export class WindowOverlayService {
     const settings = await this.storageService.getSettings()
     const { desktopBounds, alwaysOnTop } = settings.window
 
-    // Sur Windows, `thickFrame: false` + `resizable: false` retire explicitement
-    // `WS_THICKFRAME | WS_CAPTION` côté Electron C++, empêchant DWM de dessiner
-    // une barre de titre blanche fantôme derrière la surface DirectComposition transparente.
+    // Sur Windows 10/11 :
+    // 1. `thickFrame: false` + `resizable: false` + `roundedCorners: false` retire `WS_THICKFRAME | WS_CAPTION`
+    //    et désactive tout contour non-client DWM (les coins arrondis sont rendus en GPU dans `.wf-app-root`).
+    // 2. Electron >= 37.3.1 (PR #47386) supprime l'appel erroné `DefWindowProc(WM_NCACTIVATE, FALSE, 0)`
+    //    qui peignait une barre de titre blanche Win32 en haut derrière les fenêtres `transparent: true` au `blur`.
     const win = new BrowserWindow({
       title: 'TennoFrame',
       width: desktopBounds.width,
@@ -91,6 +93,7 @@ export class WindowOverlayService {
       frame: false,
       transparent: true,
       thickFrame: false,
+      roundedCorners: false,
       resizable: false,
       maximizable: false,
       hasShadow: false,
