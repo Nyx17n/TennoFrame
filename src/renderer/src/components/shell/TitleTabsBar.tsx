@@ -31,7 +31,7 @@ const SNAP_ZONE_LABELS_EN: Record<SnapZone, string> = {
 }
 
 function isInteractiveTitleTarget(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false
+  if (!(target instanceof Element)) return false
   return Boolean(
     target.closest('.app-no-drag, button, a, input, [role="button"], [data-tab-id]')
   )
@@ -149,7 +149,10 @@ export function TitleTabsBar(): React.JSX.Element {
       className="wf-shell-bar flex h-9 shrink-0 select-none items-center justify-between border-b border-border bg-background/95 pl-2"
       aria-label="Barre d'onglets et contrôles fenêtre"
     >
-      <div className="app-no-drag flex min-w-0 items-center gap-1">
+      <div
+        onPointerDown={(e) => e.stopPropagation()}
+        className="app-no-drag flex min-w-0 items-center gap-1"
+      >
         <button
           type="button"
           onClick={activateHub}
@@ -249,7 +252,10 @@ export function TitleTabsBar(): React.JSX.Element {
         )}
       </div>
 
-      <div className="app-no-drag flex h-full shrink-0 items-center">
+      <div
+        onPointerDown={(e) => e.stopPropagation()}
+        className="app-no-drag flex h-full shrink-0 items-center"
+      >
         <div className="pr-1.5">
           <CommunityCounterPill variant="titlebar" isCompact={windowState.isCompactMode} />
         </div>

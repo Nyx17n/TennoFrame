@@ -476,17 +476,21 @@ html[data-motion='off'] .animate-spin {
    - --wf-glass-*-alpha (20 % → 85 %)
    ============================================================================ */
 
-html[data-glass='liquid-glass'],
-html[data-glass='liquid-glass'] body,
-html[data-glass='liquid-glass'] #root,
-html[data-glass='simple'],
-html[data-glass='simple'] body,
-html[data-glass='simple'] #root,
-html[data-glass='medieval'],
-html[data-glass='medieval'] body,
-html[data-glass='medieval'] #root {
+/* Fenêtre DirectComposition sans cadre Win32 : fond externe transparent pour des coins arrondis nets dans tous les thèmes */
+html,
+body,
+#root {
   background: transparent !important;
   background-color: transparent !important;
+}
+
+.wf-app-root[data-maximized='false'] {
+  border-radius: 0.75rem;
+  border: 1px solid hsl(var(--border) / 0.85);
+}
+
+html:not([data-glass='medieval']):has(.wf-app-root[data-maximized='false']) .wf-overlay-motion {
+  border-radius: 0.75rem;
 }
 
 /* Fond global translucide vers le bureau / jeu UNIQUEMENT si glassDesktopBackdropEnabled = true */

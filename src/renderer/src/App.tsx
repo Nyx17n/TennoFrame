@@ -161,7 +161,7 @@ export function App(): React.JSX.Element {
     >
       <div
         aria-hidden="true"
-        className="wf-app-gradient-layer pointer-events-none fixed inset-0 z-0"
+        className="wf-app-gradient-layer pointer-events-none absolute inset-0 z-0 rounded-[inherit]"
       />
       <div className="relative z-10 flex h-full w-full flex-col overflow-hidden">
         <TitleTabsBar />
