@@ -5,9 +5,9 @@
 [![Serveur Discord](https://img.shields.io/badge/Discord-Rejoindre%20la%20communaut%C3%A9-5865F2?logo=discord&logoColor=white)](https://discord.gg/DhGwHPf82n)
 [![Licence MIT](https://img.shields.io/badge/Licence-MIT-22c55e)](https://github.com/Nyx17n/TennoFrame)
 
-> Conçu par **Maxime (`Nyxo17`)** — Architecture **Electron 35 · Node.js · React 19 · `shadcn/ui` · TypeScript strict (`strict: true`) · Validation `zod`**.
+> Conçu par **Maxime (`Nyxo17`)** — Architecture **Electron 37 · Node.js · React 19 · `shadcn/ui` · TypeScript strict (`strict: true`) · Validation `zod`**.
 
-**TennoFrame v2** (`v2.14.0`) est un compagnon bureau tout-en-un pour **Warframe** traduit dans les **15 langues officielles de Warframe**, combinant un navigateur de trading multi-onglets connecté à **Warframe Market** (avec connexion compte automatique par navigateur intégré, mise en vente, recherche cumulative à pastilles & messages `/w` multilingues), un **Hub Worldstate temps réel** (incluant le **Guide des Cadeaux 1999 — L’Hexagone**, les règles d’alertes sur mesure et les minuteurs épinglés), une **Encyclopédie de Farm, Bestiaire des Mobs, Annuaire des Marchands & Helminth** hors-ligne complète en FR/EN, **3 Styles d’Interface Visuels + 12 Polices d’Écriture hors-ligne**, un **Support In-App relié directement à Discord** et un **Système d’Extensions modulaires** incluant le **Codex Farm Overlay en jeu (`Alt+O`)**.
+**TennoFrame v2** (`v2.14.1`) est un compagnon bureau tout-en-un pour **Warframe** traduit dans les **15 langues officielles de Warframe**, combinant un navigateur de trading multi-onglets connecté à **Warframe Market** (avec connexion compte automatique par navigateur intégré, mise en vente, recherche cumulative à pastilles & messages `/w` multilingues), un **Hub Worldstate temps réel** (incluant le **Guide des Cadeaux 1999 — L’Hexagone**, les règles d’alertes sur mesure et les minuteurs épinglés), une **Encyclopédie de Farm, Bestiaire des Mobs, Annuaire des Marchands & Helminth** hors-ligne complète en FR/EN, **3 Styles d’Interface Visuels + 12 Polices d’Écriture hors-ligne**, un **Support In-App relié directement à Discord** et un **Système d’Extensions modulaires** incluant le **Codex Farm Overlay en jeu (`Alt+O`)**.
 
 ---
 

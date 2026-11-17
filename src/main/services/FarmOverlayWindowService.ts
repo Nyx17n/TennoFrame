@@ -184,6 +184,7 @@ export class FarmOverlayWindowService {
       frame: false,
       transparent: true,
       thickFrame: false,
+      roundedCorners: false,
       hasShadow: false,
       resizable: false,
       autoHideMenuBar: true,
