@@ -1,5 +1,16 @@
 [
   {
+    "version": "2.14.0",
+    "date": "November 2026",
+    "title": "Warframe: 1999 Hex Gifting Guide (Hub) & Window Polish",
+    "badge": "New in v2.14.0",
+    "highlights": [
+      "New **1999 Gifts (Hex)** Hub Tab (`wf://hub`, localized across all 15 Warframe languages): complete visual **DIRECTGIFTZ** gifting guide for all 6 members of **The Hex** (**Arthur / Broadsword**, **Eleanor / Salem**, **Lettie / Belladonna**, **Amir / H16h V0l7463**, **Aoi / Glimmer**, and **Quincy / Soldja1Shot1kil**), featuring official dossier portraits, pixel glyphs, and photos of every gift.",
+      "Bilingual Gift Search, Chemistry Breakdown & Daily Reset Tracker: search any POM-2 gift in English or French to instantly see its **Chemistry bonus (`+20 / +10 / +5`)**, **Höllars** price, max stock, trap warnings (such as Aoi's standalone *Kinemantik Speaker*), and check off daily gifts with an automatic **00:00 UTC** reset countdown.",
+      "Window & Tab Bar Fixes: fixed SVG icon click detection on the `+` New Tab button in the custom 120 Hz title bar and restored crisp rounded window corners across all opaque and light/dark themes when unmaximized."
+    ]
+  },
+  {
     "version": "2.13.1",
     "date": "November 2026",
     "title": "Codex Navigation Bar Visual Cleanup",

@@ -26,7 +26,7 @@ export function SupportTicketModal(): React.JSX.Element {
   const isOpen = useAppStore((s) => s.isSupportOpen)
   const setOpen = useAppStore((s) => s.setSupportOpen)
   const settings = useAppStore((s) => s.settings)
-  const appVersion = useAppStore((s) => s.systemStatus?.appVersion ?? '2.13.1')
+  const appVersion = useAppStore((s) => s.systemStatus?.appVersion ?? '2.14.0')
   const isCompactMode = useAppStore((s) => s.windowState.isCompactMode)
   const hubActive = useTabsStore((s) => s.hubActive)
   const tabs = useTabsStore((s) => s.tabs)
