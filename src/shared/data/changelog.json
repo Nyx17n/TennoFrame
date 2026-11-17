@@ -1,5 +1,15 @@
 [
   {
+    "version": "2.14.1",
+    "date": "November 2026",
+    "title": "Windows 10/11 Frameless Window & Overlay Ghost White Bar Fix",
+    "badge": "Hotfix v2.14.1",
+    "highlights": [
+      "Eliminated the ghost white Win32 caption bar appearing at the top behind the frameless main window and the in-game **Codex Farm Overlay (`Alt+O`)** when losing focus on Windows 10/11 (upgraded core runtime to **Electron 37.10.3** with upstream DWM fix `#47386` and explicitly disabled native non-client corner borders across all transparent windows).",
+      "Runtime & Security Maintenance: updated bundled Chromium and V8 security patches via Electron 37.10.3 and added an explicit developer console notice when a background tray instance holds the single-instance lock."
+    ]
+  },
+  {
     "version": "2.14.0",
     "date": "November 2026",
     "title": "Warframe: 1999 Hex Gifting Guide (Hub) & Window Polish",
