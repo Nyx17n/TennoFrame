@@ -78,8 +78,8 @@ export const RU_MESSAGES: UiMessages = {
     weapons: 'Оружие',
     mods: 'Моды',
     relics: 'Реликвии',
-    mobs: '👾 Враги',
-    vendors: '🏪 Торговцы',
+    mobs: 'Враги',
+    vendors: 'Торговцы',
     helminth: 'Гельминт',
     englishFallbackBadge: 'Офлайн-Кодекс на английском'
   }
@@ -163,8 +163,8 @@ export const PL_MESSAGES: UiMessages = {
     weapons: 'Broń',
     mods: 'Mody',
     relics: 'Relikty',
-    mobs: '👾 Wrogowie',
-    vendors: '🏪 Sprzedawcy',
+    mobs: 'Wrogowie',
+    vendors: 'Sprzedawcy',
     helminth: 'Helminth',
     englishFallbackBadge: 'Kodeks offline po angielsku'
   }

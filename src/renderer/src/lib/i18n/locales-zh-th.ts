@@ -78,8 +78,8 @@ export const ZH_HANS_MESSAGES: UiMessages = {
     weapons: '武器',
     mods: '振幅晶体',
     relics: '遗物',
-    mobs: '👾 敌人',
-    vendors: '🏪 商人',
+    mobs: '敌人',
+    vendors: '商人',
     helminth: 'Helminth',
     englishFallbackBadge: '离线资料库 (英文回退)'
   }
@@ -163,8 +163,8 @@ export const ZH_HANT_MESSAGES: UiMessages = {
     weapons: '武器',
     mods: 'MOD',
     relics: '遺物',
-    mobs: '👾 敵人',
-    vendors: '🏪 商人',
+    mobs: '敵人',
+    vendors: '商人',
     helminth: 'Helminth',
     englishFallbackBadge: '離線資料庫 (英文)'
   }
@@ -248,8 +248,8 @@ export const TH_MESSAGES: UiMessages = {
     weapons: 'อาวุธ',
     mods: 'Mod',
     relics: 'เรลิก',
-    mobs: '👾 ศัตรู',
-    vendors: '🏪 พ่อค้า',
+    mobs: 'ศัตรู',
+    vendors: 'พ่อค้า',
     helminth: 'Helminth',
     englishFallbackBadge: 'ข้อมูลโคเด็กซ์ออฟไลน์ (ภาษาอังกฤษ)'
   }

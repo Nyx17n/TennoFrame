@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { BookOpen, ChevronDown, Dna, Loader2, Search } from 'lucide-react'
+import { BookOpen, ChevronDown, Loader2, Search } from 'lucide-react'
 import type {
   CodexCategory,
   CodexSearchResult,
@@ -93,8 +93,8 @@ export function CodexHomeView({
       { id: 'weapons' as const, label: t.codex.weapons },
       { id: 'mods' as const, label: t.codex.mods },
       { id: 'relics' as const, label: t.codex.relics },
-      { id: 'mobs' as const, label: `👾 ${t.codex.mobs}` },
-      { id: 'vendors' as const, label: `🏪 ${t.codex.vendors}` }
+      { id: 'mobs' as const, label: t.codex.mobs },
+      { id: 'vendors' as const, label: t.codex.vendors }
     ],
     [t]
   )
@@ -255,7 +255,6 @@ export function CodexHomeView({
             variant={activeTab === 'helminth' ? 'default' : 'secondary'}
             onClick={() => selectCategory('helminth')}
           >
-            <Dna className="h-3.5 w-3.5 text-emerald-400" />
             <span>{t.codex.helminth}</span>
           </Button>
         </div>

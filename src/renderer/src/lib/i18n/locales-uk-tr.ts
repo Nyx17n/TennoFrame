@@ -78,8 +78,8 @@ export const UK_MESSAGES: UiMessages = {
     weapons: 'Зброя',
     mods: 'Моди',
     relics: 'Реліквії',
-    mobs: '👾 Вороги',
-    vendors: '🏪 Торговці',
+    mobs: 'Вороги',
+    vendors: 'Торговці',
     helminth: 'Гельмінт',
     englishFallbackBadge: 'Офлайн-Кодекс англійською'
   }
@@ -163,8 +163,8 @@ export const TR_MESSAGES: UiMessages = {
     weapons: 'Silahlar',
     mods: 'Modlar',
     relics: 'Relikler',
-    mobs: '👾 Düşmanlar',
-    vendors: '🏪 Satıcılar',
+    mobs: 'Düşmanlar',
+    vendors: 'Satıcılar',
     helminth: 'Helminth',
     englishFallbackBadge: 'Çevrimdışı Kodeks İngilizce'
   }

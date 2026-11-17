@@ -78,8 +78,8 @@ export const DE_MESSAGES: UiMessages = {
     weapons: 'Waffen',
     mods: 'Mods',
     relics: 'Relikte',
-    mobs: '👾 Gegner',
-    vendors: '🏪 Händler',
+    mobs: 'Gegner',
+    vendors: 'Händler',
     helminth: 'Helminth',
     englishFallbackBadge: 'Offline-Codex auf Englisch'
   }
@@ -163,8 +163,8 @@ export const ES_MESSAGES: UiMessages = {
     weapons: 'Armas',
     mods: 'Mods',
     relics: 'Reliquias',
-    mobs: '👾 Enemigos',
-    vendors: '🏪 Mercaderes',
+    mobs: 'Enemigos',
+    vendors: 'Mercaderes',
     helminth: 'Helminto',
     englishFallbackBadge: 'Códice sin conexión en inglés'
   }
