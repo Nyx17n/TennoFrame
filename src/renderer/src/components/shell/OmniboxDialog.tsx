@@ -35,6 +35,7 @@ interface QuickEntry {
 }
 
 const BUILTIN_VIEWS: readonly QuickEntry[] = [
+  { label: 'Tableau de Bord (Speed Dial)', subtitle: 'Accueil rapide : recherche centrale, tuiles, cycles & favoris', keywords: 'home accueil speed dial tableau de bord dashboard', route: { kind: 'speed-dial' } },
   { label: 'Hub Temps Réel Warframe', subtitle: 'Cycles Cetus/Vallis, Fissures, Baro, Duviri', keywords: 'hub cetus baro fissures invasions', route: { kind: 'hub' } },
   { label: 'Codex, Farm & Helminth', subtitle: '3 296 fiches FR/EN : Drops %, Fonderie & Helminth', keywords: 'codex farm helminth reliques ressources', route: { kind: 'codex-home' } },
   { label: 'Infirmerie Helminth', subtitle: 'Pouvoirs subsumés, S-Tier & 6 Sécrétions', keywords: 'helminth subsomption bile rugissement', route: { kind: 'codex-home', category: 'helminth' } },

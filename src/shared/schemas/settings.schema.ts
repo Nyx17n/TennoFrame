@@ -115,7 +115,14 @@ export const GLASS_OPACITY_MIN = 20
 export const GLASS_OPACITY_MAX = 85
 export const GLASS_OPACITY_DEFAULT = 48
 
-export const GlassStyleSchema = z.enum(['liquid-glass', 'simple', 'medieval'])
+export const GlassStyleSchema = z.enum([
+  'liquid-glass',
+  'simple',
+  'medieval',
+  'orokin',
+  'cephalon',
+  'pom2-1999'
+])
 export type GlassStyle = z.infer<typeof GlassStyleSchema>
 
 export const FontFamilyIdSchema = z.enum([
@@ -133,6 +140,24 @@ export const FontFamilyIdSchema = z.enum([
   'comic'
 ])
 export type FontFamilyId = z.infer<typeof FontFamilyIdSchema>
+
+export const TabsPositionSchema = z.enum(['top', 'sidebar-left'])
+export type TabsPosition = z.infer<typeof TabsPositionSchema>
+
+export const CornerRadiusStyleSchema = z.enum(['auto', 'sharp', 'subtle', 'rounded', 'pill'])
+export type CornerRadiusStyle = z.infer<typeof CornerRadiusStyleSchema>
+
+export const UiDensitySchema = z.enum(['compact', 'comfortable', 'spacious'])
+export type UiDensity = z.infer<typeof UiDensitySchema>
+
+export const NewTabTargetSchema = z.enum([
+  'speed-dial',
+  'market-home',
+  'hub',
+  'codex-home',
+  'wfm-account'
+])
+export type NewTabTarget = z.infer<typeof NewTabTargetSchema>
 
 export const CompactTimersSettingsSchema = z.object({
   enabled: z.boolean().default(true),
@@ -162,6 +187,11 @@ export const UserSettingsSchema = z.object({
       .max(GLASS_OPACITY_MAX)
       .default(GLASS_OPACITY_DEFAULT),
     fontFamily: FontFamilyIdSchema.default('auto'),
+    tabsPosition: TabsPositionSchema.default('top'),
+    sidebarCollapsed: z.boolean().default(false),
+    cornerRadius: CornerRadiusStyleSchema.default('auto'),
+    uiDensity: UiDensitySchema.default('comfortable'),
+    newTabTarget: NewTabTargetSchema.default('market-home'),
     startupAnimationEnabled: z.boolean().default(true),
     animationLevel: AnimationLevelSchema.default('full'),
     respectOsReducedMotion: z.boolean().default(true),

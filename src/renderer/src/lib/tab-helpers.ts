@@ -8,8 +8,25 @@ import {
   type NavigationHistoryEntry,
   type TabsSession
 } from '@shared/schemas/navigation.schema'
+import type { NewTabTarget } from '@shared/schemas/settings.schema'
 import { ipcClient } from '@/services/ipc-client'
 import { useAppStore } from '@/stores/useAppStore'
+
+export function resolveNewTabRoute(target?: NewTabTarget): AppRoute {
+  switch (target) {
+    case 'speed-dial':
+      return { kind: 'speed-dial' }
+    case 'hub':
+      return { kind: 'hub' }
+    case 'codex-home':
+      return { kind: 'codex-home' }
+    case 'wfm-account':
+      return { kind: 'wfm-account' }
+    case 'market-home':
+    default:
+      return { kind: 'market-home' }
+  }
+}
 
 const LOCAL_HISTORY_FALLBACK_KEY = 'wf.navigationHistory.v2'
 
@@ -57,7 +74,9 @@ export function scheduleTabsSessionPersist(session: TabsSession): void {
         // Fallback gracieux pendant le HMR dev si le Main Process n'a pas encore redémarré
         const legacySafeTabs = session.tabs
           .map((t) => {
-            const safeHistory = t.history.filter((r) => r.kind !== 'browser-history')
+            const safeHistory = t.history.filter(
+              (r) => r.kind !== 'browser-history' && r.kind !== 'speed-dial'
+            )
             if (safeHistory.length === 0) return null
             return {
               ...t,
@@ -92,7 +111,7 @@ export function appendNavigationHistoryEntry(
   route: AppRoute,
   customTitle?: string
 ): NavigationHistoryEntry[] {
-  if (route.kind === 'browser-history') {
+  if (route.kind === 'browser-history' || route.kind === 'speed-dial') {
     return [...current]
   }
   const uri = formatRouteUri(route)

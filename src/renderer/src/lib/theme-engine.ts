@@ -3,6 +3,7 @@ import {
   GLASS_OPACITY_MAX,
   GLASS_OPACITY_MIN,
   type AnimationLevel,
+  type GlassStyle,
   type ThemePresetId,
   type UserSettings
 } from '@shared/schemas/settings.schema'
@@ -218,6 +219,36 @@ export const MEDIEVAL_PALETTE_PRESETS: readonly MedievalPalettePreset[] = [
   }
 ] as const
 
+export interface FactionPalettePreset {
+  readonly id: string
+  readonly glyph: string
+  readonly primaryHex: string
+  readonly secondaryHex: string
+}
+
+export type ThemedFactionStyleId = 'medieval' | 'orokin' | 'cephalon' | 'pom2-1999'
+
+export const FACTION_STYLE_PALETTES: Readonly<
+  Record<ThemedFactionStyleId, readonly FactionPalettePreset[]>
+> = {
+  medieval: MEDIEVAL_PALETTE_PRESETS,
+  orokin: [
+    { id: 'orokin-lua', glyph: '◐', primaryHex: '#12131c', secondaryHex: '#eab308' },
+    { id: 'orokin-ivory', glyph: '✦', primaryHex: '#f8f5ec', secondaryHex: '#d49b27' },
+    { id: 'orokin-void', glyph: '💠', primaryHex: '#0b1520', secondaryHex: '#38bdf8' }
+  ],
+  cephalon: [
+    { id: 'cephalon-ordis', glyph: '⬡', primaryHex: '#06131f', secondaryHex: '#06b6d4' },
+    { id: 'cephalon-simaris', glyph: '◈', primaryHex: '#191106', secondaryHex: '#f59e0b' },
+    { id: 'cephalon-cy', glyph: '⚡', primaryHex: '#090d18', secondaryHex: '#6366f1' }
+  ],
+  'pom2-1999': [
+    { id: 'pom2-green', glyph: '📼', primaryHex: '#07140b', secondaryHex: '#22c55e' },
+    { id: 'pom2-amber', glyph: '🟠', primaryHex: '#160f05', secondaryHex: '#f59e0b' },
+    { id: 'pom2-onlyne', glyph: '💿', primaryHex: '#12091c', secondaryHex: '#ec4899' }
+  ]
+} as const
+
 interface HslTriplet {
   h: number
   s: number
@@ -304,21 +335,24 @@ export function applyThemeToDocument(appearance: UserSettings['appearance']): vo
   const isAchromatic = bg.s === 0
 
   const glassEnabled = Boolean(appearance.glassModeEnabled)
-  const glassStyle = appearance.glassStyle ?? 'liquid-glass'
-  const isMedievalActive = glassEnabled && glassStyle === 'medieval'
+  const glassStyle: GlassStyle = appearance.glassStyle ?? 'liquid-glass'
+  const activeStyle: GlassStyle | 'off' = glassEnabled ? glassStyle : 'off'
+  const isMedievalActive = activeStyle === 'medieval'
+  const isOrokinActive = activeStyle === 'orokin'
 
   const root = document.documentElement
   root.classList.toggle('dark', !isLightTheme)
   root.dataset.motion = resolveEffectiveMotion(appearance)
   document.body.classList.toggle('glow-enabled', appearance.glowEnabled)
 
-  const fg = isMedievalActive
-    ? isLightTheme
-      ? '26 62% 11%'
-      : '38 55% 93%'
-    : isLightTheme
-      ? '222 47% 11%'
-      : '210 40% 96%'
+  const fg =
+    isMedievalActive || isOrokinActive
+      ? isLightTheme
+        ? '28 52% 11%'
+        : '40 48% 94%'
+      : isLightTheme
+        ? '222 47% 11%'
+        : '210 40% 96%'
   const cardL =
     bg.l === 0
       ? 3
@@ -345,7 +379,30 @@ export function applyThemeToDocument(appearance: UserSettings['appearance']): vo
         : `${bg.h} 18% 66%`
   const accentFg = ac.l > 62 ? '222 47% 11%' : '210 40% 98%'
 
-  root.style.setProperty('--radius', isMedievalActive ? '0.25rem' : '0.5rem')
+  const cornerStyle = appearance.cornerRadius ?? 'auto'
+  const autoStyleRadius =
+    activeStyle === 'medieval'
+      ? '0.25rem'
+      : activeStyle === 'orokin'
+        ? '0.375rem'
+        : activeStyle === 'cephalon' || activeStyle === 'pom2-1999'
+          ? '0.125rem'
+          : '0.5rem'
+  const resolvedRadius =
+    cornerStyle === 'sharp'
+      ? '0rem'
+      : cornerStyle === 'subtle'
+        ? '0.25rem'
+        : cornerStyle === 'rounded'
+          ? '0.5rem'
+          : cornerStyle === 'pill'
+            ? '0.875rem'
+            : autoStyleRadius
+
+  root.style.setProperty('--radius', resolvedRadius)
+  root.dataset.corners = cornerStyle
+  root.dataset.density = appearance.uiDensity ?? 'comfortable'
+  root.dataset.tabsPosition = appearance.tabsPosition ?? 'top'
   root.style.setProperty('--background', `${bg.h} ${bg.s}% ${bg.l}%`)
   root.style.setProperty('--foreground', fg)
   root.style.setProperty('--card', `${bg.h} ${bg.s}% ${cardL}%`)
@@ -393,7 +450,7 @@ export function applyThemeToDocument(appearance: UserSettings['appearance']): vo
   root.style.setProperty('--wf-glass-modal-alpha', (clamp(glassPct + 18, 40, 93) / 100).toFixed(3))
   root.style.setProperty('--wf-glass-pill-alpha', (clamp(glassPct - 2, 20, 84) / 100).toFixed(3))
 
-  const resolvedFont = resolveFontStacks(appearance.fontFamily ?? 'auto', isMedievalActive)
+  const resolvedFont = resolveFontStacks(appearance.fontFamily ?? 'auto', activeStyle)
   root.dataset.font = resolvedFont.effectiveId
   root.style.setProperty('--wf-font-sans', resolvedFont.definition.bodyStack)
   root.style.setProperty('--wf-font-heading', resolvedFont.definition.headingStack)

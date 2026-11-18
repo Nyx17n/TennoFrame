@@ -3,6 +3,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Ghost,
+  House,
   Maximize2,
   Minimize2,
   Minus,
@@ -16,6 +17,7 @@ import { formatRouteUri } from '@shared/schemas/navigation.schema'
 import { Button } from '@/components/ui/button'
 import { NavQuickMenus } from '@/components/shell/NavQuickMenus'
 import { useUiTranslations } from '@/lib/i18n'
+import { getLayoutErgonomicsStrings } from '@/lib/i18n/layout-ergonomics-i18n'
 import { getTabCurrentRoute } from '@/lib/tab-helpers'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/stores/useAppStore'
@@ -23,7 +25,9 @@ import { useTabsStore } from '@/stores/useTabsStore'
 
 export function CommandNavBar(): React.JSX.Element {
   const windowState = useAppStore((s) => s.windowState)
+  const lang = useAppStore((s) => s.settings.market.language)
   const { t } = useUiTranslations()
+  const layoutStrings = React.useMemo(() => getLayoutErgonomicsStrings(lang), [lang])
   const clickThroughWhenPinned = useAppStore((s) => s.settings.window.clickThroughWhenPinned)
   const clickThroughShortcut = useAppStore((s) => s.settings.window.shortcuts.toggleClickThrough)
   const updateSettings = useAppStore((s) => s.updateSettings)
@@ -41,9 +45,13 @@ export function CommandNavBar(): React.JSX.Element {
   const goBack = useTabsStore((s) => s.goBack)
   const goForward = useTabsStore((s) => s.goForward)
   const reloadActive = useTabsStore((s) => s.reloadActive)
+  const navigateActive = useTabsStore((s) => s.navigateActive)
+  const openTab = useTabsStore((s) => s.openTab)
   const isPageTransitioning = useTabsStore((s) => s.isPageTransitioning)
 
   const activeTab = tabs.find((t) => t.id === activeTabId) ?? tabs[0]
+  const activeRoute = !hubActive && activeTab ? getTabCurrentRoute(activeTab) : null
+  const isHomeActive = activeRoute?.kind === 'speed-dial'
   const canGoBack = !hubActive && Boolean(activeTab && activeTab.historyIndex > 0)
   const canGoForward =
     !hubActive && Boolean(activeTab && activeTab.historyIndex < activeTab.history.length - 1)
@@ -77,6 +85,22 @@ export function CommandNavBar(): React.JSX.Element {
         >
           <RefreshCw
             className={cn('h-3.5 w-3.5 transition-colors', isPageTransitioning && 'animate-spin text-primary')}
+          />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigateActive({ kind: 'speed-dial' })}
+          onAuxClick={(e) => {
+            if (e.button === 1) {
+              e.preventDefault()
+              openTab({ kind: 'speed-dial' })
+            }
+          }}
+          title={`${layoutStrings.speedDialTitle} (wf://home)`}
+        >
+          <House
+            className={cn('h-3.5 w-3.5 transition-colors', isHomeActive && 'text-primary')}
           />
         </Button>
       </div>

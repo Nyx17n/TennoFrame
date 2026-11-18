@@ -32,7 +32,7 @@ export function useLocalShortcuts(): void {
 
       if (key === 't') {
         event.preventDefault()
-        useTabsStore.getState().openTab({ kind: 'market-home' })
+        useTabsStore.getState().openTab()
       } else if (key === 'w') {
         event.preventDefault()
         const tabsState = useTabsStore.getState()

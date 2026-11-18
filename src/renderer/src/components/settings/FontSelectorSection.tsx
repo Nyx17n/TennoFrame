@@ -17,10 +17,11 @@ export function FontSelectorSection(): React.JSX.Element {
   const strings = React.useMemo(() => getFontAndSupportStrings(language), [language])
   const isFr = language === 'fr'
 
-  const isMedievalStyle =
-    Boolean(appearance.glassModeEnabled) && appearance.glassStyle === 'medieval'
+  const activeStyle = appearance.glassModeEnabled
+    ? (appearance.glassStyle ?? 'liquid-glass')
+    : 'off'
   const selectedId = appearance.fontFamily ?? 'auto'
-  const resolved = resolveFontStacks(selectedId, isMedievalStyle)
+  const resolved = resolveFontStacks(selectedId, activeStyle)
 
   const filteredFonts = React.useMemo(() => {
     if (category === 'all') return FONT_CATALOG

@@ -8,8 +8,9 @@ import {
   type UserSettingsPatch
 } from '@shared/schemas/settings.schema'
 import { Button } from '@/components/ui/button'
+import type { FactionStylesStrings } from '@/lib/i18n/faction-styles-i18n'
 import type { GlassModeMessages } from '@/lib/i18n/glass-mode-i18n'
-import { MEDIEVAL_PALETTE_PRESETS } from '@/lib/theme-engine'
+import { FACTION_STYLE_PALETTES, type ThemedFactionStyleId } from '@/lib/theme-engine'
 import { cn } from '@/lib/utils'
 
 const OPACITY_PRESETS = [
@@ -20,6 +21,7 @@ const OPACITY_PRESETS = [
 
 interface GlassStylePreviewBoxProps {
   readonly msg: GlassModeMessages
+  readonly fMsg: FactionStylesStrings
   readonly glassEnabled: boolean
   readonly glassStyle: GlassStyle
   readonly desktopBackdrop: boolean
@@ -29,54 +31,114 @@ interface GlassStylePreviewBoxProps {
   readonly onPatch: (patch: UserSettingsPatch) => void
 }
 
+function isThemedFactionStyle(style: GlassStyle): style is ThemedFactionStyleId {
+  return (
+    style === 'medieval' ||
+    style === 'orokin' ||
+    style === 'cephalon' ||
+    style === 'pom2-1999'
+  )
+}
+
+function getPaletteLabel(id: string, msg: GlassModeMessages, fMsg: FactionStylesStrings): string {
+  switch (id) {
+    case 'dungeon-gold':
+      return msg.paletteDungeonGold
+    case 'royal-parchment':
+      return msg.paletteRoyalParchment
+    case 'crimson-order':
+      return msg.paletteCrimsonOrder
+    case 'orokin-lua':
+      return fMsg.paletteOrokinLua
+    case 'orokin-ivory':
+      return fMsg.paletteOrokinIvory
+    case 'orokin-void':
+      return fMsg.paletteOrokinVoid
+    case 'cephalon-ordis':
+      return fMsg.paletteCephalonOrdis
+    case 'cephalon-simaris':
+      return fMsg.paletteCephalonSimaris
+    case 'cephalon-cy':
+      return fMsg.paletteCephalonCy
+    case 'pom2-green':
+      return fMsg.palettePom2Green
+    case 'pom2-amber':
+      return fMsg.palettePom2Amber
+    case 'pom2-onlyne':
+      return fMsg.palettePom2Onlyne
+    default:
+      return id
+  }
+}
+
 function buildPreviewStyle(
   style: GlassStyle,
   opacity: number,
   backdrop: boolean
 ): React.CSSProperties {
   const alpha = (opacity / 100).toFixed(2)
+  const cardAlpha = backdrop ? alpha : '0.95'
   if (style === 'medieval') {
     return {
-      backgroundColor: `hsl(var(--card) / ${backdrop ? alpha : '0.95'})`,
-      backgroundImage:
-        'radial-gradient(120% 90% at 50% 0%, hsl(var(--primary) / 0.14), transparent 72%)',
+      backgroundColor: `hsl(var(--card) / ${cardAlpha})`,
       boxShadow:
-        'inset 0 0 0 2px hsl(var(--background) / 0.88), inset 0 0 0 3px hsl(var(--primary) / 0.36), 0 6px 16px -8px rgba(0,0,0,0.55)'
+        'inset 0 0 0 2px hsl(var(--background) / 0.88), inset 0 0 0 3px hsl(var(--primary) / 0.36)'
+    }
+  }
+  if (style === 'orokin') {
+    return {
+      backgroundColor: `hsl(var(--card) / ${cardAlpha})`,
+      boxShadow:
+        'inset 0 0 0 1px rgba(245,208,107,0.58), inset 0 0 0 3px hsl(var(--background) / 0.88), 0 6px 20px -8px rgba(56,189,248,0.35)'
+    }
+  }
+  if (style === 'cephalon') {
+    return {
+      backgroundColor: `hsl(var(--card) / ${cardAlpha})`,
+      boxShadow: 'inset 0 0 18px -6px hsl(var(--primary) / 0.32)'
+    }
+  }
+  if (style === 'pom2-1999') {
+    return {
+      backgroundColor: `hsl(var(--card) / ${cardAlpha})`,
+      backgroundImage:
+        'repeating-linear-gradient(0deg, rgba(0,0,0,0.16) 0px, rgba(0,0,0,0.16) 1px, transparent 1px, transparent 3px)',
+      boxShadow: 'inset 0 0 22px -8px hsl(var(--primary) / 0.36)'
     }
   }
   if (style === 'liquid-glass') {
     return {
       backgroundColor: `hsl(var(--card) / ${alpha})`,
       backdropFilter: 'blur(16px) saturate(150%)',
-      backgroundImage:
-        'radial-gradient(110px 32px at 14% 0%, rgba(255,255,255,0.34), hsl(var(--primary) / 0.16) 48%, transparent 78%), radial-gradient(110px 32px at 86% 100%, hsl(var(--primary) / 0.30), rgba(255,255,255,0.14) 48%, transparent 78%)',
       boxShadow:
-        'inset 1px 1px 0 0 rgba(255,255,255,0.62), inset -1px -1px 0 0 hsl(var(--primary) / 0.48), inset 0 0 20px -4px hsl(var(--primary) / 0.22)'
+        'inset 1px 1px 0 0 rgba(255,255,255,0.62), inset -1px -1px 0 0 hsl(var(--primary) / 0.48)'
     }
   }
   return { backgroundColor: `hsl(var(--card) / ${alpha})` }
 }
 
 export function GlassStylePreviewBox(props: GlassStylePreviewBoxProps): React.JSX.Element {
-  const { msg, glassEnabled, glassStyle, desktopBackdrop, glassOpacity, primaryColor, secondaryColor, onPatch } = props
-  const isLiquid = glassStyle === 'liquid-glass'
-  const isMedieval = glassStyle === 'medieval'
+  const { msg, fMsg, glassEnabled, glassStyle, desktopBackdrop, glassOpacity, primaryColor, secondaryColor, onPatch } = props
+  const isFaction = isThemedFactionStyle(glassStyle)
   const surfaceStyle = buildPreviewStyle(glassStyle, glassOpacity, desktopBackdrop)
-  const opacityDisabled = !glassEnabled || (isMedieval && !desktopBackdrop)
+  const opacityDisabled = !glassEnabled || (isFaction && !desktopBackdrop)
+
+  const palettesTitle =
+    glassStyle === 'orokin'
+      ? fMsg.palettesTitleOrokin
+      : glassStyle === 'cephalon'
+        ? fMsg.palettesTitleCephalon
+        : glassStyle === 'pom2-1999'
+          ? fMsg.palettesTitlePom2
+          : msg.medievalPalettesLabel
 
   return (
     <div className="space-y-3">
-      {glassEnabled && isMedieval && (
+      {glassEnabled && isFaction && (
         <div className="space-y-1.5 rounded-md border border-primary/35 bg-background/50 p-2.5">
-          <div className="text-[11px] font-semibold text-primary">{msg.medievalPalettesLabel}</div>
+          <div className="text-[11px] font-semibold text-primary">{palettesTitle}</div>
           <div className="grid gap-1.5 sm:grid-cols-3">
-            {MEDIEVAL_PALETTE_PRESETS.map((p) => {
-              const label =
-                p.id === 'dungeon-gold'
-                  ? msg.paletteDungeonGold
-                  : p.id === 'royal-parchment'
-                    ? msg.paletteRoyalParchment
-                    : msg.paletteCrimsonOrder
+            {FACTION_STYLE_PALETTES[glassStyle].map((p) => {
               const active =
                 primaryColor.toLowerCase() === p.primaryHex &&
                 secondaryColor.toLowerCase() === p.secondaryHex
@@ -104,7 +166,7 @@ export function GlassStylePreviewBox(props: GlassStylePreviewBoxProps): React.JS
                       background: `linear-gradient(135deg, ${p.primaryHex} 50%, ${p.secondaryHex} 50%)`
                     }}
                   />
-                  <span className="truncate">{label}</span>
+                  <span className="truncate">{getPaletteLabel(p.id, msg, fMsg)}</span>
                 </Button>
               )
             })}
@@ -113,33 +175,21 @@ export function GlassStylePreviewBox(props: GlassStylePreviewBoxProps): React.JS
       )}
 
       <div className="relative overflow-hidden rounded-lg border border-border/60 bg-background p-3">
-        {desktopBackdrop && (
-          <>
-            <div aria-hidden="true" className="pointer-events-none absolute -left-6 -top-6 h-24 w-36 rounded-full bg-primary/35 blur-2xl" />
-            <div aria-hidden="true" className="pointer-events-none absolute -bottom-6 right-4 h-24 w-40 rounded-full bg-amber-500/20 blur-2xl" />
-          </>
-        )}
         <div className="relative z-10 flex flex-wrap items-center justify-between gap-2.5">
           <div
             style={surfaceStyle}
-            className={cn(
-              'flex min-w-[160px] flex-1 items-center justify-between border px-3.5 py-2.5 text-xs font-medium text-foreground',
-              isMedieval ? 'rounded-[3px] border-primary/65 font-serif' : isLiquid ? 'rounded-xl border-white/25' : 'rounded-xl border-border/80'
-            )}
+            className="flex min-w-[160px] flex-1 items-center justify-between rounded-md border border-primary/45 px-3.5 py-2.5 text-xs font-medium text-foreground"
           >
-            <span>{isMedieval ? `⚜ ${msg.previewCard} ◆` : msg.previewCard}</span>
+            <span>{msg.previewCard}</span>
             <span className="font-mono text-[11px] opacity-80">
-              {isMedieval && !desktopBackdrop ? '100%' : `${glassOpacity}%`}
+              {isFaction && !desktopBackdrop ? '100%' : `${glassOpacity}%`}
             </span>
           </div>
           <div
             style={surfaceStyle}
-            className={cn(
-              'inline-flex h-9 items-center border px-4 text-xs font-medium text-foreground',
-              isMedieval ? 'rounded-[3px] border-primary/70 font-serif' : isLiquid ? 'rounded-full border-white/25' : 'rounded-full border-border/80'
-            )}
+            className="inline-flex h-9 items-center rounded-md border border-primary/45 px-4 text-xs font-medium text-foreground"
           >
-            {isMedieval ? `⚜ ${msg.previewPill}` : msg.previewPill}
+            {msg.previewPill}
           </div>
         </div>
       </div>
@@ -159,10 +209,6 @@ export function GlassStylePreviewBox(props: GlassStylePreviewBoxProps): React.JS
           onChange={(e) => onPatch({ appearance: { glassOpacityPercent: Number(e.target.value) } })}
           className="h-1.5 w-full cursor-pointer accent-primary disabled:cursor-not-allowed"
         />
-        <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-          <span>{msg.crystalHint}</span>
-          <span>{msg.smokedHint}</span>
-        </div>
         <div className="flex flex-wrap items-center justify-between gap-1.5 pt-1">
           <div className="flex flex-wrap items-center gap-1.5">
             {OPACITY_PRESETS.map((preset) => {
@@ -184,7 +230,6 @@ export function GlassStylePreviewBox(props: GlassStylePreviewBoxProps): React.JS
             type="button"
             size="sm"
             variant="ghost"
-            disabled={!glassEnabled && glassOpacity === GLASS_OPACITY_DEFAULT && isLiquid && desktopBackdrop}
             onClick={() => onPatch({ appearance: { glassModeEnabled: false, glassStyle: 'liquid-glass', glassDesktopBackdropEnabled: true, glassOpacityPercent: GLASS_OPACITY_DEFAULT } })}
           >
             <RotateCcw className="h-3 w-3" />

@@ -8,6 +8,7 @@ import {
   Flame,
   Globe,
   History,
+  LayoutDashboard,
   Package,
   ShoppingCart,
   Sparkles,
@@ -26,6 +27,8 @@ export function RouteIcon({
   className?: string
 }): React.JSX.Element {
   switch (kind) {
+    case 'speed-dial':
+      return <LayoutDashboard className={className} />
     case 'hub':
       return <Globe className={className} />
     case 'market-home':
