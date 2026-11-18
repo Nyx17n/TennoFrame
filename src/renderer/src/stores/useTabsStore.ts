@@ -14,8 +14,10 @@ import {
   loadLocalHistoryFallback,
   makeTabId,
   orderPinnedFirst,
+  resolveNewTabRoute,
   scheduleTabsSessionPersist
 } from '@/lib/tab-helpers'
+import { useAppStore } from '@/stores/useAppStore'
 
 interface OpenTabOptions {
   background?: boolean
@@ -120,7 +122,10 @@ export const useTabsStore = create<TabsStoreState>((set, get) => {
       }
     },
 
-    openTab: (route = { kind: 'market-home' }, options) => {
+    openTab: (explicitRoute, options) => {
+      const route =
+        explicitRoute ??
+        resolveNewTabRoute(useAppStore.getState().settings.appearance.newTabTarget)
       if (route.kind === 'hub') {
         return commit(
           {
@@ -231,7 +236,20 @@ export const useTabsStore = create<TabsStoreState>((set, get) => {
       if (!target || (target.pinned && !force)) return
       const remaining = state.tabs.filter((t) => t.id !== id)
       if (remaining.length === 0) {
-        const fresh: BrowserTab = { ...INITIAL_BROWSER_TAB, id: makeTabId() }
+        const defaultRoute = resolveNewTabRoute(
+          useAppStore.getState().settings.appearance.newTabTarget
+        )
+        if (defaultRoute.kind === 'hub') {
+          const fresh: BrowserTab = { ...INITIAL_BROWSER_TAB, id: makeTabId() }
+          return commit({ tabs: [fresh], activeTabId: fresh.id, hubActive: true })
+        }
+        const fresh: BrowserTab = {
+          id: makeTabId(),
+          title: getDefaultRouteTitle(defaultRoute),
+          pinned: false,
+          history: [defaultRoute],
+          historyIndex: 0
+        }
         return commit({ tabs: [fresh], activeTabId: fresh.id, hubActive: state.hubActive })
       }
       const closedIdx = state.tabs.findIndex((t) => t.id === id)

@@ -3,6 +3,7 @@ import { BackgroundGradientSection } from '@/components/settings/BackgroundGradi
 import { ColorSwatchPicker } from '@/components/settings/ColorSwatchPicker'
 import { FontSelectorSection } from '@/components/settings/FontSelectorSection'
 import { GlassModeSection } from '@/components/settings/GlassModeSection'
+import { LayoutAndErgonomicsSection } from '@/components/settings/LayoutAndErgonomicsSection'
 import { MotionSettingsSection } from '@/components/settings/MotionSettingsSection'
 import { ACCENT_SWATCH_GROUPS, BACKGROUND_SWATCH_GROUPS } from '@/lib/color-swatches'
 import { THEME_PRESETS } from '@/lib/theme-engine'
@@ -16,6 +17,8 @@ export function AppearanceSettingsTab(): React.JSX.Element {
 
   return (
     <div className="space-y-4">
+      <LayoutAndErgonomicsSection />
+
       <GlassModeSection />
 
       <FontSelectorSection />

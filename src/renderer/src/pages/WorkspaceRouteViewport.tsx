@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { AlertsCenterView } from '@/components/alerts/AlertsCenterView'
 import { CodexDetailView } from '@/components/codex/CodexDetailView'
 import { CodexHomeView } from '@/components/codex/CodexHomeView'
+import { SpeedDialHomeView } from '@/components/home/SpeedDialHomeView'
 import { HubRootView } from '@/components/hub/HubRootView'
 import { MarketCatalogView } from '@/components/market/MarketCatalogView'
 import { MarketFavoritesView } from '@/components/market/MarketFavoritesView'
@@ -67,6 +68,8 @@ export function WorkspaceRouteViewport(): React.JSX.Element {
 
   const renderRouteContent = (): React.JSX.Element => {
     switch (route.kind) {
+      case 'speed-dial':
+        return <SpeedDialHomeView />
       case 'hub':
         return <HubRootView />
       case 'market-home':

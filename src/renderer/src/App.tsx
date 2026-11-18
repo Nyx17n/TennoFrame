@@ -14,6 +14,7 @@ import { StartupSplashOverlay } from '@/components/shell/StartupSplashOverlay'
 import { StatusBar } from '@/components/shell/StatusBar'
 import { TitleTabsBar } from '@/components/shell/TitleTabsBar'
 import { UpdateBanner } from '@/components/shell/UpdateBanner'
+import { VerticalTabsSidebar } from '@/components/shell/VerticalTabsSidebar'
 import { WindowResizeHandles } from '@/components/shell/WindowResizeHandles'
 import { CompactTimersBar } from '@/components/shell/timers/CompactTimersBar'
 import { CreateWfmOrderModal } from '@/components/wfm-account/CreateWfmOrderModal'
@@ -169,15 +170,18 @@ export function App(): React.JSX.Element {
         <CommandNavBar />
         <BookmarksBar />
         <UpdateBanner />
-        <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
-          <PageTransitionLoader />
-          <div
-            ref={viewportScrollRef}
-            className={`wf-scroll-stable flex-1 overflow-y-auto ${isCompactMode ? '' : 'pb-10'}`}
-          >
-            <WorkspaceRouteViewport />
+        <div className="relative flex min-h-0 flex-1 overflow-hidden">
+          <VerticalTabsSidebar />
+          <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+            <PageTransitionLoader />
+            <div
+              ref={viewportScrollRef}
+              className={`wf-scroll-stable flex-1 overflow-y-auto ${isCompactMode ? '' : 'pb-10'}`}
+            >
+              <WorkspaceRouteViewport />
+            </div>
+            <DiscordCornerButton />
           </div>
-          <DiscordCornerButton />
         </div>
         <WhisperBar />
         <CompactTimersBar />

@@ -852,5 +852,102 @@ html[data-glass='medieval'] .wf-overlay-motion {
   backdrop-filter: blur(4px);
 }
 
+/* ============================================================================
+   Module 22 — Forme des Coins (--radius / data-corners) & Densité UI (data-density)
+   Piloté à 0 % CPU par <html data-corners="auto | sharp | subtle | rounded | pill">
+   et <html data-density="compact | comfortable | spacious">
+   ============================================================================ */
+
+html[data-corners='sharp'] .rounded,
+html[data-corners='sharp'] .rounded-sm,
+html[data-corners='sharp'] .rounded-md,
+html[data-corners='sharp'] .rounded-lg,
+html[data-corners='sharp'] .rounded-xl,
+html[data-corners='sharp'] .rounded-2xl,
+html[data-corners='sharp'] .wf-tab-pill,
+html[data-corners='sharp'] .wf-glass-pill,
+html[data-corners='sharp'] .wf-interactive-btn,
+html[data-corners='sharp'] .wf-glow-surface,
+html[data-corners='sharp'] .wf-glass-panel,
+html[data-corners='sharp'] .wf-card-lift,
+html[data-corners='sharp'] .wf-dialog-motion,
+html[data-corners='sharp'] .wf-popover-motion,
+html[data-corners='sharp'] .wf-farm-overlay-card,
+html[data-corners='sharp'] .wf-farm-overlay-shell {
+  border-radius: 0px !important;
+}
+
+html[data-corners='subtle'] .wf-glow-surface,
+html[data-corners='subtle'] .wf-glass-panel,
+html[data-corners='subtle'] .wf-card-lift,
+html[data-corners='subtle'] .wf-dialog-motion,
+html[data-corners='subtle'] .wf-popover-motion,
+html[data-corners='subtle'] .wf-farm-overlay-card,
+html[data-corners='subtle'] .wf-farm-overlay-shell {
+  border-radius: 0.25rem !important;
+}
+
+html[data-corners='rounded'] .wf-glow-surface,
+html[data-corners='rounded'] .wf-glass-panel,
+html[data-corners='rounded'] .wf-card-lift,
+html[data-corners='rounded'] .wf-dialog-motion,
+html[data-corners='rounded'] .wf-popover-motion,
+html[data-corners='rounded'] .wf-farm-overlay-card,
+html[data-corners='rounded'] .wf-farm-overlay-shell {
+  border-radius: 0.5rem !important;
+}
+
+html[data-corners='pill'] .wf-tab-pill,
+html[data-corners='pill'] .wf-glass-pill,
+html[data-corners='pill'] .wf-interactive-btn {
+  border-radius: 9999px !important;
+}
+
+html[data-corners='pill'] .wf-glow-surface,
+html[data-corners='pill'] .wf-glass-panel,
+html[data-corners='pill'] .wf-card-lift,
+html[data-corners='pill'] .wf-dialog-motion,
+html[data-corners='pill'] .wf-popover-motion,
+html[data-corners='pill'] .wf-farm-overlay-card,
+html[data-corners='pill'] .wf-farm-overlay-shell {
+  border-radius: 0.95rem !important;
+}
+
+/* Densité Compacte : resserre les barres, tableaux d'ordres et espacements de vues */
+html[data-density='compact'] .wf-shell-bar {
+  min-height: 1.9rem;
+}
+
+html[data-density='compact'] .wf-view-enter > div {
+  padding-top: 0.65rem;
+  padding-bottom: 0.65rem;
+}
+
+html[data-density='compact'] table td,
+html[data-density='compact'] table th {
+  padding-top: 0.32rem !important;
+  padding-bottom: 0.32rem !important;
+}
+
+html[data-density='compact'] .wf-stagger-grid {
+  gap: 0.45rem !important;
+}
+
+/* Densité Aérée : marges et respirations confortables sur grand écran */
+html[data-density='spacious'] .wf-view-enter > div {
+  padding-top: 1.35rem;
+  padding-bottom: 1.35rem;
+}
+
+html[data-density='spacious'] table td,
+html[data-density='spacious'] table th {
+  padding-top: 0.72rem !important;
+  padding-bottom: 0.72rem !important;
+}
+
+html[data-density='spacious'] .wf-stagger-grid {
+  gap: 0.95rem !important;
+}
+
 
 

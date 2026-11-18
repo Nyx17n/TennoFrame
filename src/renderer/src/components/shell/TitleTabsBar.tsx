@@ -1,10 +1,23 @@
 import * as React from 'react'
-import { ChevronLeft, ChevronRight, Copy, Globe, Loader2, Maximize2, Minus, Plus, Square, X } from 'lucide-react'
+import {
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  Globe,
+  Loader2,
+  Maximize2,
+  Minus,
+  PanelLeft,
+  Plus,
+  Square,
+  X
+} from 'lucide-react'
 import type { SnapZone } from '@shared/schemas/window.schema'
 import { BrowserTabPill } from '@/components/shell/BrowserTabPill'
 import { CommunityCounterPill } from '@/components/shell/CommunityCounterPill'
 import { TabOrganizerPopover } from '@/components/shell/TabOrganizerPopover'
 import { useUiTranslations } from '@/lib/i18n'
+import { getLayoutErgonomicsStrings } from '@/lib/i18n/layout-ergonomics-i18n'
 import { cn } from '@/lib/utils'
 import { ipcClient } from '@/services/ipc-client'
 import { useAppStore } from '@/stores/useAppStore'
@@ -40,7 +53,11 @@ function isInteractiveTitleTarget(target: EventTarget | null): boolean {
 export function TitleTabsBar(): React.JSX.Element {
   const windowState = useAppStore((s) => s.windowState)
   const lang = useAppStore((s) => s.settings.market.language)
+  const tabsPosition = useAppStore((s) => s.settings.appearance.tabsPosition ?? 'top')
+  const sidebarCollapsed = useAppStore((s) => Boolean(s.settings.appearance.sidebarCollapsed))
+  const updateSettings = useAppStore((s) => s.updateSettings)
   const { t } = useUiTranslations()
+  const layoutStrings = React.useMemo(() => getLayoutErgonomicsStrings(lang), [lang])
   const hubActive = useTabsStore((s) => s.hubActive)
   const tabs = useTabsStore((s) => s.tabs)
   const activeTabId = useTabsStore((s) => s.activeTabId)
@@ -153,6 +170,21 @@ export function TitleTabsBar(): React.JSX.Element {
         onPointerDown={(e) => e.stopPropagation()}
         className="app-no-drag flex min-w-0 items-center gap-1"
       >
+        {tabsPosition === 'sidebar-left' && !windowState.isCompactMode && (
+          <button
+            type="button"
+            onClick={() =>
+              void updateSettings({
+                appearance: { sidebarCollapsed: !sidebarCollapsed }
+              })
+            }
+            title={layoutStrings.sidebarToggleTip}
+            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border/70 bg-secondary/50 text-muted-foreground transition-colors hover:border-primary/45 hover:text-foreground"
+          >
+            <PanelLeft className="h-3.5 w-3.5" />
+          </button>
+        )}
+
         <button
           type="button"
           onClick={activateHub}
@@ -177,78 +209,90 @@ export function TitleTabsBar(): React.JSX.Element {
           {!windowState.isCompactMode && <span>{t.shell.hub}</span>}
         </button>
 
-        <div className="mx-0.5 h-4 w-px shrink-0 bg-border" />
+        {tabsPosition === 'top' && (
+          <>
+            <div className="mx-0.5 h-4 w-px shrink-0 bg-border" />
 
-        {canScrollLeft && (
-          <button
-            type="button"
-            onClick={() => scrollTabsBy(-220)}
-            title="Faire défiler les onglets vers la gauche (ou molette souris)"
-            aria-label="Défiler les onglets à gauche"
-            className="inline-flex h-7 w-5 shrink-0 items-center justify-center rounded border border-border/70 bg-secondary/70 text-foreground transition-colors hover:border-primary/50 hover:bg-secondary"
-          >
-            <ChevronLeft className="h-3.5 w-3.5" />
-          </button>
-        )}
+            {canScrollLeft && (
+              <button
+                type="button"
+                onClick={() => scrollTabsBy(-220)}
+                title="Faire défiler les onglets vers la gauche (ou molette souris)"
+                aria-label="Défiler les onglets à gauche"
+                className="inline-flex h-7 w-5 shrink-0 items-center justify-center rounded border border-border/70 bg-secondary/70 text-foreground transition-colors hover:border-primary/50 hover:bg-secondary"
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+              </button>
+            )}
 
-        <div
-          ref={tabsStripRef}
-          onScroll={updateScrollIndicators}
-          onWheel={handleWheelScroll}
-          onMouseDown={(e) => {
-            if (e.button === 1) e.preventDefault()
-          }}
-          className="wf-no-scrollbar flex min-w-0 flex-1 items-center gap-1 overflow-x-auto"
-        >
-          {tabs.map((tab) => (
-            <BrowserTabPill
-              key={tab.id}
-              tab={tab}
-              isActive={!hubActive && tab.id === activeTabId}
-              isCompact={windowState.isCompactMode}
-              onDragStartTab={(id) => setDraggedTabId(id)}
-              onDropOnTab={(targetId) => {
-                if (draggedTabId) {
-                  reorderTabs(draggedTabId, targetId)
-                  setDraggedTabId(null)
-                }
+            <div
+              ref={tabsStripRef}
+              onScroll={updateScrollIndicators}
+              onWheel={handleWheelScroll}
+              onMouseDown={(e) => {
+                if (e.button === 1) e.preventDefault()
               }}
-            />
-          ))}
-        </div>
+              className="wf-no-scrollbar flex min-w-0 flex-1 items-center gap-1 overflow-x-auto"
+            >
+              {tabs.map((tab) => (
+                <BrowserTabPill
+                  key={tab.id}
+                  tab={tab}
+                  isActive={!hubActive && tab.id === activeTabId}
+                  isCompact={windowState.isCompactMode}
+                  onDragStartTab={(id) => setDraggedTabId(id)}
+                  onDropOnTab={(targetId) => {
+                    if (draggedTabId) {
+                      reorderTabs(draggedTabId, targetId)
+                      setDraggedTabId(null)
+                    }
+                  }}
+                />
+              ))}
+            </div>
 
-        {canScrollRight && (
-          <button
-            type="button"
-            onClick={() => scrollTabsBy(220)}
-            title="Faire défiler les onglets vers la droite (ou molette souris)"
-            aria-label="Défiler les onglets à droite"
-            className="inline-flex h-7 w-5 shrink-0 items-center justify-center rounded border border-border/70 bg-secondary/70 text-foreground transition-colors hover:border-primary/50 hover:bg-secondary"
-          >
-            <ChevronRight className="h-3.5 w-3.5" />
-          </button>
+            {canScrollRight && (
+              <button
+                type="button"
+                onClick={() => scrollTabsBy(220)}
+                title="Faire défiler les onglets vers la droite (ou molette souris)"
+                aria-label="Défiler les onglets à droite"
+                className="inline-flex h-7 w-5 shrink-0 items-center justify-center rounded border border-border/70 bg-secondary/70 text-foreground transition-colors hover:border-primary/50 hover:bg-secondary"
+              >
+                <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            )}
+
+            <div className="flex shrink-0 items-center gap-0.5 pl-0.5">
+              <button
+                type="button"
+                onClick={() => openTab()}
+                title={t.shell.newTab}
+                className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </button>
+
+              <TabOrganizerPopover />
+            </div>
+          </>
         )}
-
-        <div className="flex shrink-0 items-center gap-0.5 pl-0.5">
-          <button
-            type="button"
-            onClick={() => openTab({ kind: 'market-home' })}
-            title={t.shell.newTab}
-            className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-          >
-            <Plus className="h-3.5 w-3.5" />
-          </button>
-
-          <TabOrganizerPopover />
-        </div>
       </div>
 
       <div className="flex h-full min-w-[24px] flex-1 items-center justify-center px-2">
-        {snapLabel && (
+        {snapLabel ? (
           <span className="pointer-events-none inline-flex items-center gap-1 rounded-full border border-primary/50 bg-primary/15 px-2.5 py-0.5 text-[11px] font-semibold text-primary shadow-sm">
             <Maximize2 className="h-3 w-3" />
             <span>{snapLabel}</span>
           </span>
+        ) : (
+          tabsPosition === 'sidebar-left' && (
+            <span className="pointer-events-none truncate text-xs font-medium text-muted-foreground">
+              {hubActive
+                ? t.shell.hub
+                : (tabs.find((tab) => tab.id === activeTabId)?.title ?? 'TennoFrame')}
+            </span>
+          )
         )}
       </div>
 

@@ -345,7 +345,24 @@ export function applyThemeToDocument(appearance: UserSettings['appearance']): vo
         : `${bg.h} 18% 66%`
   const accentFg = ac.l > 62 ? '222 47% 11%' : '210 40% 98%'
 
-  root.style.setProperty('--radius', isMedievalActive ? '0.25rem' : '0.5rem')
+  const cornerStyle = appearance.cornerRadius ?? 'auto'
+  const resolvedRadius =
+    cornerStyle === 'sharp'
+      ? '0rem'
+      : cornerStyle === 'subtle'
+        ? '0.25rem'
+        : cornerStyle === 'rounded'
+          ? '0.5rem'
+          : cornerStyle === 'pill'
+            ? '0.875rem'
+            : isMedievalActive
+              ? '0.25rem'
+              : '0.5rem'
+
+  root.style.setProperty('--radius', resolvedRadius)
+  root.dataset.corners = cornerStyle
+  root.dataset.density = appearance.uiDensity ?? 'comfortable'
+  root.dataset.tabsPosition = appearance.tabsPosition ?? 'top'
   root.style.setProperty('--background', `${bg.h} ${bg.s}% ${bg.l}%`)
   root.style.setProperty('--foreground', fg)
   root.style.setProperty('--card', `${bg.h} ${bg.s}% ${cardL}%`)

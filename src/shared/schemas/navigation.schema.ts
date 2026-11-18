@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { MarketFilterChipSchema } from './market-search.schema'
 
 export const RouteKindSchema = z.enum([
+  'speed-dial',
   'hub',
   'market-home',
   'market-catalog',
@@ -79,6 +80,8 @@ export function formatSlugTitle(slug: string): string {
 
 export function getDefaultRouteTitle(route: AppRoute): string {
   switch (route.kind) {
+    case 'speed-dial':
+      return 'Tableau de Bord'
     case 'hub':
       return 'Hub Temps Réel'
     case 'market-home':
@@ -121,6 +124,8 @@ export function getDefaultRouteTitle(route: AppRoute): string {
 
 export function formatRouteUri(route: AppRoute): string {
   switch (route.kind) {
+    case 'speed-dial':
+      return 'wf://home'
     case 'hub':
       return 'wf://hub'
     case 'market-home':
@@ -182,6 +187,16 @@ export function parseInputToRoute(rawInput: string): AppRoute {
   }
 
   const lower = trimmed.toLowerCase()
+  if (
+    lower === 'wf://home' ||
+    lower === 'wf://speed-dial' ||
+    lower === 'home' ||
+    lower === 'accueil' ||
+    lower === 'speed dial' ||
+    lower === 'tableau de bord'
+  ) {
+    return { kind: 'speed-dial' }
+  }
   if (lower === 'wf://hub' || lower === 'hub') return { kind: 'hub' }
   if (
     lower === 'wf://wfm-account' ||
