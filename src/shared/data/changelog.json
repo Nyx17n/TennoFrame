@@ -1,5 +1,17 @@
 [
   {
+    "version": "2.16.0",
+    "date": "November 2026",
+    "title": "Warframe Faction UI Styles, Vertical Tabs Sidebar, Density & Speed Dial Dashboard",
+    "badge": "New in v2.16.0",
+    "highlights": [
+      "Three New **Warframe Faction UI Styles** (`Settings → Appearance`, 6 styles total across all 15 Warframe languages): transform TennoFrame and the in-game **Codex Farm Overlay (`Alt+O`)** with **Orokin Imperial** (Prime gold filigree, nacre sheen & Void energy glow), **Cephalon Tactical HUD** (sharp corner brackets, holographic grid & Orbitron/Rajdhani typography), or **POM-2 Terminal (1999)** (flicker-free Hollvania CRT scanlines, phosphor glow & JetBrains Mono terminal font), each featuring 3 one-click color palettes and opaque/transparent desktop modes.",
+      "Collapsible **Vertical Tabs Sidebar (Arc / Zen Style)**: switch between the classic horizontal top tab strip and a left vertical sidebar (`208 px` expanded or `48 px` icon rail, auto-collapsed in `460×660` Compact Overlay) with pinned tabs, vertical drag-and-drop reordering, middle-click close, and a streamlined 120 Hz Aero Snap title bar.",
+      "Customizable **Corner Geometry (`--radius`) & Interface Density**: tailor every card, button, tab, and modal with 5 corner shapes (*Auto*, *Sharp 0px*, *Subtle 4px*, *Standard 8px*, *Soft / Pill 14px*) and 3 spacing densities (*Compact* for +25% visible orders, *Comfortable*, or *Spacious*) at zero idle CPU cost.",
+      "New **Speed Dial Dashboard (`wf://home`)**, Customizable New Tab Target & **Home Button (`🏠`)**: launch a rich Speed Dial home page featuring central Market/Codex search, live Worldstate cycles (*Cetus, Orb Vallis, Cambion Drift, Duviri, Baro Ki'Teer*), 7 quick-access tiles, pinned Market favorites, and recent history — reachable anytime via the new **`🏠` Home** button next to Refresh (`↻`) or as your default `+` / `Ctrl+T` page."
+    ]
+  },
+  {
     "version": "2.15.0",
     "date": "November 2026",
     "title": "Secure Screenshot Attachments in In-App Discord Support",
