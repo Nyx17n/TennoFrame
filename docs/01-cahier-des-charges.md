@@ -942,6 +942,42 @@ Pour épurer l'interface tout en accélérant les actions fréquentes à la sour
      3. *État Nominal Bilingue* (6 fiches membres complètes avec portraits, photos des cadeaux, coûts Höllars, Chimie `❤️`, pièges signalés et cochage quotidien),
      4. *Repli Hors-Ligne des images* (affichage gracieux du badge glyphé si une miniature Wiki n'a pas encore pu être mise en cache hors connexion).
 
+### 3.22. Module 22 — Personnalisation de la Disposition & Ergonomie du Navigateur (Onglets Verticaux Arc/Zen, Forme des Coins & Densité UI, et Page Nouvel Onglet « Speed Dial »)
+
+1. **Objectif Métier & Les 3 Nouveaux Piliers d'Ergonomie Personnalisable (`Paramètres → Apparence`, 15 Langues)** :
+   - Permettre à chaque joueur d'adapter la **géométrie et la navigation** de **TennoFrame** à son écran et à sa façon de trader/farmer, sans le moindre coût CPU au repos (pilotage par variables CSS et attributs `data-*` sur `<html>`).
+   - **Pilier 1 — Position des Onglets (`tabsPosition: 'top' | 'sidebar-left'` + `sidebarCollapsed: boolean`)** :
+     - **`top` *(Haut Classique, défaut)*** : disposition horizontale habituelle dans `TitleTabsBar` avec défilement molette et chevrons `‹ / ›`.
+     - **`sidebar-left` *(Barre Latérale Verticale style Arc / Zen)*** :
+       - La barre de titre supérieure `TitleTabsBar` s'épure automatiquement (bouton de bascule du volet `◧`, bouton `🌐 Hub`, titre de la vue active centré sur la zone de déplacement 120 Hz Aero Snap, `CommunityCounterPill` et contrôles `— ▢ ✕`).
+       - À gauche du viewport s'affiche **`VerticalTabsSidebar`** (**`216 px`** dépliée ou **`48 px`** repliée en rail d'icônes via `⫷ / ⫸`) : onglets épinglés `📌` en tête, bouton `+ Nouvel Onglet` + `TabOrganizerPopover`, et liste verticale scrollable des onglets ouverts (titres complets lisibles même avec 15+ items Warframe Market ouverts, Drag & Drop vertical, fermeture clic molette et menu contextuel clic droit).
+   - **Pilier 2 — Forme des Coins (`cornerRadius`) & Densité d'Affichage (`uiDensity`)** :
+     - **`cornerRadius: 'auto' | 'sharp' | 'subtle' | 'rounded' | 'pill'`** : pilote `--radius` et `data-corners` sur toute l'application (cartes, boutons, champs, onglets, modales et `Codex Farm Overlay`) :
+       - `auto` *(défaut)* : suit intelligemment le style actif (`8 px` standard, `4 px` en *Style Médiéval*).
+       - `sharp` *(Angulaire Tactique — `0 px`)* : angles droits nets façon HUD Corpus / Militaire.
+       - `subtle` *(Subtil — `4 px` / `0.25rem`)* : micro-biseau discret.
+       - `rounded` *(Standard — `8 px` / `0.5rem`)* : arrondi moderne équilibré.
+       - `pill` *(Doux / Pilule — `14 px` / `0.875rem`)* : courbes douces généreuses.
+     - **`uiDensity: 'compact' | 'comfortable' | 'spacious'`** : pilote `data-density` sur `<html>` :
+       - `compact` : resserre harmonieusement la hauteur des barres secondaires, des lignes d'ordres Warframe Market et des espacements de grilles pour afficher **~25 % d'annonces et d'items en plus** sans scroller.
+       - `comfortable` *(défaut)* : équilibre visuel standard.
+       - `spacious` *(Aérée)* : marges et respirations élargies pour le confort de lecture sur grand écran (`1440p / 4K`).
+   - **Pilier 3 — Cible d'Accueil & Bouton `+` Nouvel Onglet (`newTabTarget` + Vue `wf://home` « Speed Dial »)** :
+     - **`newTabTarget: 'speed-dial' | 'market-home' | 'hub' | 'codex-home' | 'wfm-account'`** *(défaut rétrocompatible : `'market-home'`)* : définit quelle vue s'ouvre au clic sur **`+`**, au raccourci **`Ctrl+T`**, et comme onglet initial vierge.
+     - **Nouvelle route interne `'speed-dial'` (`wf://home` — `SpeedDialHomeView`)** : véritable page d'accueil rapide de navigateur Warframe comprenant :
+       1. **Barre de recherche centrale** (*Marché + Codex + navigation `wf://`*, focus rapide et autocomplétion directe),
+       2. **Grille de 7 Tuiles d'Accès Rapide** (*Marché, Hub Temps Réel & Cadeaux 1999, Codex & Helminth, Panier Bundler, Ducanator, Rivens, Mon Compte WFM*),
+       3. **Bandeau Temps Réel des Cycles du Monde** (*Cetus, Vallée Orbis, Puy de Cambion, Duviri, Baro Ki'Teer* — servi via le cache `worldstate` sans requête superflue),
+       4. **Section Favoris Marché épinglés & Pages récentes** (accès 1-clic aux items suivis par le joueur).
+2. **Contrats `zod`, Sécurité & Adaptation Mode Compact (`460×660`)** :
+   - Validation stricte via `TabsPositionSchema`, `CornerRadiusStyleSchema`, `UiDensitySchema` et `NewTabTargetSchema` dans `src/shared/schemas/settings.schema.ts`, et extension de `RouteKindSchema` avec `'speed-dial'` dans `src/shared/schemas/navigation.schema.ts` (rétrocompatibilité 100 % garantie avec les fichiers `settings.json` existants grâce aux `.default(...)`).
+   - **Adaptation Mode Compact (`460×660`)** : si `tabsPosition === 'sidebar-left'` et que le joueur bascule en Mode Compact (`Alt+M`), `VerticalTabsSidebar` passe automatiquement en **rail compact `44 px` (ou repliable en 1 clic)** afin de préserver toute la largeur utile par-dessus Warframe ; `SpeedDialHomeView` empile ses tuiles sur 2 colonnes fluides sans débordement horizontal.
+3. **Les 4 États UI Obligatoires** :
+   1. *Chargement initial / Skeleton des cycles sur `SpeedDialHomeView`* (tuiles et barre de recherche immédiatement interactives à `0 ms`, *Skeleton* léger sur le bandeau Worldstate pendant la première lecture),
+   2. *État Vide des Favoris / Récents sur `SpeedDialHomeView`* (encadré guidé invitant à ajouter des items en favoris `★` avec bouton direct vers le Catalogue Marché),
+   3. *État Nominal Actif* (bascule instantanée à chaud entre Onglets Haut ↔ Latéraux, les 5 styles de coins, les 3 densités et les 5 cibles de Nouvel Onglet dans les **15 langues Warframe**),
+   4. *Repli Hors-Ligne gracieux sur `SpeedDialHomeView`* (si `warframestat.us` est injoignable, affichage sobre « Cycles momentanément hors-ligne · Réessayer » tout en gardant la recherche Codex hors-ligne et les tuiles 100 % fonctionnelles).
+
 ---
 
 ## 4. Architecture Technique, Contrats IPC & Sécurité
@@ -1033,7 +1069,7 @@ Tous les paramètres d'entrée et toutes les réponses API passent par une valid
 
 ## 5. Plan des Maquettes Excalidraw (`docs/02-tennoframe/` — Synchronisées `v2.10+`)
 
-L'ensemble des **22 planches Excalidraw** dans `docs/02-tennoframe/` documente fidèlement l'architecture de **TennoFrame**, chacune présentant côte à côte la version **Desktop (`1440×900`)**, son adaptation **Compact Overlay (`460×660`)**, et **les 4 états UI obligatoires** (*Chargement / Skeleton*, *Vide*, *Nominal*, *Erreur*) :
+L'ensemble des **23 planches Excalidraw** dans `docs/02-tennoframe/` documente fidèlement l'architecture de **TennoFrame**, chacune présentant côte à côte la version **Desktop (`1440×900`)**, son adaptation **Compact Overlay (`460×660`)**, et **les 4 états UI obligatoires** (*Chargement / Skeleton*, *Vide*, *Nominal*, *Erreur*) :
 
 1. `01-app-shell-navigation.excalidraw` : Fenêtre *Frameless* `v2.6.0`, `TitleTabsBar` (défilement molette + chevrons `‹ / ›` + fermeture clic molette), `ClickThroughBanner` (`👻` `Alt+G` + maintien `0.5s`), `CommandNavBar` (`Ctrl+K`, cloche `🔔`, `PC · Cross · FR ▾`, Zoom, `📌`, `👻`, `🗖`, `⚙`), `BookmarksBar` centrée + `Historique` (`Ctrl+H`), Omnibox, Organisateur d'onglets, bandeau `/w`, `CompactTimersBar`, bouton Discord et `StatusBar v2.6.0`.
 2. `02-market-home-catalog-item.excalidraw` : Accueil Marché (flux d'annonces récentes en direct, `ViewModeToggle` `[⊞|▭|☰] + [S|M|L]`, badges `Min · Moy · Max` Platinum), Catalogue, Favoris, Profil joueur, et **Fiche Item complète** (Ordres Vente/Achat, Comparateur *Set vs Pièces*, Pont bidirectionnel *Codex*, Statistiques 48h/90j + pagination *Afficher plus*).
@@ -1057,6 +1093,7 @@ L'ensemble des **22 planches Excalidraw** dans `docs/02-tennoframe/` documente f
 20. `20-typography-font-selector.excalidraw` *(Module 19 — Système de Changement de Police d'Écriture & Catalogue Typographique Hors-Ligne)* : **Composant `FontSelectorSection` dans `SettingsModal → Apparence`** avec filtres par univers (*Toutes · Sans-Serif · Sci-Fi · Médiéval & Serif · Mono & Fun*), **grille des 12 polices iconiques** (`Auto`, `Segoe UI`, `Inter`, `Roboto`, `Poppins`, `Montserrat`, `Rajdhani Sci-Fi`, `Orbitron`, `Cinzel Médiéval`, `Georgia`, `JetBrains Mono`, `Comic Sans`) rendues chacune dans leur propre typographie (`Aa · 145p`), **bandeau d'aperçu temps réel** (*Titre, prix Platinum tabulaire `145p` et commande `/w`*), **rendu comparé Desktop `1440×900`, Mode Compact `460×660` & `Codex Farm Overlay`**, architecture `.woff2` 100 % locale (`font-src 'self'`, zéro Google CDN) et **les 4 états UI obligatoires**.
 21. `21-in-app-discord-support.excalidraw` *(Module 20 — Système de Support & Signalement de Bug In-App vers Discord avec Pièce Jointe Image Zéro-Risque CDR)* : **Schéma d'architecture de sécurité bout-en-bout & Pipeline CDR (*Content Disarm & Reconstruction*)** (`TennoFrame IPC Main` + ré-encodage pixels `nativeImage` détruisant 100 % EXIF/polyglottes → `Cloudflare Worker + KV` avec 3 secrets Webhooks isolés, 5 couches anti-spam `3 / 24h`, double vérification *Magic Bytes* & `allowed_mentions: []` → `Salons Discord #bug-reports / #suggestions / #aide` en `multipart/form-data`), **Vue Desktop `1440×900` avec `SupportTicketModal`** (3 catégories `🐛 Bug` / `💡 Suggestion` / `❓ Aide`, zone d'image *Glisser / Parcourir / `Ctrl+V`* avec miniature nettoyée, diagnostic anonyme), **Aperçu du rendu Discord avec capture intégrée à l'Embed**, **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
 22. `22-hub-hex-gifting-guide.excalidraw` *(Module 21 — Onglet Hub « Cadeaux L'Hexagone 1999 » / The Hex KIM Gifting Guide)* : **Barre du Hub enrichie du 7e onglet `🎁 Cadeaux 1999 (Hex)`**, **bandeau supérieur** (recherche instantanée bilingue FR/EN par cadeau ou personnage + filtres rapides des 6 membres + compteur Daily Reset UTC `00:00`), **Vue Desktop `1440×900`** présentant les **6 cartes membres de L'Hexagone** (*Arthur / Broadsword, Eleanor / Salem, Lettie / Belladonna, Amir / H16h V0l7463, Aoi / Glimmer + alerte piège Enceinte, Quincy / Soldja1Shot1kil*) avec **portrait officiel + glyphe pixel**, **traduction complète de la bio**, **grille visuelle des cadeaux avec photo, nom FR + sous-titre EN, prix Höllars, Stock et bonus Chimie `❤️ +20 / +10 / +5`** + case `✓ Offert aujourd'hui`, **Adaptation Mode Compact `460×660`** par-dessus le terminal POM-2 en jeu et **les 4 états UI obligatoires**.
+23. `23-ui-layout-tabs-density-newtab.excalidraw` *(Module 22 — Personnalisation de la Disposition & Ergonomie : Onglets Verticaux Arc/Zen, Forme des Coins & Densité UI, et Page Nouvel Onglet « Speed Dial »)* : **Carte `LayoutAndErgonomicsSection` dans `SettingsModal → Apparence`** (bascule Position des Onglets `Haut Classique | Barre Latérale Gauche`, sélecteur Forme des Coins `Auto | 0px Tactique | 4px Subtil | 8px Standard | 14px Pilule`, sélecteur Densité `Compacte | Confortable | Aérée` et Cible `+` Nouvel Onglet `Speed Dial | Marché | Hub | Codex | Profil WFM`), **Vue Desktop `1440×900`** combinant **`VerticalTabsSidebar` (`216 px` dépliée / `48 px` rail d'icônes)** et la nouvelle page **`SpeedDialHomeView` (`wf://home`)** (recherche centrale, 7 tuiles d'accès rapide, cycles Worldstate en direct, favoris Marché & pages récentes), **comparatif visuel Coins & Densités**, **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
 
 ---
 
