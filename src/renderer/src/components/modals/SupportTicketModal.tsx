@@ -3,9 +3,14 @@ import { Bug, HelpCircle, Lightbulb, Loader2, MessageSquarePlus, Send } from 'lu
 import { DISCORD_INVITE_URL } from '@shared/constants'
 import { formatRouteUri } from '@shared/schemas/navigation.schema'
 import type {
+  SupportSanitizedAttachment,
   SupportTicketCategory,
   SupportTicketResult
 } from '@shared/schemas/support.schema'
+import {
+  isCandidateRasterImageFile,
+  SupportAttachmentDropzone
+} from '@/components/modals/SupportAttachmentDropzone'
 import { SupportTicketResultBanner } from '@/components/modals/SupportTicketResultBanner'
 import { Button } from '@/components/ui/button'
 import {
@@ -36,6 +41,9 @@ export function SupportTicketModal(): React.JSX.Element {
   const [subject, setSubject] = React.useState('')
   const [contact, setContact] = React.useState('')
   const [message, setMessage] = React.useState('')
+  const [attachment, setAttachment] = React.useState<SupportSanitizedAttachment | null>(null)
+  const [isProcessingImage, setIsProcessingImage] = React.useState(false)
+  const [imageError, setImageError] = React.useState<string | null>(null)
   const [includeDiagnostics, setIncludeDiagnostics] = React.useState(true)
   const [isSending, setIsSending] = React.useState(false)
   const [cooldownSec, setCooldownSec] = React.useState(0)
@@ -77,9 +85,55 @@ export function SupportTicketModal(): React.JSX.Element {
 
   const isValid = subject.trim().length >= 5 && message.trim().length >= 15
 
+  const handleSelectImageFile = React.useCallback(async (file: File): Promise<void> => {
+    setImageError(null)
+    const precheckErr = isCandidateRasterImageFile(file)
+    if (precheckErr) {
+      setImageError(precheckErr)
+      return
+    }
+    setIsProcessingImage(true)
+    try {
+      const arrayBuf = await file.arrayBuffer()
+      const res = await ipcClient.support.prepareAttachment({
+        bytes: new Uint8Array(arrayBuf),
+        fileNameHint: file.name
+      })
+      if (res.ok && res.attachment) {
+        setAttachment(res.attachment)
+        setImageError(null)
+      } else {
+        setImageError(res.errorMessage ?? 'Unsupported or unsafe image file.')
+      }
+    } catch (err) {
+      setImageError(err instanceof Error ? err.message : 'Unable to read image file.')
+    } finally {
+      setIsProcessingImage(false)
+    }
+  }, [])
+
+  const handleDialogPaste = (e: React.ClipboardEvent<HTMLDivElement>): void => {
+    if (isSending || isProcessingImage) return
+    const items = e.clipboardData?.items
+    if (!items) return
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i]
+      if (item && item.kind === 'file' && item.type.toLowerCase().startsWith('image/')) {
+        const pastedFile = item.getAsFile()
+        if (pastedFile) {
+          e.preventDefault()
+          void handleSelectImageFile(pastedFile)
+          return
+        }
+      }
+    }
+  }
+
   const handleSubmit = async (e?: React.FormEvent): Promise<void> => {
     e?.preventDefault()
-    if (!isValid || isSending || cooldownSec > 0 || dailyRemaining <= 0) return
+    if (!isValid || isSending || isProcessingImage || cooldownSec > 0 || dailyRemaining <= 0) {
+      return
+    }
     setIsSending(true)
     setResult(null)
     try {
@@ -89,7 +143,8 @@ export function SupportTicketModal(): React.JSX.Element {
         message: message.trim(),
         contact: contact.trim(),
         includeDiagnostics,
-        activeRoute
+        activeRoute,
+        attachment
       })
       setResult(res)
       if (res.cooldownRemainingSec > 0) setCooldownSec(res.cooldownRemainingSec)
@@ -97,6 +152,8 @@ export function SupportTicketModal(): React.JSX.Element {
       if (res.ok) {
         setSubject('')
         setMessage('')
+        setAttachment(null)
+        setImageError(null)
       }
     } finally {
       setIsSending(false)
@@ -137,7 +194,10 @@ export function SupportTicketModal(): React.JSX.Element {
 
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>
-      <DialogContent className="max-h-[88vh] max-w-xl overflow-y-auto p-5">
+      <DialogContent
+        onPaste={handleDialogPaste}
+        className="max-h-[88vh] max-w-xl overflow-y-auto p-5"
+      >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base font-bold">
             <MessageSquarePlus className="h-4 w-4 text-primary" />
@@ -221,6 +281,20 @@ export function SupportTicketModal(): React.JSX.Element {
             />
           </label>
 
+          <SupportAttachmentDropzone
+            attachment={attachment}
+            isProcessing={isProcessingImage}
+            errorMessage={imageError}
+            disabled={isSending}
+            isCompactMode={isCompactMode}
+            strings={strings}
+            onSelectFile={(file) => void handleSelectImageFile(file)}
+            onRemove={() => {
+              setAttachment(null)
+              setImageError(null)
+            }}
+          />
+
           <label className="flex cursor-pointer items-start gap-2 rounded-md border border-border/80 bg-card/50 p-2.5">
             <input
               type="checkbox"
@@ -269,7 +343,13 @@ export function SupportTicketModal(): React.JSX.Element {
               <Button
                 type="submit"
                 size="sm"
-                disabled={!isValid || isSending || cooldownSec > 0 || dailyRemaining <= 0}
+                disabled={
+                  !isValid ||
+                  isSending ||
+                  isProcessingImage ||
+                  cooldownSec > 0 ||
+                  dailyRemaining <= 0
+                }
               >
                 {isSending ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />

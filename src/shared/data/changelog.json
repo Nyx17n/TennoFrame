@@ -1,5 +1,16 @@
 [
   {
+    "version": "2.15.0",
+    "date": "November 2026",
+    "title": "Secure Screenshot Attachments in In-App Discord Support",
+    "badge": "New in v2.15.0",
+    "highlights": [
+      "Screenshot Attachments in **In-App Support** (localized across all 15 Warframe languages): attach a screenshot to any **Bug Report**, **Suggestion**, or **Question / Help** ticket via **Drag & Drop**, **Browse**, or **`Ctrl+V` clipboard paste** directly after taking a **`Win+Shift+S`** snip in-game, with instant thumbnail preview and one-click removal.",
+      "Zero-Risk Image Content Disarm & Reconstruction (**CDR**) Pipeline: strictly accepts raster images (`PNG`, `JPG`, `WebP` up to `8 MB`), blocks vector/executable/archive formats (`.svg`, `.exe`, `.zip`, `.html`, `.pdf`, `.gif`) and decompression bombs before decoding, decodes raw `RGBA` pixels via Skia `nativeImage`, and synthesizes a brand-new image (`≤ 1920px`, `≤ 2.5 MB`) — physically stripping **100% of EXIF/GPS metadata** and any hidden or polyglot payloads.",
+      "Native Discord Multipart Embed Delivery & Server-Side Binary Verification: the Cloudflare Worker relay independently validates binary PNG/JPEG headers and end-of-image trailers (`IEND` / `FFD9`), integrates image SHA-256 hashes into duplicate & 5-layer anti-spam protection (`3 tickets / 24h`), and embeds verified screenshots directly inside Discord ticket cards."
+    ]
+  },
+  {
     "version": "2.14.1",
     "date": "November 2026",
     "title": "Windows 10/11 Frameless Window & Overlay Ghost White Bar Fix",

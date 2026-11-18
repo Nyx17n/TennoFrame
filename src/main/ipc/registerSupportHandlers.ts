@@ -19,6 +19,11 @@ export function registerSupportHandlers({
     return supportService.getStatus()
   })
 
+  ipcMain.handle(IPC_CHANNELS.SUPPORT_PREPARE_ATTACHMENT, (event, rawPayload: unknown) => {
+    assertTrustedSender(event, windowService.getMainWindow())
+    return supportService.prepareAttachment(rawPayload)
+  })
+
   ipcMain.handle(IPC_CHANNELS.SUPPORT_SEND_TICKET, async (event, rawPayload: unknown) => {
     assertTrustedSender(event, windowService.getMainWindow())
     const parsed = SupportTicketInputSchema.parse(rawPayload)

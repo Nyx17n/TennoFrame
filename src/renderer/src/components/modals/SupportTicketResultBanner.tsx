@@ -87,6 +87,7 @@ export function SupportTicketResultBanner({
     result &&
     !result.ok &&
     (result.errorCode === 'SPAM_CONTENT' ||
+      result.errorCode === 'INVALID_IMAGE' ||
       result.errorCode === 'DUPLICATE' ||
       result.errorCode === 'BANNED' ||
       result.errorCode === 'DAILY_LIMIT' ||

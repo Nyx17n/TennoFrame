@@ -25,6 +25,8 @@ import type {
 } from './schemas/market-search.schema'
 import type { UserSettings, UserSettingsPatch } from './schemas/settings.schema'
 import type {
+  SupportPrepareAttachmentResult,
+  SupportRawAttachmentInput,
   SupportStatus,
   SupportTicketInput,
   SupportTicketResult
@@ -128,6 +130,7 @@ export const IPC_CHANNELS = {
   UPDATER_INSTALL: 'updater:downloadAndInstall',
   UPDATER_ON_STATUS: 'updater:onStatus',
   SUPPORT_GET_STATUS: 'support:getStatus',
+  SUPPORT_PREPARE_ATTACHMENT: 'support:prepareAttachment',
   SUPPORT_SEND_TICKET: 'support:sendTicket'
 } as const
 
@@ -224,6 +227,7 @@ export interface TennoFrameBridgeApi {
   }
   readonly support: {
     getStatus: () => Promise<SupportStatus>
+    prepareAttachment: (input: SupportRawAttachmentInput) => Promise<SupportPrepareAttachmentResult>
     sendTicket: (input: SupportTicketInput) => Promise<SupportTicketResult>
   }
 }
