@@ -502,8 +502,11 @@ html[data-glass='liquid-glass'][data-glass-backdrop='true'] .wf-app-root {
   backdrop-filter: blur(22px) saturate(145%);
 }
 
-html[data-glass='medieval'][data-glass-backdrop='true'] .wf-app-root {
-  backdrop-filter: blur(12px) saturate(130%);
+html[data-glass='medieval'][data-glass-backdrop='true'] .wf-app-root,
+html[data-glass='orokin'][data-glass-backdrop='true'] .wf-app-root,
+html[data-glass='cephalon'][data-glass-backdrop='true'] .wf-app-root,
+html[data-glass='pom2-1999'][data-glass-backdrop='true'] .wf-app-root {
+  backdrop-filter: blur(14px) saturate(135%);
 }
 
 html[data-glass='liquid-glass'] .wf-app-root {
@@ -526,6 +529,17 @@ html[data-glass='simple'] .wf-app-root[data-maximized='false'] {
 html[data-glass='medieval'] .wf-app-root[data-maximized='false'] {
   border-radius: 3px;
   border: 1px solid hsl(var(--primary) / 0.72);
+}
+
+html[data-glass='orokin'] .wf-app-root[data-maximized='false'] {
+  border-radius: 0.5rem;
+  border: 1px solid rgba(245, 208, 107, 0.65);
+}
+
+html[data-glass='cephalon'] .wf-app-root[data-maximized='false'],
+html[data-glass='pom2-1999'] .wf-app-root[data-maximized='false'] {
+  border-radius: 2px;
+  border: 1px solid hsl(var(--primary) / 0.75);
 }
 
 html[data-glass-backdrop='true'] .wf-app-gradient-layer {
@@ -844,10 +858,235 @@ html[data-glass='medieval'] ::-webkit-scrollbar-thumb {
   border-radius: 2px;
 }
 
+/* ----------------------------------------------------------------------------
+   STYLE D : « Orokin Impérial » (Filigranes Or Prime, Nacre & Énergie du Néant)
+   ---------------------------------------------------------------------------- */
+
+html[data-glass='orokin'] .wf-shell-bar {
+  background-color: hsl(var(--card) / 0.96) !important;
+  border-color: rgba(245, 208, 107, 0.44) !important;
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 248, 220, 0.08) 0%,
+    transparent 35%,
+    transparent 65%,
+    rgba(56, 189, 248, 0.08) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 248, 214, 0.32),
+    inset 0 -1px 0 0 rgba(245, 208, 107, 0.34);
+}
+
+html[data-glass='orokin'][data-glass-backdrop='true'] .wf-shell-bar {
+  background-color: hsl(var(--card) / var(--wf-glass-bar-alpha, 0.6)) !important;
+  backdrop-filter: blur(16px) saturate(140%);
+}
+
+html[data-glass='orokin'] .wf-glow-surface,
+html[data-glass='orokin'] .wf-glass-panel,
+html[data-glass='orokin'] .wf-card-lift,
+html[data-glass='orokin'] .wf-farm-overlay-card {
+  border-radius: 0.375rem;
+  background-color: hsl(var(--card) / 0.95) !important;
+  border-color: rgba(245, 208, 107, 0.52) !important;
+  background-image:
+    radial-gradient(120% 80% at 50% 0%, rgba(255, 243, 196, 0.14), transparent 68%),
+    radial-gradient(110% 70% at 50% 100%, rgba(56, 189, 248, 0.12), transparent 72%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 248, 220, 0.22),
+    inset 0 0 0 3px hsl(var(--background) / 0.82),
+    0 8px 24px -10px rgba(56, 189, 248, 0.28) !important;
+}
+
+html[data-glass='orokin'][data-glass-backdrop='true'] .wf-glow-surface,
+html[data-glass='orokin'][data-glass-backdrop='true'] .wf-glass-panel,
+html[data-glass='orokin'][data-glass-backdrop='true'] .wf-card-lift,
+html[data-glass='orokin'][data-glass-backdrop='true'] .wf-farm-overlay-card {
+  background-color: hsl(var(--card) / var(--wf-glass-card-alpha, 0.44)) !important;
+  backdrop-filter: blur(14px) saturate(140%);
+}
+
+html[data-glass='orokin'] .wf-dialog-motion,
+html[data-glass='orokin'] .wf-drawer-motion,
+html[data-glass='orokin'] .wf-popover-motion,
+html[data-glass='orokin'] .wf-farm-overlay-shell {
+  border-radius: 0.375rem;
+  background-color: hsl(var(--popover) / 0.97) !important;
+  border-color: rgba(245, 208, 107, 0.68) !important;
+  box-shadow:
+    inset 0 0 0 2px hsl(var(--popover) / 0.9),
+    inset 0 0 0 3px rgba(245, 208, 107, 0.34),
+    0 18px 42px -10px rgba(14, 165, 233, 0.26) !important;
+}
+
+html[data-glass='orokin'][data-glass-backdrop='true'] .wf-dialog-motion,
+html[data-glass='orokin'][data-glass-backdrop='true'] .wf-drawer-motion,
+html[data-glass='orokin'][data-glass-backdrop='true'] .wf-popover-motion,
+html[data-glass='orokin'][data-glass-backdrop='true'] .wf-farm-overlay-shell {
+  background-color: hsl(var(--popover) / var(--wf-glass-modal-alpha, 0.68)) !important;
+  backdrop-filter: blur(18px) saturate(145%);
+}
+
+/* ----------------------------------------------------------------------------
+   STYLE E : « Céphalon / HUD Tactique » (Coins Nets, Repères & Grille Holo)
+   ---------------------------------------------------------------------------- */
+
+html[data-glass='cephalon'] .wf-shell-bar {
+  background-color: hsl(var(--card) / 0.95) !important;
+  border-color: hsl(var(--primary) / 0.48) !important;
+  background-image: repeating-linear-gradient(
+    90deg,
+    hsl(var(--primary) / 0.04) 0px,
+    hsl(var(--primary) / 0.04) 1px,
+    transparent 1px,
+    transparent 24px
+  );
+  box-shadow: inset 0 -1px 0 0 hsl(var(--primary) / 0.36);
+}
+
+html[data-glass='cephalon'][data-glass-backdrop='true'] .wf-shell-bar {
+  background-color: hsl(var(--card) / var(--wf-glass-bar-alpha, 0.58)) !important;
+  backdrop-filter: blur(14px) saturate(150%);
+}
+
+html[data-glass='cephalon'] .wf-glow-surface,
+html[data-glass='cephalon'] .wf-glass-panel,
+html[data-glass='cephalon'] .wf-card-lift,
+html[data-glass='cephalon'] .wf-farm-overlay-card {
+  border-radius: 2px;
+  background-color: hsl(var(--card) / 0.94) !important;
+  border-color: hsl(var(--primary) / 0.48) !important;
+  background-image:
+    linear-gradient(135deg, hsl(var(--primary) / 0.24) 0%, transparent 18%),
+    repeating-linear-gradient(
+      0deg,
+      hsl(var(--primary) / 0.028) 0px,
+      hsl(var(--primary) / 0.028) 1px,
+      transparent 1px,
+      transparent 18px
+    );
+  box-shadow:
+    inset 2px 2px 0 0 hsl(var(--primary) / 0.62),
+    inset -2px -2px 0 0 hsl(var(--primary) / 0.42),
+    0 8px 22px -12px hsl(var(--primary) / 0.4) !important;
+}
+
+html[data-glass='cephalon'][data-glass-backdrop='true'] .wf-glow-surface,
+html[data-glass='cephalon'][data-glass-backdrop='true'] .wf-glass-panel,
+html[data-glass='cephalon'][data-glass-backdrop='true'] .wf-card-lift,
+html[data-glass='cephalon'][data-glass-backdrop='true'] .wf-farm-overlay-card {
+  background-color: hsl(var(--card) / var(--wf-glass-card-alpha, 0.4)) !important;
+  backdrop-filter: blur(14px) saturate(150%);
+}
+
+html[data-glass='cephalon'] .wf-dialog-motion,
+html[data-glass='cephalon'] .wf-drawer-motion,
+html[data-glass='cephalon'] .wf-popover-motion,
+html[data-glass='cephalon'] .wf-farm-overlay-shell {
+  border-radius: 2px;
+  background-color: hsl(var(--popover) / 0.96) !important;
+  border-color: hsl(var(--primary) / 0.68) !important;
+  box-shadow:
+    inset 2px 2px 0 0 hsl(var(--primary) / 0.72),
+    inset -2px -2px 0 0 hsl(var(--primary) / 0.52),
+    0 18px 40px -12px rgba(0, 0, 0, 0.7) !important;
+}
+
+html[data-glass='cephalon'][data-glass-backdrop='true'] .wf-dialog-motion,
+html[data-glass='cephalon'][data-glass-backdrop='true'] .wf-drawer-motion,
+html[data-glass='cephalon'][data-glass-backdrop='true'] .wf-popover-motion,
+html[data-glass='cephalon'][data-glass-backdrop='true'] .wf-farm-overlay-shell {
+  background-color: hsl(var(--popover) / var(--wf-glass-modal-alpha, 0.66)) !important;
+  backdrop-filter: blur(16px) saturate(150%);
+}
+
+/* ----------------------------------------------------------------------------
+   STYLE F : « Terminal POM-2 (1999) » (Scanlines CRT Statiques & Halo Phosphore)
+   ---------------------------------------------------------------------------- */
+
+html[data-glass='pom2-1999'] .wf-app-root {
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.13) 0px,
+    rgba(0, 0, 0, 0.13) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  box-shadow: inset 0 0 42px -14px hsl(var(--primary) / 0.34);
+}
+
+html[data-glass='pom2-1999'] .wf-shell-bar {
+  background-color: hsl(var(--card) / 0.96) !important;
+  border-color: hsl(var(--primary) / 0.58) !important;
+  box-shadow: inset 0 -1px 0 0 hsl(var(--primary) / 0.42);
+}
+
+html[data-glass='pom2-1999'][data-glass-backdrop='true'] .wf-shell-bar {
+  background-color: hsl(var(--card) / var(--wf-glass-bar-alpha, 0.62)) !important;
+  backdrop-filter: blur(10px);
+}
+
+html[data-glass='pom2-1999'] .wf-glow-surface,
+html[data-glass='pom2-1999'] .wf-glass-panel,
+html[data-glass='pom2-1999'] .wf-card-lift,
+html[data-glass='pom2-1999'] .wf-farm-overlay-card {
+  border-radius: 2px;
+  background-color: hsl(var(--card) / 0.94) !important;
+  border-color: hsl(var(--primary) / 0.62) !important;
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.14) 0px,
+    rgba(0, 0, 0, 0.14) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  box-shadow:
+    inset 0 0 22px -10px hsl(var(--primary) / 0.35),
+    0 4px 14px -8px rgba(0, 0, 0, 0.65) !important;
+}
+
+html[data-glass='pom2-1999'][data-glass-backdrop='true'] .wf-glow-surface,
+html[data-glass='pom2-1999'][data-glass-backdrop='true'] .wf-glass-panel,
+html[data-glass='pom2-1999'][data-glass-backdrop='true'] .wf-card-lift,
+html[data-glass='pom2-1999'][data-glass-backdrop='true'] .wf-farm-overlay-card {
+  background-color: hsl(var(--card) / var(--wf-glass-card-alpha, 0.44)) !important;
+  backdrop-filter: blur(10px);
+}
+
+html[data-glass='pom2-1999'] .wf-dialog-motion,
+html[data-glass='pom2-1999'] .wf-drawer-motion,
+html[data-glass='pom2-1999'] .wf-popover-motion,
+html[data-glass='pom2-1999'] .wf-farm-overlay-shell {
+  border-radius: 2px;
+  background-color: hsl(var(--popover) / 0.97) !important;
+  border-color: hsl(var(--primary) / 0.78) !important;
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.14) 0px,
+    rgba(0, 0, 0, 0.14) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  box-shadow:
+    inset 0 0 28px -10px hsl(var(--primary) / 0.42),
+    0 16px 38px -10px rgba(0, 0, 0, 0.75) !important;
+}
+
+html[data-glass='pom2-1999'][data-glass-backdrop='true'] .wf-dialog-motion,
+html[data-glass='pom2-1999'][data-glass-backdrop='true'] .wf-drawer-motion,
+html[data-glass='pom2-1999'][data-glass-backdrop='true'] .wf-popover-motion,
+html[data-glass='pom2-1999'][data-glass-backdrop='true'] .wf-farm-overlay-shell {
+  background-color: hsl(var(--popover) / var(--wf-glass-modal-alpha, 0.68)) !important;
+  backdrop-filter: blur(12px);
+}
+
 /* Voile arrière des modales allégé pour voir TennoFrame réagir en direct */
 html[data-glass='liquid-glass'] .wf-overlay-motion,
 html[data-glass='simple'] .wf-overlay-motion,
-html[data-glass='medieval'] .wf-overlay-motion {
+html[data-glass='medieval'] .wf-overlay-motion,
+html[data-glass='orokin'] .wf-overlay-motion,
+html[data-glass='cephalon'] .wf-overlay-motion,
+html[data-glass='pom2-1999'] .wf-overlay-motion {
   background-color: rgba(8, 6, 4, 0.38) !important;
   backdrop-filter: blur(4px);
 }

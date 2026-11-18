@@ -1,4 +1,4 @@
-import type { FontFamilyId } from '@shared/schemas/settings.schema'
+import type { FontFamilyId, GlassStyle } from '@shared/schemas/settings.schema'
 
 export type FontCategoryFilter = 'all' | 'sans' | 'scifi' | 'medieval' | 'mono-fun'
 
@@ -173,16 +173,47 @@ export const FONT_CATALOG: readonly FontOptionDefinition[] = [
 
 export function resolveFontStacks(
   selectedId: FontFamilyId,
-  isMedievalStyleActive: boolean
+  activeStyle: GlassStyle | 'off' = 'off'
 ): {
   readonly effectiveId: Exclude<FontFamilyId, 'auto'>
   readonly definition: FontOptionDefinition
 } {
-  const effectiveId: Exclude<FontFamilyId, 'auto'> =
-    selectedId === 'auto' ? (isMedievalStyleActive ? 'medieval' : 'system') : selectedId
+  if (selectedId === 'auto') {
+    if (activeStyle === 'medieval') {
+      const def = FONT_CATALOG.find((item) => item.id === 'medieval') ?? FONT_CATALOG[1]!
+      return { effectiveId: 'medieval', definition: def }
+    }
+    if (activeStyle === 'orokin') {
+      const base = FONT_CATALOG.find((item) => item.id === 'montserrat') ?? FONT_CATALOG[1]!
+      return {
+        effectiveId: 'montserrat',
+        definition: {
+          ...base,
+          name: 'Cinzel & Montserrat',
+          headingStack: `'Cinzel', 'Montserrat', ${INTL_SANS_FALLBACK}`
+        }
+      }
+    }
+    if (activeStyle === 'cephalon') {
+      const base = FONT_CATALOG.find((item) => item.id === 'rajdhani') ?? FONT_CATALOG[1]!
+      return {
+        effectiveId: 'rajdhani',
+        definition: {
+          ...base,
+          name: 'Orbitron & Rajdhani',
+          headingStack: `'Orbitron', 'Rajdhani', ${INTL_SANS_FALLBACK}`
+        }
+      }
+    }
+    if (activeStyle === 'pom2-1999') {
+      const def = FONT_CATALOG.find((item) => item.id === 'jetbrains-mono') ?? FONT_CATALOG[1]!
+      return { effectiveId: 'jetbrains-mono', definition: def }
+    }
+    return { effectiveId: 'system', definition: FONT_CATALOG[1]! }
+  }
 
   const definition =
-    FONT_CATALOG.find((item) => item.id === effectiveId) ?? FONT_CATALOG[1]!
+    FONT_CATALOG.find((item) => item.id === selectedId) ?? FONT_CATALOG[1]!
 
-  return { effectiveId, definition }
+  return { effectiveId: selectedId, definition }
 }

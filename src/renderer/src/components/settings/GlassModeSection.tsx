@@ -1,12 +1,23 @@
 import * as React from 'react'
-import { Crown, Eye, EyeOff, Layers, Sparkles } from 'lucide-react'
+import { Cpu, Crown, Eye, EyeOff, Gem, Layers, Sparkles, Terminal } from 'lucide-react'
 import type { GlassStyle } from '@shared/schemas/settings.schema'
 import { GlassStylePreviewBox } from '@/components/settings/GlassStylePreviewBox'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
+import { getFactionStylesStrings } from '@/lib/i18n/faction-styles-i18n'
 import { getGlassModeMessages } from '@/lib/i18n/glass-mode-i18n'
+import { FACTION_STYLE_PALETTES, type ThemedFactionStyleId } from '@/lib/theme-engine'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/stores/useAppStore'
+
+function isThemedFactionStyle(style: GlassStyle): style is ThemedFactionStyleId {
+  return (
+    style === 'medieval' ||
+    style === 'orokin' ||
+    style === 'cephalon' ||
+    style === 'pom2-1999'
+  )
+}
 
 export function GlassModeSection(): React.JSX.Element {
   const lang = useAppStore((s) => s.settings.market.language)
@@ -18,24 +29,39 @@ export function GlassModeSection(): React.JSX.Element {
   const desktopBackdrop = appearance.glassDesktopBackdropEnabled !== false
   const glassOpacity = appearance.glassOpacityPercent
   const msg = getGlassModeMessages(lang)
+  const fMsg = React.useMemo(() => getFactionStylesStrings(lang), [lang])
+
+  const styleItems: readonly {
+    id: GlassStyle
+    label: string
+    Icon: typeof Sparkles
+  }[] = [
+    { id: 'liquid-glass', label: msg.styleLiquidGlass, Icon: Sparkles },
+    { id: 'simple', label: msg.styleSimple, Icon: Layers },
+    { id: 'medieval', label: msg.styleMedieval, Icon: Crown },
+    { id: 'orokin', label: fMsg.styleOrokin, Icon: Gem },
+    { id: 'cephalon', label: fMsg.styleCephalon, Icon: Cpu },
+    { id: 'pom2-1999', label: fMsg.stylePom2, Icon: Terminal }
+  ]
 
   const activeStyleName =
-    glassStyle === 'medieval'
-      ? msg.styleMedieval
-      : glassStyle === 'simple'
-        ? msg.styleSimple
-        : msg.styleLiquidGlass
+    styleItems.find((item) => item.id === glassStyle)?.label ?? msg.styleLiquidGlass
 
   const selectStyle = (nextStyle: GlassStyle): void => {
-    if (nextStyle === 'medieval') {
-      const applyDungeonPalette = appearance.preset === 'dark'
+    if (isThemedFactionStyle(nextStyle)) {
+      const defaultPalette = FACTION_STYLE_PALETTES[nextStyle][0]
+      const applyStarterPalette = appearance.preset === 'dark' && defaultPalette !== undefined
       void updateSettings({
         appearance: {
           glassModeEnabled: true,
-          glassStyle: 'medieval',
+          glassStyle: nextStyle,
           ...(glassEnabled ? {} : { glassDesktopBackdropEnabled: false }),
-          ...(applyDungeonPalette
-            ? { preset: 'custom', primaryColor: '#1a130d', secondaryColor: '#d97706' }
+          ...(applyStarterPalette
+            ? {
+                preset: 'custom',
+                primaryColor: defaultPalette.primaryHex,
+                secondaryColor: defaultPalette.secondaryHex
+              }
             : {})
         }
       })
@@ -51,14 +77,10 @@ export function GlassModeSection(): React.JSX.Element {
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0 flex-1 space-y-0.5">
           <h3 className="flex items-center gap-1.5 text-sm font-semibold text-primary">
-            {glassEnabled && glassStyle === 'medieval' ? (
-              <Crown className="h-4 w-4 shrink-0" />
-            ) : (
-              <Sparkles className="h-4 w-4 shrink-0" />
-            )}
-            <span>{msg.title}</span>
+            <Sparkles className="h-4 w-4 shrink-0" />
+            <span>{fMsg.sectionTitle}</span>
           </h3>
-          <p className="text-xs text-muted-foreground">{msg.desc}</p>
+          <p className="text-xs text-muted-foreground">{fMsg.sectionDesc}</p>
         </div>
 
         <span
@@ -94,38 +116,19 @@ export function GlassModeSection(): React.JSX.Element {
       </label>
 
       <div className="grid gap-2 sm:grid-cols-3">
-        <Button
-          type="button"
-          size="sm"
-          variant={glassEnabled && glassStyle === 'liquid-glass' ? 'default' : 'outline'}
-          onClick={() => selectStyle('liquid-glass')}
-          className="justify-start gap-2"
-        >
-          <Sparkles className="h-3.5 w-3.5 shrink-0" />
-          <span className="truncate">{msg.styleLiquidGlass}</span>
-        </Button>
-
-        <Button
-          type="button"
-          size="sm"
-          variant={glassEnabled && glassStyle === 'simple' ? 'default' : 'outline'}
-          onClick={() => selectStyle('simple')}
-          className="justify-start gap-2"
-        >
-          <Layers className="h-3.5 w-3.5 shrink-0" />
-          <span className="truncate">{msg.styleSimple}</span>
-        </Button>
-
-        <Button
-          type="button"
-          size="sm"
-          variant={glassEnabled && glassStyle === 'medieval' ? 'default' : 'outline'}
-          onClick={() => selectStyle('medieval')}
-          className="justify-start gap-2"
-        >
-          <Crown className="h-3.5 w-3.5 shrink-0" />
-          <span className="truncate">{msg.styleMedieval}</span>
-        </Button>
+        {styleItems.map(({ id, label, Icon }) => (
+          <Button
+            key={id}
+            type="button"
+            size="sm"
+            variant={glassEnabled && glassStyle === id ? 'default' : 'outline'}
+            onClick={() => selectStyle(id)}
+            className="justify-start gap-2"
+          >
+            <Icon className="h-3.5 w-3.5 shrink-0" />
+            <span className="truncate">{label}</span>
+          </Button>
+        ))}
       </div>
 
       <div
@@ -157,6 +160,7 @@ export function GlassModeSection(): React.JSX.Element {
 
       <GlassStylePreviewBox
         msg={msg}
+        fMsg={fMsg}
         glassEnabled={glassEnabled}
         glassStyle={glassStyle}
         desktopBackdrop={desktopBackdrop}

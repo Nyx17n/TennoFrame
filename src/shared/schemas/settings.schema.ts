@@ -115,7 +115,14 @@ export const GLASS_OPACITY_MIN = 20
 export const GLASS_OPACITY_MAX = 85
 export const GLASS_OPACITY_DEFAULT = 48
 
-export const GlassStyleSchema = z.enum(['liquid-glass', 'simple', 'medieval'])
+export const GlassStyleSchema = z.enum([
+  'liquid-glass',
+  'simple',
+  'medieval',
+  'orokin',
+  'cephalon',
+  'pom2-1999'
+])
 export type GlassStyle = z.infer<typeof GlassStyleSchema>
 
 export const FontFamilyIdSchema = z.enum([
