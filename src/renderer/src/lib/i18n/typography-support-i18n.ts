@@ -35,6 +35,13 @@ export interface FontAndSupportStrings {
   readonly supportFallbackHint: string
   readonly supportCopyOpenDiscordBtn: string
   readonly supportCopiedToast: string
+  readonly supportImageLabel: string
+  readonly supportImageHint: string
+  readonly supportImageBrowseBtn: string
+  readonly supportImageProcessing: string
+  readonly supportImageVerifiedBadge: string
+  readonly supportImageRemoveBtn: string
+  readonly supportImageBlockedTitle: string
 }
 
 const FR: FontAndSupportStrings = {
@@ -76,7 +83,14 @@ const FR: FontAndSupportStrings = {
   supportFallbackHint:
     'Relais direct indisponible ou non configuré — ton texte est conservé ! Tu peux le copier en 1 clic et le coller sur Discord :',
   supportCopyOpenDiscordBtn: 'Copier mon rapport & ouvrir Discord',
-  supportCopiedToast: 'Rapport copié dans le presse-papiers !'
+  supportCopiedToast: 'Rapport copié dans le presse-papiers !',
+  supportImageLabel: 'Capture d’écran (optionnelle)',
+  supportImageHint: 'Glisser une image, Parcourir ou Ctrl+V (PNG, JPG, WebP · max 8 Mo)',
+  supportImageBrowseBtn: 'Parcourir…',
+  supportImageProcessing: 'Vérification & nettoyage sécurisé de l’image…',
+  supportImageVerifiedBadge: 'Image vérifiée & métadonnées EXIF supprimées',
+  supportImageRemoveBtn: 'Retirer',
+  supportImageBlockedTitle: 'Fichier bloqué par sécurité :'
 }
 
 const EN: FontAndSupportStrings = {
@@ -118,23 +132,30 @@ const EN: FontAndSupportStrings = {
   supportFallbackHint:
     'Direct relay unavailable — your message is safely kept! Copy your formatted report in 1 click and paste it on Discord:',
   supportCopyOpenDiscordBtn: 'Copy Report & Open Discord',
-  supportCopiedToast: 'Formatted report copied to clipboard!'
+  supportCopiedToast: 'Formatted report copied to clipboard!',
+  supportImageLabel: 'Screenshot (optional)',
+  supportImageHint: 'Drag & drop an image, Browse, or press Ctrl+V (PNG, JPG, WebP · max 8 MB)',
+  supportImageBrowseBtn: 'Browse…',
+  supportImageProcessing: 'Verifying & sanitizing screenshot…',
+  supportImageVerifiedBadge: 'Verified image · EXIF metadata stripped',
+  supportImageRemoveBtn: 'Remove',
+  supportImageBlockedTitle: 'File blocked for security:'
 }
 
 const OVERRIDES: Partial<Record<AppLanguage, Partial<FontAndSupportStrings>>> = {
-  de: { fontTitle: 'Schriftart der Oberfläche', supportBtnLabel: 'Support / Bug', supportSendBtn: 'An Discord senden' },
-  es: { fontTitle: 'Fuente de la interfaz', supportBtnLabel: 'Soporte / Bug', supportSendBtn: 'Enviar a Discord' },
-  it: { fontTitle: 'Carattere dell’interfaccia', supportBtnLabel: 'Supporto / Bug', supportSendBtn: 'Invia su Discord' },
-  pt: { fontTitle: 'Fonte da interface', supportBtnLabel: 'Suporte / Bug', supportSendBtn: 'Enviar para o Discord' },
-  ru: { fontTitle: 'Шрифт интерфейса', supportBtnLabel: 'Поддержка', supportSendBtn: 'Отправить в Discord' },
-  pl: { fontTitle: 'Czcionka interfejsu', supportBtnLabel: 'Wsparcie / Błąd', supportSendBtn: 'Wyślij na Discord' },
-  uk: { fontTitle: 'Шрифт інтерфейсу', supportBtnLabel: 'Підтримка', supportSendBtn: 'Надіслати в Discord' },
-  tr: { fontTitle: 'Arayüz Yazı Tipi', supportBtnLabel: 'Destek / Hata', supportSendBtn: 'Discord’a Gönder' },
-  ja: { fontTitle: 'インターフェースのフォント', supportBtnLabel: 'サポート / バグ', supportSendBtn: 'Discordに送信' },
-  ko: { fontTitle: '인터페이스 글꼴', supportBtnLabel: '지원 / 버그 제보', supportSendBtn: 'Discord로 보내기' },
-  'zh-hans': { fontTitle: '界面字体', supportBtnLabel: '支持 / 反馈', supportSendBtn: '发送到 Discord' },
-  'zh-hant': { fontTitle: '介面字體', supportBtnLabel: '支援 / 回報', supportSendBtn: '傳送到 Discord' },
-  th: { fontTitle: 'แบบอักษรอินเทอร์เฟซ', supportBtnLabel: 'ช่วยเหลือ / แจ้งบั๊ก', supportSendBtn: 'ส่งไปยัง Discord' }
+  de: { fontTitle: 'Schriftart der Oberfläche', supportBtnLabel: 'Support / Bug', supportSendBtn: 'An Discord senden', supportImageLabel: 'Screenshot (optional)' },
+  es: { fontTitle: 'Fuente de la interfaz', supportBtnLabel: 'Soporte / Bug', supportSendBtn: 'Enviar a Discord', supportImageLabel: 'Captura de pantalla (opcional)' },
+  it: { fontTitle: 'Carattere dell’interfaccia', supportBtnLabel: 'Supporto / Bug', supportSendBtn: 'Invia su Discord', supportImageLabel: 'Screenshot (opzionale)' },
+  pt: { fontTitle: 'Fonte da interface', supportBtnLabel: 'Suporte / Bug', supportSendBtn: 'Enviar para o Discord', supportImageLabel: 'Captura de ecrã (opcional)' },
+  ru: { fontTitle: 'Шрифт интерфейса', supportBtnLabel: 'Поддержка', supportSendBtn: 'Отправить в Discord', supportImageLabel: 'Скриншот (необязательно)' },
+  pl: { fontTitle: 'Czcionka interfejsu', supportBtnLabel: 'Wsparcie / Błąd', supportSendBtn: 'Wyślij na Discord', supportImageLabel: 'Zrzut ekranu (opcjonalnie)' },
+  uk: { fontTitle: 'Шрифт інтерфейсу', supportBtnLabel: 'Підтримка', supportSendBtn: 'Надіслати в Discord', supportImageLabel: 'Знімок екрана (необов’язково)' },
+  tr: { fontTitle: 'Arayüz Yazı Tipi', supportBtnLabel: 'Destek / Hata', supportSendBtn: 'Discord’a Gönder', supportImageLabel: 'Ekran Görüntüsü (isteğe bağlı)' },
+  ja: { fontTitle: 'インターフェースのフォント', supportBtnLabel: 'サポート / バグ', supportSendBtn: 'Discordに送信', supportImageLabel: 'スクリーンショット（任意）' },
+  ko: { fontTitle: '인터페이스 글꼴', supportBtnLabel: '지원 / 버그 제보', supportSendBtn: 'Discord로 보내기', supportImageLabel: '스크린샷 (선택 사항)' },
+  'zh-hans': { fontTitle: '界面字体', supportBtnLabel: '支持 / 反馈', supportSendBtn: '发送到 Discord', supportImageLabel: '屏幕截图（可选）' },
+  'zh-hant': { fontTitle: '介面字體', supportBtnLabel: '支援 / 回報', supportSendBtn: '傳送到 Discord', supportImageLabel: '螢幕截圖（選填）' },
+  th: { fontTitle: 'แบบอักษรอินเทอร์เฟซ', supportBtnLabel: 'ช่วยเหลือ / แจ้งบั๊ก', supportSendBtn: 'ส่งไปยัง Discord', supportImageLabel: 'ภาพหน้าจอ (ไม่บังคับ)' }
 }
 
 export function getFontAndSupportStrings(lang: AppLanguage): FontAndSupportStrings {

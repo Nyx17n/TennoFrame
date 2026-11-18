@@ -7,8 +7,12 @@ import { DEFAULT_SUPPORT_RELAY_URL } from '@shared/constants'
 import {
   SUPPORT_COOLDOWN_SECONDS,
   SUPPORT_DAILY_MAX,
+  SupportRawAttachmentInputSchema,
   SupportTicketInputSchema,
   type SupportErrorCode,
+  type SupportPrepareAttachmentResult,
+  type SupportRawAttachmentInput,
+  type SupportSanitizedAttachment,
   type SupportStatus,
   type SupportTicketInput,
   type SupportTicketResult
@@ -17,6 +21,7 @@ import {
   HttpStatusError,
   type RateLimitedHttpClient
 } from '../infrastructure/http/RateLimitedHttpClient'
+import { sanitizeSupportImageBuffer } from './supportImageSanitizer'
 import type { StorageService } from './StorageService'
 import type { WindowOverlayService } from './WindowOverlayService'
 
@@ -109,8 +114,8 @@ function validateHumanContent(subject: string, message: string): string | null {
   return null
 }
 
-function computeMessageDigest(subject: string, message: string): string {
-  const norm = `${subject.toLowerCase().trim()}::${message.toLowerCase().replace(/\s+/g, ' ').trim()}`
+function computeMessageDigest(subject: string, message: string, imageHash = ''): string {
+  const norm = `${subject.toLowerCase().trim()}::${message.toLowerCase().replace(/\s+/g, ' ').trim()}::${imageHash}`
   return createHash('sha256').update(norm).digest('hex').slice(0, 24)
 }
 
@@ -224,6 +229,18 @@ export class SupportService {
     }
   }
 
+  public prepareAttachment(rawInput: unknown): SupportPrepareAttachmentResult {
+    const parsed = SupportRawAttachmentInputSchema.safeParse(rawInput)
+    if (!parsed.success) {
+      return {
+        ok: false,
+        errorMessage: parsed.error.issues[0]?.message ?? 'Invalid image file.'
+      }
+    }
+    const _rawData: SupportRawAttachmentInput = parsed.data
+    return sanitizeSupportImageBuffer(_rawData.bytes)
+  }
+
   public async sendTicket(rawInput: SupportTicketInput): Promise<SupportTicketResult> {
     await this.ensureLoaded()
     const metrics = this.computeQuotaMetrics()
@@ -274,7 +291,30 @@ export class SupportService {
       }
     }
 
-    const digest = computeMessageDigest(input.subject, input.message)
+    let verifiedAttachment: SupportSanitizedAttachment | null = null
+    let imageHash = ''
+    if (input.attachment) {
+      const reSanitized = sanitizeSupportImageBuffer(
+        new Uint8Array(Buffer.from(input.attachment.dataBase64, 'base64'))
+      )
+      if (!reSanitized.ok || !reSanitized.attachment) {
+        return {
+          ok: false,
+          ticketId: null,
+          cooldownRemainingSec: 0,
+          dailyRemaining: metrics.dailyRemaining,
+          errorCode: 'INVALID_IMAGE',
+          errorMessage: reSanitized.errorMessage ?? 'Invalid or unsafe image attachment.'
+        }
+      }
+      verifiedAttachment = reSanitized.attachment
+      imageHash = createHash('sha256')
+        .update(verifiedAttachment.dataBase64)
+        .digest('hex')
+        .slice(0, 16)
+    }
+
+    const digest = computeMessageDigest(input.subject, input.message, imageHash)
     if (this.state.lastDigest && this.state.lastDigest === digest) {
       return {
         ok: false,
@@ -330,7 +370,7 @@ export class SupportService {
         RelayTicketResponseSchema,
         {
           bypassRateLimit: true,
-          timeoutMs: 12_000,
+          timeoutMs: verifiedAttachment ? 25_000 : 12_000,
           headers: { 'X-TennoFrame-Client': `TennoFrame/${app.getVersion()}` },
           bodyJson: {
             ticketId: clientTicketId,
@@ -340,7 +380,15 @@ export class SupportService {
             subject: input.subject,
             message: input.message,
             contact: input.contact || '',
-            diagnostics
+            diagnostics,
+            ...(verifiedAttachment
+              ? {
+                  attachment: {
+                    mimeType: verifiedAttachment.mimeType,
+                    dataBase64: verifiedAttachment.dataBase64
+                  }
+                }
+              : {})
           }
         }
       )

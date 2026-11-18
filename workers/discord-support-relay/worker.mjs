@@ -1,11 +1,11 @@
 /**
- * TennoFrame — Cloudflare Worker Support Relay (5-Layer Anti-Spam Edition)
+ * TennoFrame — Cloudflare Worker Support Relay (5-Layer Anti-Spam + Zero-Risk Image CDR Edition)
  *
- * 5 Anti-Spam Layers:
- *   1. Persistent Client DPAPI Quota (enforced in TennoFrame Main Process)
+ * Security & Anti-Spam Layers:
+ *   1. Persistent Client DPAPI Quota + Skia `nativeImage` Pixel Re-Encoding (EXIF/polyglot stripped)
  *   2. Persistent Server Quota in Cloudflare KV (`SUPPORT_KV`) by IP Hash + Device Hash (10 min cooldown, max 3 / 24h)
  *   3. Single-Use HMAC-SHA256 Challenge Token (`/v1/challenge`, min 3.5s human write time, replay-protected)
- *   4. Smart Content & Anti-Promo Filter (blocks keyboard smash, duplicate messages, external Discord invites & phishing)
+ *   4. Smart Content & Anti-Promo Filter + Binary PNG/JPEG Header+Trailer Verification (`IEND` / `FFD9`)
  *   5. Permanent Ban System (`ban:usr_xxxxxxxx` in `SUPPORT_KV`, Sender ID shown in Discord Embed footer)
  */
 
@@ -45,6 +45,11 @@ const WINDOW_24H_MS = 24 * 3_600_000 // Rolling 24h window
 const DAILY_MAX = 3 // Max 3 tickets per 24h
 const CHALLENGE_MIN_AGE_MS = 3_500 // Minimum 3.5s human typing delay
 const CHALLENGE_MAX_AGE_MS = 15 * 60_000 // Challenge valid for 15 minutes
+const MAX_JSON_BODY_BYTES = 3_800_000 // Max HTTP JSON payload (~2.5 MB image in base64 + text)
+const MAX_TEXT_ONLY_BYTES = 16_384 // Strict ceiling when no image attachment is included
+const MAX_IMAGE_BYTES = 2_621_440 // 2.5 MiB binary image ceiling
+const MAX_IMAGE_DIM = 4_096 // Max width/height after client CDR
+const MAX_IMAGE_PIXELS = 12_000_000 // Max total pixels
 
 function jsonResponse(status, payload) {
   return new Response(JSON.stringify(payload), {
@@ -63,7 +68,8 @@ function toHex(bytes) {
 }
 
 async function sha256Hex(input) {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input))
+  const data = typeof input === 'string' ? new TextEncoder().encode(input) : input
+  const digest = await crypto.subtle.digest('SHA-256', data)
   return toHex(digest)
 }
 
@@ -90,25 +96,24 @@ function sanitizeField(str, maxLen) {
 function detectSpamContent(subject, message) {
   const combined = `${subject} ${message}`
 
-  // 1. Repeated single character smash (e.g. "aaaaaaaaaa", "!!!!!!!!!!")
   if (/(.)\1{7,}/i.test(combined)) {
     return 'Repeated character spam detected.'
   }
 
-  // 2. Minimum meaningful words & distinct letters
   const words = message.split(/\s+/).filter((w) => w.length >= 2)
-  const distinctLetters = new Set(message.toLowerCase().replace(/[^a-z\u00c0-\u024f\u0400-\u04ff]/g, ''))
+  const distinctLetters = new Set(
+    message.toLowerCase().replace(/[^a-z\u00c0-\u024f\u0400-\u04ff]/g, '')
+  )
   if (words.length < 3 || (distinctLetters.size > 0 && distinctLetters.size < 4)) {
     return 'Please write a clear, complete sentence (minimum 3 words).'
   }
 
-  // 3. Repeated identical word spam ("test test test test")
   if (/\b(\w{2,})\b(?:\s+\1\b){3,}/i.test(combined)) {
     return 'Repeated word spam detected.'
   }
 
-  // 4. External Discord invite / scam URLs (allow official TennoFrame invite DhGwHPf82n)
-  const inviteMatches = combined.match(/(?:discord\.gg|discord(?:app)?\.com\/invite)\/([a-z0-9-]+)/gi) || []
+  const inviteMatches =
+    combined.match(/(?:discord\.gg|discord(?:app)?\.com\/invite)\/([a-z0-9-]+)/gi) || []
   for (const inv of inviteMatches) {
     if (!inv.toLowerCase().endsWith('/dhgwhpf82n')) {
       return 'External Discord server invites are not allowed.'
@@ -125,6 +130,211 @@ function detectSpamContent(subject, message) {
   }
 
   return null
+}
+
+function decodeBase64Strict(b64) {
+  if (typeof b64 !== 'string' || b64.length < 32 || b64.length > 3_550_000) {
+    return null
+  }
+  if (!/^[A-Za-z0-9+/]+={0,2}$/.test(b64) || b64.length % 4 !== 0) {
+    return null
+  }
+  try {
+    const bin = atob(b64)
+    const out = new Uint8Array(bin.length)
+    for (let i = 0; i < bin.length; i++) {
+      out[i] = bin.charCodeAt(i)
+    }
+    return out
+  } catch {
+    return null
+  }
+}
+
+function hasEmbeddedExecutableOrScript(bytes) {
+  if (bytes[0] === 0x4d && bytes[1] === 0x5a) return true // MZ (PE/EXE/DLL)
+  if (bytes[0] === 0x50 && bytes[1] === 0x4b && bytes[2] === 0x03 && bytes[3] === 0x04) return true // ZIP
+  if (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x38) return true // GIF
+
+  let head = ''
+  const scanLen = Math.min(512, bytes.byteLength)
+  for (let i = 0; i < scanLen; i++) {
+    head += String.fromCharCode(bytes[i])
+  }
+  const lower = head.toLowerCase()
+  return (
+    lower.includes('<svg') ||
+    lower.includes('<html') ||
+    lower.includes('<!doc') ||
+    lower.includes('<script') ||
+    lower.includes('<?xml') ||
+    lower.startsWith('%pdf-')
+  )
+}
+
+function verifyStrictPngBytes(bytes) {
+  if (bytes.byteLength < 45) return null
+  const sig = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]
+  for (let i = 0; i < sig.length; i++) {
+    if (bytes[i] !== sig[i]) return null
+  }
+  // Must start with IHDR chunk at 12..15
+  if (
+    bytes[12] !== 0x49 ||
+    bytes[13] !== 0x48 ||
+    bytes[14] !== 0x44 ||
+    bytes[15] !== 0x52
+  ) {
+    return null
+  }
+  // Must end with exact 12-byte IEND chunk (blocks trailing polyglot ZIP/EXE payloads!)
+  const iend = [0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82]
+  const tailStart = bytes.byteLength - iend.length
+  for (let i = 0; i < iend.length; i++) {
+    if (bytes[tailStart + i] !== iend[i]) return null
+  }
+
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength)
+  const width = view.getUint32(16, false)
+  const height = view.getUint32(20, false)
+  return { width, height }
+}
+
+function verifyStrictJpegBytes(bytes) {
+  if (bytes.byteLength < 32) return null
+  if (bytes[0] !== 0xff || bytes[1] !== 0xd8 || bytes[2] !== 0xff) return null
+  // Must end with exact JPEG EOI marker FF D9 (blocks trailing polyglot payloads!)
+  if (bytes[bytes.byteLength - 2] !== 0xff || bytes[bytes.byteLength - 1] !== 0xd9) {
+    return null
+  }
+
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength)
+  let offset = 2
+  while (offset + 9 < bytes.byteLength) {
+    if (bytes[offset] !== 0xff) {
+      offset += 1
+      continue
+    }
+    while (offset < bytes.byteLength && bytes[offset] === 0xff) {
+      offset += 1
+    }
+    if (offset >= bytes.byteLength) break
+    const marker = bytes[offset]
+    offset += 1
+
+    if (marker === 0xd8 || marker === 0xd9 || (marker >= 0xd0 && marker <= 0xd7) || marker === 0x01) {
+      continue
+    }
+    if (offset + 2 > bytes.byteLength) break
+    const segLen = view.getUint16(offset, false)
+    if (segLen < 2 || offset + segLen > bytes.byteLength) break
+
+    const isSof =
+      (marker >= 0xc0 && marker <= 0xc3) ||
+      (marker >= 0xc5 && marker <= 0xc7) ||
+      (marker >= 0xc9 && marker <= 0xcb) ||
+      (marker >= 0xcd && marker <= 0xcf)
+    if (isSof && offset + 7 <= bytes.byteLength) {
+      const height = view.getUint16(offset + 3, false)
+      const width = view.getUint16(offset + 5, false)
+      return { width, height }
+    }
+    offset += segLen
+  }
+  return null
+}
+
+async function verifyAttachmentPayload(rawAtt, ticketId) {
+  if (rawAtt == null) {
+    return { ok: true, attachment: null }
+  }
+  if (typeof rawAtt !== 'object') {
+    return { ok: false, error: 'Invalid attachment structure.' }
+  }
+  const mimeType = rawAtt.mimeType
+  if (mimeType !== 'image/png' && mimeType !== 'image/jpeg') {
+    return { ok: false, error: 'Only sanitized PNG or JPEG images are accepted.' }
+  }
+
+  const bytes = decodeBase64Strict(rawAtt.dataBase64)
+  if (!bytes || bytes.byteLength < 32 || bytes.byteLength > MAX_IMAGE_BYTES) {
+    return { ok: false, error: 'Invalid or oversized image payload (max 2.5 MB).' }
+  }
+
+  if (hasEmbeddedExecutableOrScript(bytes)) {
+    return { ok: false, error: 'Blocked unsafe or executable content signature.' }
+  }
+
+  const dims = mimeType === 'image/png' ? verifyStrictPngBytes(bytes) : verifyStrictJpegBytes(bytes)
+  if (!dims) {
+    return {
+      ok: false,
+      error: 'Corrupted image or trailing polyglot data detected. Only pure PNG/JPEG images are allowed.'
+    }
+  }
+
+  if (
+    dims.width < 8 ||
+    dims.height < 8 ||
+    dims.width > MAX_IMAGE_DIM ||
+    dims.height > MAX_IMAGE_DIM ||
+    dims.width * dims.height > MAX_IMAGE_PIXELS
+  ) {
+    return { ok: false, error: `Image dimensions (${dims.width}x${dims.height}) exceed safe bounds.` }
+  }
+
+  const ext = mimeType === 'image/png' ? 'png' : 'jpg'
+  const fileName = `screenshot-${ticketId}.${ext}`
+  const imgDigest = (await sha256Hex(bytes)).slice(0, 16)
+
+  return {
+    ok: true,
+    attachment: {
+      mimeType,
+      bytes,
+      fileName,
+      imgDigest
+    }
+  }
+}
+
+async function postDiscordTicket(webhookUrl, basePayload, verifiedAttachment) {
+  if (!verifiedAttachment) {
+    return fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(basePayload)
+    })
+  }
+
+  const payloadWithAttachment = {
+    ...basePayload,
+    attachments: [
+      {
+        id: 0,
+        filename: verifiedAttachment.fileName,
+        description: 'TennoFrame In-App Support Screenshot'
+      }
+    ],
+    embeds: basePayload.embeds.map((emb, idx) =>
+      idx === 0
+        ? { ...emb, image: { url: `attachment://${verifiedAttachment.fileName}` } }
+        : emb
+    )
+  }
+
+  const form = new FormData()
+  form.append('payload_json', JSON.stringify(payloadWithAttachment))
+  form.append(
+    'files[0]',
+    new Blob([verifiedAttachment.bytes], { type: verifiedAttachment.mimeType }),
+    verifiedAttachment.fileName
+  )
+
+  return fetch(webhookUrl, {
+    method: 'POST',
+    body: form
+  })
 }
 
 function validateWebhookUrl(rawUrl) {
@@ -168,6 +378,7 @@ export default {
         ok: true,
         service: 'tennoframe-support-relay',
         antiSpamLayers: 5,
+        imageCdrEnabled: true,
         dailyMax: DAILY_MAX,
         kvBound: Boolean(env.SUPPORT_KV),
         channelsConfigured: {
@@ -198,15 +409,38 @@ export default {
     }
 
     const contentLength = Number(request.headers.get('content-length') || '0')
-    if (contentLength > 8192) {
-      return jsonResponse(413, { ok: false, errorCode: 'VALIDATION_ERROR', error: 'Payload too large' })
+    if (contentLength > MAX_JSON_BODY_BYTES) {
+      return jsonResponse(413, {
+        ok: false,
+        errorCode: 'INVALID_IMAGE',
+        error: 'Payload too large (maximum 2.5 MB image allowed).'
+      })
+    }
+
+    let rawText
+    try {
+      rawText = await request.text()
+    } catch {
+      return jsonResponse(400, { ok: false, errorCode: 'VALIDATION_ERROR', error: 'Unreadable request body' })
+    }
+
+    if (rawText.length > MAX_JSON_BODY_BYTES) {
+      return jsonResponse(413, {
+        ok: false,
+        errorCode: 'INVALID_IMAGE',
+        error: 'Payload too large (maximum 2.5 MB image allowed).'
+      })
     }
 
     let body
     try {
-      body = await request.json()
+      body = JSON.parse(rawText)
     } catch {
       return jsonResponse(400, { ok: false, errorCode: 'VALIDATION_ERROR', error: 'Invalid JSON' })
+    }
+
+    if (!body?.attachment && rawText.length > MAX_TEXT_ONLY_BYTES) {
+      return jsonResponse(413, { ok: false, errorCode: 'VALIDATION_ERROR', error: 'Text payload too large' })
     }
 
     const category = Object.prototype.hasOwnProperty.call(CATEGORY_META, body?.category)
@@ -294,7 +528,7 @@ export default {
       return jsonResponse(400, { ok: false, errorCode: 'VALIDATION_ERROR', error: 'Message too short' })
     }
 
-    // Layer 4 — Smart Anti-Garbage & Anti-Promo Filter
+    // Layer 4a — Smart Anti-Garbage & Anti-Promo Filter
     const spamReason = detectSpamContent(subject, message)
     if (spamReason) {
       return jsonResponse(400, {
@@ -304,9 +538,25 @@ export default {
       })
     }
 
+    // Layer 4b — Zero-Trust Binary Image Verification (Header + Trailer + Dimensions + Anti-Polyglot)
+    const attCheck = await verifyAttachmentPayload(body?.attachment, ticketId)
+    if (!attCheck.ok) {
+      return jsonResponse(400, {
+        ok: false,
+        errorCode: 'INVALID_IMAGE',
+        error: attCheck.error
+      })
+    }
+    const verifiedAttachment = attCheck.attachment
+
     // Layer 2 — Persistent KV Quota (10 min cooldown + Max 3 / 24h + Anti-Duplicate)
     const msgDigest = (
-      await sha256Hex(`${subject.toLowerCase().trim()}::${message.toLowerCase().replace(/\s+/g, ' ').trim()}`)
+      await sha256Hex(
+        `${subject.toLowerCase().trim()}::${message
+          .toLowerCase()
+          .replace(/\s+/g, ' ')
+          .trim()}::${verifiedAttachment ? verifiedAttachment.imgDigest : ''}`
+      )
     ).slice(0, 24)
 
     const [ipQuota, devQuota] = await Promise.all([
@@ -324,10 +574,7 @@ export default {
 
     const usedToday = Math.max(ipQuota.timestamps.length, devQuota.timestamps.length)
     if (usedToday >= DAILY_MAX) {
-      const oldest = Math.min(
-        ipQuota.timestamps[0] ?? now,
-        devQuota.timestamps[0] ?? now
-      )
+      const oldest = Math.min(ipQuota.timestamps[0] ?? now, devQuota.timestamps[0] ?? now)
       const resetSec = Math.max(60, Math.ceil((oldest + WINDOW_24H_MS - now) / 1000))
       return jsonResponse(429, {
         ok: false,
@@ -415,28 +662,28 @@ export default {
     }
 
     const webhookUrl = validateWebhookUrl(webhookRaw)
-    let dcRes = await fetch(webhookUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(discordPayload)
-    })
+    let dcRes = await postDiscordTicket(webhookUrl, discordPayload, verifiedAttachment)
 
     if (!dcRes.ok) {
       const errText = await dcRes.text()
       if (dcRes.status === 400 && errText.includes('220001')) {
-        dcRes = await fetch(webhookUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
+        dcRes = await postDiscordTicket(
+          webhookUrl,
+          {
             ...discordPayload,
             thread_name: `[${meta.forumPrefix} #${ticketId}] ${subject}`.slice(0, 98)
-          })
-        })
+          },
+          verifiedAttachment
+        )
       }
     }
 
     if (!dcRes.ok) {
-      return jsonResponse(502, { ok: false, errorCode: 'NETWORK_ERROR', error: 'Discord delivery failed' })
+      return jsonResponse(502, {
+        ok: false,
+        errorCode: 'NETWORK_ERROR',
+        error: 'Discord delivery failed'
+      })
     }
 
     // Persist consumed nonce + updated IP & Device 24h quotas in Cloudflare KV

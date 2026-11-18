@@ -45,8 +45,11 @@ import {
   type UserSettingsPatch
 } from '@shared/schemas/settings.schema'
 import {
+  SupportPrepareAttachmentResultSchema,
   SupportStatusSchema,
   SupportTicketResultSchema,
+  type SupportPrepareAttachmentResult,
+  type SupportRawAttachmentInput,
   type SupportStatus,
   type SupportTicketInput,
   type SupportTicketResult
@@ -495,6 +498,20 @@ export const ipcClient = {
         }
       }
       return SupportStatusSchema.parse(await bridge.support.getStatus())
+    },
+    async prepareAttachment(
+      input: SupportRawAttachmentInput
+    ): Promise<SupportPrepareAttachmentResult> {
+      const bridge = getBridge()
+      if (typeof bridge.support?.prepareAttachment !== 'function') {
+        return {
+          ok: false,
+          errorMessage: 'Please restart TennoFrame to enable secure screenshot attachments.'
+        }
+      }
+      return SupportPrepareAttachmentResultSchema.parse(
+        await bridge.support.prepareAttachment(input)
+      )
     },
     async sendTicket(input: SupportTicketInput): Promise<SupportTicketResult> {
       const bridge = getBridge()
