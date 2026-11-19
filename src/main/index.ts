@@ -132,10 +132,15 @@ async function bootstrap(): Promise<void> {
       const parsed = new URL(request.url)
       const assetPath = parsed.pathname.replace(/^\/+/, '')
       const resolved = await cacheService.resolveAssetByHost(parsed.hostname, assetPath)
+      const safeMime =
+        resolved.contentType.startsWith('image/') && !resolved.contentType.includes('svg')
+          ? resolved.contentType
+          : 'image/png'
       return new Response(resolved.bytes, {
         status: 200,
         headers: {
-          'Content-Type': resolved.contentType,
+          'Content-Type': safeMime,
+          'X-Content-Type-Options': 'nosniff',
           'Cache-Control': 'public, max-age=604800, immutable'
         }
       })

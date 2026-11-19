@@ -77,7 +77,7 @@ export function AudioAlertsSettingsTab(): React.JSX.Element {
           <div className="space-y-0.5">
             <div className="font-medium text-foreground">Notifications visuelles dans l’app</div>
             <p className="text-[11px] text-muted-foreground">
-              Empilées en bas à droite et archivées sous l’icône 🔔 de la barre supérieure.
+              Empilées en bas à droite et archivées dans le centre d’alertes de la barre supérieure.
             </p>
           </div>
           <Button size="sm" variant="secondary" onClick={handleTestNotification}>

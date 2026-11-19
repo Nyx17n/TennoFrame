@@ -18,7 +18,40 @@ import { ipcClient } from '@/services/ipc-client'
 import { useFarmOverlayStore } from '@/stores/useFarmOverlayStore'
 import { notify, useNotificationStore } from '@/stores/useNotificationStore'
 
-export type SettingsTabId = 'appearance' | 'audio' | 'window' | 'market' | 'extensions' | 'system'
+export type SettingsCategoryId = 'general' | 'appearance' | 'overlay' | 'market' | 'system'
+
+export type SettingsTabId =
+  | SettingsCategoryId
+  | 'audio'
+  | 'window'
+  | 'extensions'
+
+interface ResolvedSettingsRoute {
+  category: SettingsCategoryId
+  subTab: string
+}
+
+function resolveSettingsDeepLink(tab?: SettingsTabId): ResolvedSettingsRoute | null {
+  if (!tab) return null
+  switch (tab) {
+    case 'general':
+      return { category: 'general', subTab: 'language' }
+    case 'appearance':
+      return { category: 'appearance', subTab: 'themes' }
+    case 'window':
+      return { category: 'overlay', subTab: 'window' }
+    case 'extensions':
+      return { category: 'overlay', subTab: 'extensions' }
+    case 'overlay':
+      return { category: 'overlay', subTab: 'window' }
+    case 'market':
+      return { category: 'market', subTab: 'platform' }
+    case 'audio':
+      return { category: 'market', subTab: 'audio' }
+    case 'system':
+      return { category: 'system', subTab: 'updates' }
+  }
+}
 
 interface AppStoreState {
   settings: UserSettings
@@ -32,14 +65,16 @@ interface AppStoreState {
   isChangelogOpen: boolean
   isSupportOpen: boolean
   splashRunId: number
-  activeSettingsTab: SettingsTabId
+  activeSettingsTab: SettingsCategoryId
+  activeSettingsSubTab: string
   setOmniboxOpen: (open: boolean) => void
   openSettingsModal: (tab?: SettingsTabId) => void
   setSettingsOpen: (open: boolean) => void
   setChangelogOpen: (open: boolean) => void
   setSupportOpen: (open: boolean) => void
   replayStartupAnimation: () => void
-  setActiveSettingsTab: (tab: SettingsTabId) => void
+  setActiveSettingsTab: (tab: SettingsCategoryId, subTab?: string) => void
+  setActiveSettingsSubTab: (subTab: string) => void
   initialize: () => Promise<() => void>
   refreshSystemStatus: () => Promise<void>
   clearSystemCache: () => Promise<void>
@@ -83,20 +118,33 @@ export const useAppStore = create<AppStoreState>((set, get) => ({
   isChangelogOpen: false,
   isSupportOpen: false,
   splashRunId: 1,
-  activeSettingsTab: 'appearance',
+  activeSettingsTab: 'general',
+  activeSettingsSubTab: 'language',
 
   setOmniboxOpen: (open) => set({ isOmniboxOpen: open }),
   openSettingsModal: (tab) =>
-    set((s) => ({
-      isSettingsOpen: true,
-      activeSettingsTab: tab ?? s.activeSettingsTab
-    })),
+    set((s) => {
+      const resolved = resolveSettingsDeepLink(tab)
+      return {
+        isSettingsOpen: true,
+        activeSettingsTab: resolved ? resolved.category : s.activeSettingsTab,
+        activeSettingsSubTab: resolved ? resolved.subTab : s.activeSettingsSubTab
+      }
+    }),
   setSettingsOpen: (open) => set({ isSettingsOpen: open }),
   setChangelogOpen: (open) => set({ isChangelogOpen: open }),
   setSupportOpen: (open) => set({ isSupportOpen: open }),
   replayStartupAnimation: () =>
     set((s) => ({ isSettingsOpen: false, splashRunId: s.splashRunId + 1 })),
-  setActiveSettingsTab: (tab) => set({ activeSettingsTab: tab }),
+  setActiveSettingsTab: (tab, subTab) =>
+    set((s) => {
+      const def = resolveSettingsDeepLink(tab)
+      return {
+        activeSettingsTab: tab,
+        activeSettingsSubTab: subTab ?? def?.subTab ?? s.activeSettingsSubTab
+      }
+    }),
+  setActiveSettingsSubTab: (subTab) => set({ activeSettingsSubTab: subTab }),
 
   initialize: async () => {
     set({ isLoading: true, errorMessage: null })

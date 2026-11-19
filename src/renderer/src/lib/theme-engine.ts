@@ -31,7 +31,7 @@ export const THEME_PRESETS: readonly ThemePresetDefinition[] = [
   },
   {
     id: 'light',
-    glyph: '☀',
+    glyph: '❖',
     label: 'Clair',
     subtitle: 'Clair & Doux',
     primaryHex: '#f1f5f9',
@@ -115,7 +115,7 @@ export const THEME_PRESETS: readonly ThemePresetDefinition[] = [
   },
   {
     id: 'yellow-light',
-    glyph: '☀',
+    glyph: '❖',
     label: 'Jaune Clair',
     subtitle: 'Solaire & Ivoire Doré',
     primaryHex: '#fefce8',
@@ -141,7 +141,7 @@ export const THEME_PRESETS: readonly ThemePresetDefinition[] = [
   },
   {
     id: 'orange-dark',
-    glyph: '☀',
+    glyph: '❖',
     label: 'Orange Sombre',
     subtitle: 'Ember & Fusion Solaire',
     primaryHex: '#1f1209',
@@ -201,19 +201,19 @@ export interface MedievalPalettePreset {
 export const MEDIEVAL_PALETTE_PRESETS: readonly MedievalPalettePreset[] = [
   {
     id: 'dungeon-gold',
-    glyph: '🏰',
+    glyph: '❖',
     primaryHex: '#1a130d',
     secondaryHex: '#d97706'
   },
   {
     id: 'royal-parchment',
-    glyph: '📜',
+    glyph: '◈',
     primaryHex: '#f4e7cc',
     secondaryHex: '#b45309'
   },
   {
     id: 'crimson-order',
-    glyph: '🩸',
+    glyph: '◆',
     primaryHex: '#220d10',
     secondaryHex: '#dc2626'
   }
@@ -235,17 +235,17 @@ export const FACTION_STYLE_PALETTES: Readonly<
   orokin: [
     { id: 'orokin-lua', glyph: '◐', primaryHex: '#12131c', secondaryHex: '#eab308' },
     { id: 'orokin-ivory', glyph: '✦', primaryHex: '#f8f5ec', secondaryHex: '#d49b27' },
-    { id: 'orokin-void', glyph: '💠', primaryHex: '#0b1520', secondaryHex: '#38bdf8' }
+    { id: 'orokin-void', glyph: '❖', primaryHex: '#0b1520', secondaryHex: '#38bdf8' }
   ],
   cephalon: [
     { id: 'cephalon-ordis', glyph: '⬡', primaryHex: '#06131f', secondaryHex: '#06b6d4' },
     { id: 'cephalon-simaris', glyph: '◈', primaryHex: '#191106', secondaryHex: '#f59e0b' },
-    { id: 'cephalon-cy', glyph: '⚡', primaryHex: '#090d18', secondaryHex: '#6366f1' }
+    { id: 'cephalon-cy', glyph: '⬢', primaryHex: '#090d18', secondaryHex: '#6366f1' }
   ],
   'pom2-1999': [
-    { id: 'pom2-green', glyph: '📼', primaryHex: '#07140b', secondaryHex: '#22c55e' },
-    { id: 'pom2-amber', glyph: '🟠', primaryHex: '#160f05', secondaryHex: '#f59e0b' },
-    { id: 'pom2-onlyne', glyph: '💿', primaryHex: '#12091c', secondaryHex: '#ec4899' }
+    { id: 'pom2-green', glyph: '▣', primaryHex: '#07140b', secondaryHex: '#22c55e' },
+    { id: 'pom2-amber', glyph: '◉', primaryHex: '#160f05', secondaryHex: '#f59e0b' },
+    { id: 'pom2-onlyne', glyph: '◎', primaryHex: '#12091c', secondaryHex: '#ec4899' }
   ]
 } as const
 

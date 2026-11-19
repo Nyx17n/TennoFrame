@@ -70,7 +70,7 @@ export function WindowShortcutsSettingsTab(): React.JSX.Element {
 
         <label className="flex cursor-pointer items-center justify-between gap-3 text-xs">
           <div className="space-y-0.5">
-            <div>Souris traversante automatique en jeu (quand épinglé 📌)</div>
+            <div>Souris traversante automatique en jeu (quand la fenêtre est épinglée)</div>
             <div className="text-[11px] text-muted-foreground">
               Empêche le curseur d’accrocher TennoFrame quand tu tournes la caméra dans Warframe.
             </div>

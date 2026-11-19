@@ -1,47 +1,64 @@
 import * as React from 'react'
+import { ChevronDown } from 'lucide-react'
 import { BackgroundGradientSection } from '@/components/settings/BackgroundGradientSection'
-import { BookmarksOrderSection } from '@/components/settings/BookmarksOrderSection'
 import { ColorSwatchPicker } from '@/components/settings/ColorSwatchPicker'
 import { FontSelectorSection } from '@/components/settings/FontSelectorSection'
 import { GlassModeSection } from '@/components/settings/GlassModeSection'
-import { LayoutAndErgonomicsSection } from '@/components/settings/LayoutAndErgonomicsSection'
 import { MotionSettingsSection } from '@/components/settings/MotionSettingsSection'
+import { WfLotusEmblemIcon } from '@/components/settings/WarframeSettingsIcons'
 import { ACCENT_SWATCH_GROUPS, BACKGROUND_SWATCH_GROUPS } from '@/lib/color-swatches'
 import { THEME_PRESETS } from '@/lib/theme-engine'
 import { useAppStore } from '@/stores/useAppStore'
 
-export function AppearanceSettingsTab(): React.JSX.Element {
+export type AppearanceSubTab = 'themes' | 'styles' | 'fonts'
+
+export function AppearanceSettingsTab({
+  subTab = 'themes'
+}: {
+  subTab?: AppearanceSubTab
+}): React.JSX.Element {
   const appearance = useAppStore((s) => s.settings.appearance)
   const updateSettings = useAppStore((s) => s.updateSettings)
+  const [customColorsOpen, setCustomColorsOpen] = React.useState(
+    () => appearance.preset === 'custom'
+  )
 
   const activePreset = THEME_PRESETS.find((p) => p.id === appearance.preset)
 
+  if (subTab === 'styles') {
+    return (
+      <div className="space-y-4">
+        <GlassModeSection />
+      </div>
+    )
+  }
+
+  if (subTab === 'fonts') {
+    return (
+      <div className="space-y-4">
+        <FontSelectorSection />
+        <MotionSettingsSection />
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-4">
-      <LayoutAndErgonomicsSection />
-
-      <BookmarksOrderSection />
-
-      <GlassModeSection />
-
-      <FontSelectorSection />
-
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h3 className="flex items-center gap-1.5 text-sm font-semibold text-primary">
-            <span>◆</span>
+          <h3 className="flex items-center gap-2 text-sm font-semibold text-primary">
+            <WfLotusEmblemIcon className="h-4 w-4 shrink-0" />
             <span>Thème de l’Interface</span>
           </h3>
           <p className="text-xs text-muted-foreground">
-            Choisis l’apparence visuelle de TennoFrame parmi les 20 thèmes (Sombre, Clair, OLED,
-            Bleu, Cyan, Vert, Jaune, Rouge, Orange, Violet, Rose) :
+            Choisissez l’apparence visuelle de TennoFrame parmi les 20 thèmes Warframe :
           </p>
         </div>
 
         <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-400">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
           <span>
-            {activePreset ? `${activePreset.glyph} ${activePreset.label}` : '✦ Personnalisé'}
+            {activePreset ? `${activePreset.glyph} ${activePreset.label}` : '❖ Personnalisé'}
           </span>
         </span>
       </div>
@@ -69,7 +86,7 @@ export function AppearanceSettingsTab(): React.JSX.Element {
                     }
                   : undefined
               }
-              className={`wf-card-lift group flex flex-col items-center justify-center gap-0.5 rounded-lg border px-2.5 py-2.5 text-center transition-all ${
+              className={`wf-card-lift group flex flex-col items-center justify-center gap-0.5 rounded-lg border px-2.5 py-2 text-center transition-all ${
                 active
                   ? 'border-primary bg-primary/10'
                   : 'border-border/80 bg-card/60 hover:border-primary/45 hover:bg-secondary/40'
@@ -95,39 +112,49 @@ export function AppearanceSettingsTab(): React.JSX.Element {
         })}
       </div>
 
-      <div className="space-y-1">
-        <h3 className="flex items-center gap-1.5 text-sm font-semibold text-primary">
-          <span>✦</span>
-          <span>Couleurs personnalisées</span>
-        </h3>
-        <p className="text-xs text-muted-foreground">
-          Choisis une couleur prédéfinie (ou libre) pour le fond et pour les accents,
-          indépendamment l’une de l’autre.
-        </p>
-      </div>
+      <div className="rounded-lg border border-border/80 bg-card/60">
+        <button
+          type="button"
+          onClick={() => setCustomColorsOpen((v) => !v)}
+          className="flex w-full items-center justify-between px-3.5 py-2.5 text-left text-xs font-semibold hover:bg-secondary/30"
+        >
+          <div className="flex items-center gap-2">
+            <span
+              className="h-3.5 w-3.5 rounded-full border border-border"
+              style={{ backgroundColor: appearance.secondaryColor }}
+            />
+            <span>Couleurs personnalisées (Fonds & Accents sur mesure)</span>
+          </div>
+          <ChevronDown
+            className={`h-4 w-4 text-muted-foreground transition-transform ${
+              customColorsOpen ? 'rotate-180' : ''
+            }`}
+          />
+        </button>
 
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-        <ColorSwatchPicker
-          title="Couleur Principale (Fonds)"
-          value={appearance.primaryColor}
-          groups={BACKGROUND_SWATCH_GROUPS}
-          onChange={(hex) =>
-            void updateSettings({ appearance: { preset: 'custom', primaryColor: hex } })
-          }
-        />
-        <ColorSwatchPicker
-          title="Couleur Secondaire (Accents)"
-          value={appearance.secondaryColor}
-          groups={ACCENT_SWATCH_GROUPS}
-          onChange={(hex) =>
-            void updateSettings({ appearance: { preset: 'custom', secondaryColor: hex } })
-          }
-        />
+        {customColorsOpen && (
+          <div className="grid grid-cols-1 gap-3 border-t border-border/60 p-3.5 lg:grid-cols-2">
+            <ColorSwatchPicker
+              title="Couleur Principale (Fonds)"
+              value={appearance.primaryColor}
+              groups={BACKGROUND_SWATCH_GROUPS}
+              onChange={(hex) =>
+                void updateSettings({ appearance: { preset: 'custom', primaryColor: hex } })
+              }
+            />
+            <ColorSwatchPicker
+              title="Couleur Secondaire (Accents)"
+              value={appearance.secondaryColor}
+              groups={ACCENT_SWATCH_GROUPS}
+              onChange={(hex) =>
+                void updateSettings({ appearance: { preset: 'custom', secondaryColor: hex } })
+              }
+            />
+          </div>
+        )}
       </div>
 
       <BackgroundGradientSection />
-
-      <MotionSettingsSection />
     </div>
   )
 }

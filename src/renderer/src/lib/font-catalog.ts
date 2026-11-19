@@ -124,7 +124,7 @@ export const FONT_CATALOG: readonly FontOptionDefinition[] = [
   {
     id: 'medieval',
     category: 'medieval',
-    glyph: '🏰',
+    glyph: '❖',
     name: 'Cinzel & Palatino',
     badgeEn: 'Medieval / Duviri Grimoire',
     badgeFr: 'Médiéval / Grimoire Duviri',
@@ -136,7 +136,7 @@ export const FONT_CATALOG: readonly FontOptionDefinition[] = [
   {
     id: 'georgia',
     category: 'medieval',
-    glyph: '📖',
+    glyph: '§',
     name: 'Georgia & Times',
     badgeEn: 'Classic Book Serif',
     badgeFr: 'Roman Classique',
@@ -148,7 +148,7 @@ export const FONT_CATALOG: readonly FontOptionDefinition[] = [
   {
     id: 'jetbrains-mono',
     category: 'mono-fun',
-    glyph: '⌨',
+    glyph: '▣',
     name: 'JetBrains Mono',
     badgeEn: 'Developer Monospace',
     badgeFr: 'Code & Alignement Pro',
@@ -160,7 +160,7 @@ export const FONT_CATALOG: readonly FontOptionDefinition[] = [
   {
     id: 'comic',
     category: 'mono-fun',
-    glyph: '😊',
+    glyph: '◉',
     name: 'Comic Sans / Neue',
     badgeEn: 'Casual & Easy Reading',
     badgeFr: 'Décontractée & Lecture Aisée',
