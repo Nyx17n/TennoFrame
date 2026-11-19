@@ -1115,6 +1115,31 @@ Pour épurer l'interface tout en accélérant les actions fréquentes à la sour
      - Bouton **`↺ Réinitialiser par défaut`** restaurant l'ordre et la visibilité d'origine en 1 clic.
 3. **Mode Compact (`460×660`) & 4 États UI** : barre défilable horizontalement à la molette ne rendant que les raccourcis non masqués (ou entièrement masquée si tous les raccourcis / l'interrupteur global sont désactivés) ; 4 états UI couverts (*Hydratation initiale sans saut visuel*, *État barre entièrement masquée réactivable à tout moment depuis Paramètres `⚙`*, *État nominal personnalisé*, *Validation `zod` tolérante aux anciennes configurations avec repli propre sur l'ordre par défaut*).
 
+### 3.31. Module 31 — Refonte Architecturale des Paramètres : 5 Catégories & Sous-Onglets Horizontaux (Zéro Scroll Long)
+
+1. **Objectif Métier & UX** :
+   - Remplacer l'ancien empilement vertical monolithique de `SettingsModal` par une architecture claire en **5 Catégories Racines** à gauche et **2 à 3 Sous-Onglets Horizontaux épinglés en haut** du panneau droit, de sorte que chaque écran de réglage tienne d'un seul coup d'œil sans long défilement :
+     1. **`🧭 Général & Navigation` (`general`)** :
+        - *Sous-onglet `Langue & Démarrage`* : Grille des **15 langues d'affichage** de l'application, **Zoom global (`50 % – 200 %`)**, et réglage + relecture de l'**animation d'ouverture (`StartupSplashOverlay`)**.
+        - *Sous-onglet `Disposition & Coins`* : Position des onglets (`Haut Classique | Barre Latérale Gauche`), Cible `+` Nouvel Onglet (`Speed Dial | Marché | Hub | Codex | Profil WFM`), Forme des coins et Densité UI.
+        - *Sous-onglet `Barre de Raccourcis`* : `BookmarksOrderSection` (Interrupteur global, flèches `↑`/`↓` et masquage `👁` des 13 onglets).
+     2. **`🎨 Apparence` (`appearance`)** :
+        - *Sous-onglet `Thèmes & Couleurs`* : Les **20 Thèmes Bicolores**, le **Dégradé de Fond d'Écran** (`BackgroundGradientSection`) et un accordéon repliable **`✦ Couleurs personnalisées (Fonds & Accents)`** pour ne plus alourdir la vue tant qu'on utilise un thème prédéfini.
+        - *Sous-onglet `Styles Factions & Verre`* : `GlassModeSection` (Mode Transparent ON/OFF, les 6 styles `Liquid Glass · Simple · Médiéval · Orokin · Céphalon · POM-2`, `Voir le bureau` et Opacité).
+        - *Sous-onglet `Polices & Animations`* : `FontSelectorSection` (12 polices `.woff2` locales) + `MotionSettingsSection` (Animations Complètes/Réduites/Désactivées, respect OS & Glow).
+     3. **`🎯 En Jeu & Overlay` (`overlay`)** :
+        - *Sous-onglet `Fenêtre & Raccourcis`* : System Tray à la fermeture, Premier plan (`Always-on-Top`), Souris traversante automatique (`📌`) et enregistreur des 4 raccourcis clavier globaux.
+        - *Sous-onglet `Overlay Farm Alt+O & Extensions`* : Activation et configuration de `Codex Farm Overlay`, `Minuteurs Compacts` et `Bandeau /w persistant`.
+     4. **`🏪 Marché & Alertes` (`market`)** :
+        - *Sous-onglet `Plateforme & /w`* : Plateforme (`PC / Consoles / Mobile`), Crossplay, statut vendeur par défaut et **Langue des messages `/w`** avec aperçu en direct.
+        - *Sous-onglet `Audio & Price Sniper`* : Sons d'alertes, sonnerie + écoute test, volume, fréquence de scan et notifications Windows / UI.
+     5. **`💾 Système` (`system`)** :
+        - *Sous-onglet `Mises à jour & Cache`* : Version installée, Notes de Patch, Support/Bug Discord, vérification & installation MAJ SHA-512 et gestion du cache local.
+        - *Sous-onglet `Sauvegarde JSON`* : Export `.json`, Import `.json` et Réinitialisation complète sécurisée.
+2. **Rétrocompatibilité des Liens Profonds (`openSettingsModal`)** :
+   - Tous les boutons existants de l'application (`openSettingsModal('audio')`, `openSettingsModal('extensions')`, `openSettingsModal('system')`, `openSettingsModal('market')`) sélectionnent automatiquement la bonne catégorie racine **ET le bon sous-onglet horizontal** correspondant.
+3. **Mode Compact (`460×660`) & 4 États UI** : barre des 5 catégories en ruban horizontal compact + barre de sous-onglets condensée juste en dessous ; 4 états couverts (*Chargement statut système/updater*, *État replié propre des palettes custom*, *Navigation nominale instantanée*, *Feedback d'erreur/succès sur sauvegarde, MAJ et cache*).
+
 ---
 
 ## 4. Architecture Technique, Contrats IPC & Sécurité
@@ -1211,7 +1236,7 @@ Tous les paramètres d'entrée et toutes les réponses API passent par une valid
 
 ## 5. Plan des Maquettes Excalidraw (`docs/02-tennoframe/` — Synchronisées `v2.10+`)
 
-L'ensemble des **31 planches Excalidraw** dans `docs/02-tennoframe/` documente fidèlement l'architecture de **TennoFrame**, chacune présentant côte à côte la version **Desktop (`1440×900`)**, son adaptation **Compact Overlay (`460×660`)**, et **les 4 états UI obligatoires** (*Chargement / Skeleton*, *Vide*, *Nominal*, *Erreur*) :
+L'ensemble des **32 planches Excalidraw** dans `docs/02-tennoframe/` documente fidèlement l'architecture de **TennoFrame**, chacune présentant côte à côte la version **Desktop (`1440×900`)**, son adaptation **Compact Overlay (`460×660`)**, et **les 4 états UI obligatoires** (*Chargement / Skeleton*, *Vide*, *Nominal*, *Erreur*) :
 
 1. `01-app-shell-navigation.excalidraw` : Fenêtre *Frameless* `v2.6.0`, `TitleTabsBar` (défilement molette + chevrons `‹ / ›` + fermeture clic molette), `ClickThroughBanner` (`👻` `Alt+G` + maintien `0.5s`), `CommandNavBar` (`Ctrl+K`, cloche `🔔`, `PC · Cross · FR ▾`, Zoom, `📌`, `👻`, `🗖`, `⚙`), `BookmarksBar` centrée + `Historique` (`Ctrl+H`), Omnibox, Organisateur d'onglets, bandeau `/w`, `CompactTimersBar`, bouton Discord et `StatusBar v2.6.0`.
 2. `02-market-home-catalog-item.excalidraw` : Accueil Marché (flux d'annonces récentes en direct, `ViewModeToggle` `[⊞|▭|☰] + [S|M|L]`, badges `Min · Moy · Max` Platinum), Catalogue, Favoris, Profil joueur, et **Fiche Item complète** (Ordres Vente/Achat, Comparateur *Set vs Pièces*, Pont bidirectionnel *Codex*, Statistiques 48h/90j + pagination *Afficher plus*).
@@ -1244,6 +1269,7 @@ L'ensemble des **31 planches Excalidraw** dans `docs/02-tennoframe/` documente f
 29. `29-foundry-craft-planner.excalidraw` *(Module 28 — Planificateur de Fonderie & Liste de Courses Agrégée `wf://foundry`)* : **Vue Desktop `1440×900`** (colonne gauche des Warframes/Armes ciblées + colonne droite de la Liste de Courses Consolidée additionnant récursivement toutes les ressources, compteurs `Possédé / Requis`, meilleurs spots de drop Codex et bouton `🎯 Tout épingler dans l'Overlay Farm`), **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
 30. `30-codex-arcanes-and-build-visuals.excalidraw` *(Module 29 + Enrichissement Visuel Module 27 — Onglet Codex « ✨ Arcanes » Complet & Vignettes d'Illustrations Mods/Arcanes dans le Studio de Builds)* : **Vue Desktop `1440×900` du Codex onglet `✨ Arcanes`** (filtres par emplacement *Warframe / Principale / Secondaire / Mêlée / Opérateur & Amp / Zaw & Kitgun*, cartes avec icône officielle + rareté + effet Rang Max + sources de drop/Loid Vosfor, et **Fiche Détail Arcane** avec progression `Rang 0 → Rang 5`, épinglage `Alt+O` et pont Platinum), **Vue Desktop améliorée du `Studio de Builds`** affichant les miniatures `wf-asset://` sur les 10 slots de Mods, les slots d'Arcanes, la modale de sélection et le panneau de coût Platinum, **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
 31. `31-customizable-bookmarks-bar.excalidraw` *(Module 30 — Barre de Raccourcis Personnalisable dans les Paramètres : Ordre par Boutons `↑`/`↓` & Masquage, Zéro Drag & Drop UI)* : **Vue Desktop `1440×900`** montrant `BookmarksBar` épurée (sans Drag & Drop ni icône parasite) pilotée exclusivement depuis la carte **`BookmarksOrderSection` dans `SettingsModal → Apparence`** (interrupteur global, liste ordonnée avec flèches `↑` / `↓`, bascule `👁 Afficher / Masquer` par onglet et bouton `↺ Par défaut`), **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
+32. `32-settings-reorganization-v2.excalidraw` *(Module 31 — Refonte Architecturale des Paramètres en 5 Catégories + Sous-Onglets Horizontaux)* : **Vue Desktop `1440×900`** de la nouvelle `SettingsModal` avec rail latéral de **5 catégories claires** (`🧭 Général & Navigation`, `🎨 Apparence`, `🎯 En Jeu & Overlay`, `🏪 Marché & Alertes`, `💾 Système`) + **barre de sous-onglets horizontaux épinglée en haut** éliminant tout scroll long + accordéon repliable pour les pastilles de couleurs personnalisées, **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
 
 ---
 
