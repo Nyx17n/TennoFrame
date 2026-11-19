@@ -1,5 +1,18 @@
 [
   {
+    "version": "2.17.0",
+    "date": "November 2026",
+    "title": "Pro Trader & Builder Suite, Offline Codex Arcanes Tab & Warframe-Themed Settings Redesign",
+    "badge": "New in v2.17.0",
+    "highlights": [
+      "New **Platinum Profit & Arbitrage Scanner (`wf://market/profit-scanner`)**: uncover live Warframe Market margins across **Arcane Fusion (`21× Rank 0 → Rank 5`)**, **Endo-to-Platinum Mod Valuation (`Rank 0 → Rank 10` in Platinum / 1,000 Endo)**, and **Prime Sets vs. Parts Arbitrage**, with one-click export straight to the Cart Bundler.",
+      "New **Platinum Ledger & Daily Trade Tracker (`wf://market/ledger`)**: automatic sales logging whenever you click `✓ Sold -1` in *My WFM Profile*, manual Buy/Sell entries, 14-day net profit chart, **Mastery Rank daily remaining trades** auto-resetting at `00:00 UTC`, Platinum savings goal gauge, Dojo Credit trade tax calculator, and CSV export.",
+      "Multi-Platform **Riven Grader & Price Estimator (`wf://market/rivens`)**: instant offline Rank-8 `[Min … Max]` stat range & roll quality (`0–100%`) math by Disposition (`2+0`, `2+1`, `3+0`, `3+1`), automatic **Meta Grade (`S+` to `Reroll`)**, and live WFM auction price estimation without Overwolf.",
+      "New **Build Studio (`wf://builds`)** & **Foundry Multi-Craft Planner (`wf://foundry`)**: plan Warframe & Weapon loadouts with full Mod & Arcane artwork, Forma capacity math, Helminth infusions, Archon Shards, `tf-build://` share codes, and live remaining Platinum cost — plus aggregate crafting materials across up to 30 Warframes & Weapons into one consolidated Foundry shopping list with one-click **`Alt+O` Codex Farm Overlay** pinning.",
+      "New **Codex `Arcanes` Tab (`161` Offline Arcanes)** & **Reorganized Settings Modal**: browse every Warframe, Weapon, Operator, Amp, Zaw & Kitgun Arcane offline (`Rank 0 → Rank 5` effects, drop rates & Loid Vosfor Dissolution packs), reorder or hide **Bookmarks Bar** shortcuts freely, and navigate a streamlined **5-Category + Horizontal Sub-Tabs Settings** interface crafted with custom Warframe vector emblems."
+    ]
+  },
+  {
     "version": "2.16.0",
     "date": "November 2026",
     "title": "Warframe Faction UI Styles, Vertical Tabs Sidebar, Density & Speed Dial Dashboard",
