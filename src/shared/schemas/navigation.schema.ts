@@ -17,6 +17,10 @@ export const RouteKindSchema = z.enum([
   'alerts',
   'codex-home',
   'codex-detail',
+  'profit-scanner',
+  'platinum-ledger',
+  'builds',
+  'foundry',
   'browser-history'
 ])
 
@@ -117,6 +121,14 @@ export function getDefaultRouteTitle(route: AppRoute): string {
       return 'Codex & Helminth'
     case 'codex-detail':
       return route.slug ? `Codex : ${formatSlugTitle(route.slug)}` : 'Fiche Codex'
+    case 'profit-scanner':
+      return 'Scanner de Profits'
+    case 'platinum-ledger':
+      return 'Comptabilité Platinum'
+    case 'builds':
+      return 'Studio de Builds'
+    case 'foundry':
+      return 'Planificateur Fonderie'
     case 'browser-history':
       return 'Historique'
   }
@@ -160,6 +172,14 @@ export function formatRouteUri(route: AppRoute): string {
       return 'wf://codex'
     case 'codex-detail':
       return `wf://codex/${route.category ?? 'warframes'}/${route.slug ?? 'wisp'}`
+    case 'profit-scanner':
+      return 'wf://market/profit-scanner'
+    case 'platinum-ledger':
+      return 'wf://market/ledger'
+    case 'builds':
+      return 'wf://builds'
+    case 'foundry':
+      return 'wf://foundry'
     case 'browser-history':
       return 'wf://history'
   }
@@ -221,6 +241,35 @@ export function parseInputToRoute(rawInput: string): AppRoute {
   if (lower === 'wf://alerts' || lower === 'alertes') return { kind: 'alerts' }
   if (lower === 'wf://codex' || lower === 'codex' || lower === 'helminth') {
     return { kind: 'codex-home' }
+  }
+  if (
+    lower === 'wf://market/profit-scanner' ||
+    lower === 'wf://profit-scanner' ||
+    lower === 'profit scanner' ||
+    lower === 'scanner de profits' ||
+    lower === 'arbitrage'
+  ) {
+    return { kind: 'profit-scanner' }
+  }
+  if (
+    lower === 'wf://market/ledger' ||
+    lower === 'wf://ledger' ||
+    lower === 'ledger' ||
+    lower === 'comptabilite' ||
+    lower === 'comptabilité'
+  ) {
+    return { kind: 'platinum-ledger' }
+  }
+  if (lower === 'wf://builds' || lower === 'builds' || lower === 'build studio') {
+    return { kind: 'builds' }
+  }
+  if (
+    lower === 'wf://foundry' ||
+    lower === 'foundry' ||
+    lower === 'fonderie' ||
+    lower === 'craft planner'
+  ) {
+    return { kind: 'foundry' }
   }
   if (lower === 'wf://history' || lower === 'historique' || lower === 'history') {
     return { kind: 'browser-history' }

@@ -14,6 +14,7 @@ import {
 import { HttpStatusError, type RateLimitedHttpClient } from '../infrastructure/http/RateLimitedHttpClient'
 import type { CacheService } from './CacheService'
 import type { MarketApiService } from './MarketApiService'
+import type { PlatinumLedgerService } from './PlatinumLedgerService'
 import type { WfmAuthService } from './WfmAuthService'
 import {
   RawWfmExtendedUserResponseSchema,
@@ -32,7 +33,8 @@ export class WfmAccountService {
     private readonly http: RateLimitedHttpClient,
     private readonly cache: CacheService,
     private readonly marketApi: MarketApiService,
-    private readonly auth: WfmAuthService
+    private readonly auth: WfmAuthService,
+    private readonly ledger?: PlatinumLedgerService
   ) {}
 
   public async getOverview(forceRefresh = false): Promise<WfmAccountOverview> {
@@ -284,6 +286,17 @@ export class WfmAccountService {
       const remaining = known ? Math.max(0, known.quantity - units) : 0
       if (known && known.type === 'sell') {
         this.auth.recordCompletedSale(known.platinum * units, units)
+      }
+      if (known && this.ledger) {
+        await this.ledger.recordAutoWfmTrade({
+          type: known.type,
+          itemSlug: known.itemSlug,
+          itemNameFr: known.itemNameFr,
+          itemNameEn: known.itemNameEn,
+          unitPlatinum: known.platinum,
+          quantity: units,
+          ...(known.rank !== undefined ? { rank: known.rank } : {})
+        })
       }
       if (remaining <= 0) {
         this.lastKnownOrders.delete(input.orderId)

@@ -16,12 +16,20 @@ import {
   type CodexSummaryCard,
   type HelminthOverview
 } from '@shared/schemas/codex.schema'
+import type {
+  BuildCatalogPayload,
+  FoundryConsolidatedResource,
+  FoundryProjectDetail,
+  FoundryState
+} from '@shared/schemas/pro-tools.schema'
 import type { MarketApiService } from './MarketApiService'
 import { CodexAcquisitionResolver } from './CodexAcquisitionResolver'
 import {
+  CodexArcanesDatabaseSchema,
   CodexCraftRecipesDatabaseSchema,
   CodexMobsVendorsDatabaseSchema,
   CodexRawDatabaseSchema,
+  type CodexArcanesDatabase,
   type CodexCraftRecipesDatabase,
   type CodexMobsVendorsDatabase,
   type CodexRawDatabase
@@ -71,9 +79,11 @@ export class CodexRepository {
   private db: CodexRawDatabase | null = null
   private craftRecipes: CodexCraftRecipesDatabase | null = null
   private mobsVendors: CodexMobsVendorsDatabase | null = null
+  private arcanesDb: CodexArcanesDatabase = { arcanes: [] }
   private resolver: CodexAcquisitionResolver | null = null
   private loadingPromise: Promise<CodexRawDatabase> | null = null
   private summariesByCat: Record<CodexCategory, CodexSummaryCard[]> | null = null
+  private buildCatalogCache: BuildCatalogPayload | null = null
 
   public constructor(private readonly marketApi: MarketApiService) {}
 
@@ -99,12 +109,20 @@ export class CodexRepository {
         mobsVendors = CodexMobsVendorsDatabaseSchema.parse(JSON.parse(rawMv))
       }
 
+      let arcanesDb: CodexArcanesDatabase = { arcanes: [] }
+      const arcPath = resolveResourceFilePath('codex-arcanes.json')
+      if (existsSync(arcPath)) {
+        const rawArc = await readFile(arcPath, 'utf-8')
+        arcanesDb = CodexArcanesDatabaseSchema.parse(JSON.parse(rawArc))
+      }
+
       const resolver = new CodexAcquisitionResolver(parsed, craftRecipes)
       this.db = parsed
       this.craftRecipes = craftRecipes
       this.mobsVendors = mobsVendors
+      this.arcanesDb = arcanesDb
       this.resolver = resolver
-      this.summariesByCat = this.buildSummaries(parsed, resolver, mobsVendors)
+      this.summariesByCat = this.buildSummaries(parsed, resolver, mobsVendors, arcanesDb)
       return parsed
     })()
 
@@ -118,7 +136,8 @@ export class CodexRepository {
   private buildSummaries(
     db: CodexRawDatabase,
     resolver: CodexAcquisitionResolver,
-    mv: CodexMobsVendorsDatabase
+    mv: CodexMobsVendorsDatabase,
+    arcDb: CodexArcanesDatabase
   ): Record<CodexCategory, CodexSummaryCard[]> {
     return {
       resources: db.resources.map((r) => {
@@ -255,7 +274,31 @@ export class CodexRepository {
         acquisitionText: `${v.roleFr}`,
         vendorCurrenciesFr: v.currencies.map((c) => c.nameFr).slice(0, 2),
         matchedOfferingPreview: null
-      }))
+      })),
+      arcanes: arcDb.arcanes.map((a) => {
+        const maxEffect =
+          a.levelStatsFr[a.levelStatsFr.length - 1] ??
+          a.levelStatsEn[a.levelStatsEn.length - 1] ??
+          a.typeLabelFr
+        const topSrc =
+          a.vendorSources[0]?.vendorNameFr ??
+          a.drops[0]?.location ??
+          a.vosforHintFr
+        return {
+          id: a.id,
+          category: 'arcanes',
+          nameFr: a.nameFr,
+          nameEn: a.nameEn,
+          imageUrl: toCodexImageUrl(a.img),
+          badgeText: `${a.rarity} · R${a.maxRank}`,
+          subtitle: `${a.typeLabelFr} · ${maxEffect}`.slice(0, 480),
+          isPrime: a.rarity === 'Legendary',
+          isVaulted: false,
+          isTradable: a.tradable,
+          craftComponents: [],
+          acquisitionText: topSrc.slice(0, 240)
+        }
+      })
     }
   }
 
@@ -366,6 +409,10 @@ export class CodexRepository {
         const weapon = db.weapons.find((w) => w.id === card.id)
         if (!weapon || weapon.slot !== params.slotFilter) continue
       }
+      if (params.category === 'arcanes' && params.slotFilter !== 'all') {
+        const arc = this.arcanesDb.arcanes.find((a) => a.id === card.id)
+        if (!arc || arc.slotCategory !== params.slotFilter) continue
+      }
       filtered.push(card)
     }
 
@@ -380,6 +427,7 @@ export class CodexRepository {
         warframes: summaries.warframes.length,
         weapons: summaries.weapons.length,
         mods: summaries.mods.length,
+        arcanes: summaries.arcanes.length,
         relics: summaries.relics.length,
         mobs: summaries.mobs.length,
         vendors: summaries.vendors.length
@@ -397,6 +445,7 @@ export class CodexRepository {
       'resources',
       'warframes',
       'weapons',
+      'arcanes',
       'vendors',
       'mobs',
       'relics',
@@ -523,6 +572,7 @@ export class CodexRepository {
         relicInfo: null,
         mobInfo: null,
         vendorInfo: null,
+        arcaneInfo: null,
         drops: resolved.drops,
         acquisitionSources: resolved.acquisitionSources,
         totalBuildCredits: null,
@@ -574,6 +624,7 @@ export class CodexRepository {
         relicInfo: null,
         mobInfo: null,
         vendorInfo: null,
+        arcaneInfo: null,
         drops: resolved.drops,
         acquisitionSources: resolved.acquisitionSources,
         totalBuildCredits: resolved.totalBuildCredits,
@@ -624,6 +675,7 @@ export class CodexRepository {
         relicInfo: null,
         mobInfo: null,
         vendorInfo: null,
+        arcaneInfo: null,
         drops: resolved.drops,
         acquisitionSources: resolved.acquisitionSources,
         totalBuildCredits: resolved.totalBuildCredits,
@@ -644,7 +696,7 @@ export class CodexRepository {
         nameFr: item.name,
         nameEn: item.en,
         imageUrl: toCodexImageUrl(item.img),
-        descriptionFr: item.stats.join('\n'),
+        descriptionFr: item.stats.map((s) => s.replace(/\\n/g, ' ')).join('\n'),
         typeLabel: item.type,
         isPrime: item.en.startsWith('Primed '),
         isVaulted: false,
@@ -666,6 +718,7 @@ export class CodexRepository {
         relicInfo: null,
         mobInfo: null,
         vendorInfo: null,
+        arcaneInfo: null,
         drops: resolved.drops,
         acquisitionSources: resolved.acquisitionSources,
         totalBuildCredits: null,
@@ -739,6 +792,7 @@ export class CodexRepository {
           }))
         },
         vendorInfo: null,
+        arcaneInfo: null,
         drops: mob.drops.map((d) => ({
           part: d.typeLabelFr,
           location: d.nameFr,
@@ -815,6 +869,7 @@ export class CodexRepository {
             isTradable: o.isTradable
           }))
         },
+        arcaneInfo: null,
         drops: [],
         acquisitionSources: [
           {
@@ -829,6 +884,95 @@ export class CodexRepository {
             partNameFr: null
           }
         ],
+        totalBuildCredits: null,
+        components: [],
+        totalUsedFor: 0,
+        usedFor: []
+      }
+    }
+
+    if (category === 'arcanes') {
+      const arc = this.arcanesDb.arcanes.find((a) => a.id === id || a.marketSlug === id)
+      if (!arc) throw new Error(`Arcane Codex introuvable : ${id}`)
+      const marketSlug = await this.resolveMarketSlug('arcanes', arc.id, arc.nameEn, false, arc.tradable)
+      const maxStat =
+        arc.levelStatsFr[arc.levelStatsFr.length - 1] ??
+        arc.levelStatsEn[arc.levelStatsEn.length - 1] ??
+        ''
+
+      const sources: CodexItemDetail['acquisitionSources'] = [
+        ...arc.vendorSources.map((vs) => ({
+          type: 'syndicate' as const,
+          labelFr: `${vs.vendorNameFr}${vs.hubFr ? ` (${vs.hubFr})` : ''}`,
+          labelEn: vs.vendorNameFr,
+          sublabelFr: vs.costFr || 'Marchand Syndicat',
+          sublabelEn: null,
+          chancePct: 100,
+          isGuaranteed: true,
+          costCredits: null,
+          partNameFr: null
+        })),
+        ...arc.drops.slice(0, 8).map((d) => ({
+          type: 'drop' as const,
+          labelFr: d.location,
+          labelEn: d.location,
+          sublabelFr: `${d.rarity} · Rang 0`,
+          sublabelEn: null,
+          chancePct: d.chancePct,
+          isGuaranteed: d.chancePct >= 100,
+          costCredits: null,
+          partNameFr: null
+        })),
+        {
+          type: 'syndicate' as const,
+          labelFr: arc.vosforHintFr || 'Loid — Dissolution d’Arcanes (Sanctum Anatomica, Deimos)',
+          labelEn: 'Loid — Vosfor Arcane Dissolution (Sanctum Anatomica)',
+          sublabelFr: '200 Vosfor = Pack de 3 Arcanes aléatoires de la collection',
+          sublabelEn: '200 Vosfor = Pack of 3 random Arcanes',
+          chancePct: 100,
+          isGuaranteed: false,
+          costCredits: null,
+          partNameFr: null
+        }
+      ]
+
+      return {
+        id: arc.id,
+        category: 'arcanes',
+        nameFr: arc.nameFr,
+        nameEn: arc.nameEn,
+        imageUrl: toCodexImageUrl(arc.img),
+        descriptionFr: maxStat,
+        typeLabel: `${arc.typeLabelFr} · ${arc.rarity}`,
+        isPrime: arc.rarity === 'Legendary',
+        isVaulted: false,
+        isTradable: arc.tradable,
+        marketSlug: marketSlug ?? (arc.tradable && arc.marketSlug ? arc.marketSlug : null),
+        planets: null,
+        utility: `Rang Max R${arc.maxRank} (${arc.copiesForMaxRank}× exemplaires Rang 0 requis)`,
+        warframeStats: null,
+        abilities: [],
+        weaponStats: null,
+        modStats: null,
+        relicInfo: null,
+        mobInfo: null,
+        vendorInfo: null,
+        arcaneInfo: {
+          rarity: arc.rarity,
+          slotCategory: arc.slotCategory,
+          maxRank: arc.maxRank,
+          copiesForMaxRank: arc.copiesForMaxRank,
+          vosforHintFr: arc.vosforHintFr,
+          levelStatsFr: arc.levelStatsFr,
+          levelStatsEn: arc.levelStatsEn
+        },
+        drops: arc.drops.map((d) => ({
+          part: null,
+          location: d.location,
+          chance: d.chancePct,
+          rarity: d.rarity
+        })),
+        acquisitionSources: sources,
         totalBuildCredits: null,
         components: [],
         totalUsedFor: 0,
@@ -870,6 +1014,7 @@ export class CodexRepository {
       },
       mobInfo: null,
       vendorInfo: null,
+      arcaneInfo: null,
       drops: resolved.drops,
       acquisitionSources: resolved.acquisitionSources,
       totalBuildCredits: null,
@@ -921,6 +1066,397 @@ export class CodexRepository {
           imageUrl: toCodexImageUrl(resourceMap.get(br.slug)?.img)
         }))
       }))
+    }
+  }
+
+  public async resolveModMarketSlug(modId: string): Promise<string | null> {
+    const db = await this.ensureLoaded()
+    const mod = db.mods.find((m) => m.id === modId)
+    if (!mod) return null
+    return this.resolveMarketSlug('mods', mod.id, mod.en, false, mod.tradable)
+  }
+
+  public async getBuildStudioCatalog(): Promise<BuildCatalogPayload> {
+    if (this.buildCatalogCache) {
+      return this.buildCatalogCache
+    }
+    const db = await this.ensureLoaded()
+    const resolver = this.resolver!
+
+    let marketThumbBySlug = new Map<string, string | null>()
+    try {
+      const marketCatalog = await this.marketApi.getCatalog(false)
+      marketThumbBySlug = new Map(marketCatalog.map((item) => [item.slug, item.thumb]))
+    } catch {
+      marketThumbBySlug = new Map()
+    }
+
+    const arcanes: BuildCatalogPayload['arcanes'] = this.arcanesDb.arcanes
+      .map((a) => {
+        const maxStat =
+          a.levelStatsFr[a.levelStatsFr.length - 1] ??
+          a.levelStatsEn[a.levelStatsEn.length - 1] ??
+          ''
+        const sources: BuildCatalogPayload['arcanes'][number]['topSources'] = [
+          ...a.vendorSources.slice(0, 2).map((vs) => ({
+            type: 'syndicate' as const,
+            labelFr: `${vs.vendorNameFr}${vs.hubFr ? ` (${vs.hubFr})` : ''}`.slice(0, 280),
+            sublabelFr: (vs.costFr || 'Marchand Syndicat').slice(0, 280),
+            chancePct: 100,
+            isGuaranteed: true
+          })),
+          ...a.drops.slice(0, 2).map((d) => ({
+            type: 'drop' as const,
+            labelFr: d.location.slice(0, 280),
+            sublabelFr: `${d.rarity} · Rang 0`,
+            chancePct: d.chancePct,
+            isGuaranteed: d.chancePct >= 100
+          }))
+        ].slice(0, 3)
+
+        return {
+          slug: a.marketSlug || a.id.replace(/-/g, '_'),
+          codexId: a.id,
+          nameFr: a.nameFr,
+          nameEn: a.nameEn,
+          thumb: marketThumbBySlug.get(a.marketSlug) ?? null,
+          imageUrl: toCodexImageUrl(a.img),
+          rarity: a.rarity,
+          slotCategory: a.slotCategory,
+          maxRank: a.maxRank,
+          statsSummary: maxStat.slice(0, 220),
+          topSources: sources
+        }
+      })
+      .sort((a, b) => a.nameFr.localeCompare(b.nameFr, 'fr'))
+
+    const equipment: BuildCatalogPayload['equipment'] = [
+      ...db.warframes
+        .filter((wf) => wf.id !== 'helminth')
+        .map((wf) => ({
+          id: wf.id,
+          category: 'warframes' as const,
+          weaponSlot: null,
+          weaponType: null,
+          nameFr: wf.name,
+          nameEn: wf.en,
+          imageUrl: toCodexImageUrl(wf.img),
+          isPrime: wf.prime,
+          auraPolarity: wf.aura || null,
+          innatePolarities: wf.pol
+        })),
+      ...db.weapons
+        .filter((wep) => ['primary', 'secondary', 'melee', 'arch-gun'].includes(wep.slot))
+        .map((wep) => ({
+          id: wep.id,
+          category: 'weapons' as const,
+          weaponSlot: wep.slot,
+          weaponType: wep.type,
+          nameFr: wep.name,
+          nameEn: wep.en,
+          imageUrl: toCodexImageUrl(wep.img),
+          isPrime: wep.prime,
+          auraPolarity: null,
+          innatePolarities: []
+        }))
+    ].sort((a, b) => a.nameFr.localeCompare(b.nameFr, 'fr'))
+
+    const mods: BuildCatalogPayload['mods'] = db.mods
+      .map((m) => {
+        const resolved = resolver.resolveMod(m)
+        return {
+          id: m.id,
+          nameFr: m.name,
+          nameEn: m.en,
+          imageUrl: toCodexImageUrl(m.img),
+          typeLabel: m.type,
+          compatName: m.compat,
+          polarity: (m.pol || 'none').toLowerCase(),
+          rarity: m.rarity,
+          baseDrain: m.drain,
+          maxRank: m.maxRank,
+          tradable: m.tradable,
+          statsSummary: (m.stats[m.stats.length - 1] ?? m.stats[0] ?? '')
+            .replace(/\\n|\r?\n/g, ' · ')
+            .slice(0, 220),
+          topSources: resolved.acquisitionSources.slice(0, 3).map((src) => ({
+            type: src.type,
+            labelFr: src.labelFr.slice(0, 280),
+            sublabelFr: src.sublabelFr ? src.sublabelFr.slice(0, 280) : null,
+            chancePct: src.chancePct,
+            isGuaranteed: src.isGuaranteed
+          }))
+        }
+      })
+      .sort((a, b) => a.nameFr.localeCompare(b.nameFr, 'fr'))
+
+    const subsumedAbilities: BuildCatalogPayload['subsumedAbilities'] = db.warframes
+      .filter((w) => !w.prime && w.id !== 'helminth' && HELMINTH_SUBSUMED_INDEX_BY_WARFRAME[w.id])
+      .map((w) => {
+        const meta = HELMINTH_SUBSUMED_INDEX_BY_WARFRAME[w.id]!
+        const ab = w.abilities[meta.abilityIndex] ?? w.abilities[0]
+        return {
+          warframeId: w.id,
+          warframeNameFr: w.name,
+          abilityNameFr: ab?.name ?? w.name,
+          imageUrl: toCodexImageUrl(ab?.img),
+          isMeta: Boolean(meta.isMeta)
+        }
+      })
+      .sort((a, b) => a.abilityNameFr.localeCompare(b.abilityNameFr, 'fr'))
+
+    const payload: BuildCatalogPayload = {
+      equipment,
+      mods,
+      arcanes,
+      subsumedAbilities
+    }
+    if (arcanes.length > 0) {
+      this.buildCatalogCache = payload
+    }
+    return payload
+  }
+
+  public async resolveFoundryBreakdown(
+    projectInputs: ReadonlyArray<{
+      category: 'warframes' | 'weapons'
+      id: string
+      addedAtIso: string
+    }>,
+    ownedByKey: Readonly<Record<string, number>>
+  ): Promise<FoundryState> {
+    const db = await this.ensureLoaded()
+    const resolver = this.resolver!
+    const resourceBySlug = new Map(db.resources.map((r) => [r.id, r]))
+
+    const projects: FoundryProjectDetail[] = []
+    let totalCredits = 0
+
+    const aggMap = new Map<
+      string,
+      {
+        resourceId: string
+        category: 'resources' | 'warframes' | 'weapons'
+        nameFr: string
+        nameEn: string
+        imageUrl: string | null
+        requiredCount: number
+        usedBySet: Set<string>
+      }
+    >()
+
+    const addRequirement = (
+      key: string,
+      resourceId: string,
+      category: 'resources' | 'warframes' | 'weapons',
+      nameFr: string,
+      nameEn: string,
+      imageUrl: string | null,
+      count: number,
+      projectNameFr: string
+    ): void => {
+      if (count <= 0) return
+      const existing = aggMap.get(key)
+      if (existing) {
+        existing.requiredCount += count
+        existing.usedBySet.add(projectNameFr)
+      } else {
+        aggMap.set(key, {
+          resourceId,
+          category,
+          nameFr,
+          nameEn,
+          imageUrl,
+          requiredCount: count,
+          usedBySet: new Set([projectNameFr])
+        })
+      }
+    }
+
+    for (const p of projectInputs) {
+      if (p.category === 'warframes') {
+        const wf = db.warframes.find((w) => w.id === p.id)
+        if (!wf) continue
+        const resolved = resolver.resolveWarframe(wf)
+        const credits = resolved.totalBuildCredits ?? 25_000
+        totalCredits += credits
+        projects.push({
+          key: `warframes:${wf.id}`,
+          category: 'warframes',
+          id: wf.id,
+          nameFr: wf.name,
+          nameEn: wf.en,
+          imageUrl: toCodexImageUrl(wf.img),
+          isPrime: wf.prime,
+          buildCredits: credits,
+          addedAtIso: p.addedAtIso
+        })
+
+        const precomputed = this.craftRecipes?.warframes[wf.id]?.totalResources ?? []
+        if (precomputed.length > 0) {
+          for (const tr of precomputed) {
+            const slug = tr.resSlug ?? normalizeText(tr.nameEn || tr.nameFr).replace(/\s+/g, '-')
+            const resObj = tr.resSlug ? resourceBySlug.get(tr.resSlug) : undefined
+            addRequirement(
+              `res:${slug}`,
+              slug,
+              'resources',
+              resObj?.name ?? tr.nameFr,
+              resObj?.en ?? (tr.nameEn || tr.nameFr),
+              toCodexImageUrl(resObj?.img ?? tr.img),
+              tr.count,
+              wf.name
+            )
+          }
+        } else {
+          for (const comp of resolved.components) {
+            if (comp.subResources.length > 0) {
+              for (const sr of comp.subResources) {
+                const slug = sr.resourceSlug ?? normalizeText(sr.nameEn || sr.nameFr).replace(/\s+/g, '-')
+                const resObj = sr.resourceSlug ? resourceBySlug.get(sr.resourceSlug) : undefined
+                addRequirement(
+                  `res:${slug}`,
+                  slug,
+                  'resources',
+                  sr.nameFr,
+                  resObj?.en ?? (sr.nameEn || sr.nameFr),
+                  sr.imageUrl,
+                  sr.count * comp.count,
+                  wf.name
+                )
+              }
+            } else if (comp.isResource && comp.resourceSlug) {
+              const resObj = resourceBySlug.get(comp.resourceSlug)
+              addRequirement(
+                `res:${comp.resourceSlug}`,
+                comp.resourceSlug,
+                'resources',
+                comp.nameFr,
+                resObj?.en ?? comp.nameEn,
+                comp.imageUrl,
+                comp.count,
+                wf.name
+              )
+            }
+          }
+        }
+      } else {
+        const wep = db.weapons.find((w) => w.id === p.id)
+        if (!wep) continue
+        const resolved = resolver.resolveWeapon(wep)
+        const credits = resolved.totalBuildCredits ?? 15_000
+        totalCredits += credits
+        projects.push({
+          key: `weapons:${wep.id}`,
+          category: 'weapons',
+          id: wep.id,
+          nameFr: wep.name,
+          nameEn: wep.en,
+          imageUrl: toCodexImageUrl(wep.img),
+          isPrime: wep.prime,
+          buildCredits: credits,
+          addedAtIso: p.addedAtIso
+        })
+
+        const precomputed = this.craftRecipes?.weapons[wep.id]?.totalResources ?? []
+        if (precomputed.length > 0) {
+          for (const tr of precomputed) {
+            const slug = tr.resSlug ?? normalizeText(tr.nameEn || tr.nameFr).replace(/\s+/g, '-')
+            const resObj = tr.resSlug ? resourceBySlug.get(tr.resSlug) : undefined
+            addRequirement(
+              `res:${slug}`,
+              slug,
+              'resources',
+              resObj?.name ?? tr.nameFr,
+              resObj?.en ?? (tr.nameEn || tr.nameFr),
+              toCodexImageUrl(resObj?.img ?? tr.img),
+              tr.count,
+              wep.name
+            )
+          }
+        } else {
+          for (const comp of resolved.components) {
+            if (comp.isResource && comp.resourceSlug) {
+              const resObj = resourceBySlug.get(comp.resourceSlug)
+              addRequirement(
+                `res:${comp.resourceSlug}`,
+                comp.resourceSlug,
+                'resources',
+                comp.nameFr,
+                resObj?.en ?? comp.nameEn,
+                comp.imageUrl,
+                comp.count,
+                wep.name
+              )
+            }
+          }
+        }
+      }
+    }
+
+    const resources: FoundryConsolidatedResource[] = []
+    let completedResourcesCount = 0
+
+    for (const [key, entry] of aggMap.entries()) {
+      const ownedCount = Math.max(0, ownedByKey[key] ?? 0)
+      const missingCount = Math.max(0, entry.requiredCount - ownedCount)
+      if (missingCount === 0) {
+        completedResourcesCount += 1
+      }
+
+      const rawRes = resourceBySlug.get(entry.resourceId)
+      const resolvedRes = rawRes ? resolver.resolveResource(rawRes) : null
+      const topSrc = resolvedRes?.acquisitionSources[0]
+      const bestSpotFr =
+        topSrc?.labelFr ??
+        rawRes?.planets ??
+        'Missions Carte Céleste / Conteneurs de ressources'
+      const bestSpotEn =
+        topSrc?.labelEn ??
+        rawRes?.planets ??
+        'Star Chart Missions / Resource Containers'
+
+      const isArgonCrystal =
+        entry.resourceId.includes('argon') ||
+        entry.nameEn.toLowerCase().includes('argon crystal')
+
+      resources.push({
+        key,
+        resourceId: entry.resourceId,
+        category: entry.category,
+        nameFr: entry.nameFr,
+        nameEn: entry.nameEn,
+        imageUrl: entry.imageUrl,
+        isArgonCrystal,
+        requiredCount: entry.requiredCount,
+        ownedCount,
+        missingCount,
+        bestSpotFr: bestSpotFr.slice(0, 240),
+        bestSpotEn: bestSpotEn.slice(0, 240),
+        usedByNames: Array.from(entry.usedBySet),
+        topSources: (resolvedRes?.acquisitionSources ?? []).slice(0, 3).map((src) => ({
+          type: src.type,
+          labelFr: src.labelFr.slice(0, 280),
+          sublabelFr: src.sublabelFr ? src.sublabelFr.slice(0, 280) : null,
+          chancePct: src.chancePct,
+          isGuaranteed: src.isGuaranteed
+        }))
+      })
+    }
+
+    resources.sort((a, b) => {
+      const aDone = a.missingCount === 0 ? 1 : 0
+      const bDone = b.missingCount === 0 ? 1 : 0
+      if (aDone !== bDone) return aDone - bDone
+      if (a.isArgonCrystal !== b.isArgonCrystal) return a.isArgonCrystal ? -1 : 1
+      return b.usedByNames.length - a.usedByNames.length || a.nameFr.localeCompare(b.nameFr, 'fr')
+    })
+
+    return {
+      projects,
+      totalCredits,
+      resources,
+      completedResourcesCount
     }
   }
 }

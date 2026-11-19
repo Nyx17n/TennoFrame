@@ -1,16 +1,16 @@
 import * as React from 'react'
-import { Globe, MessageSquare, Star } from 'lucide-react'
+import { MessageSquare, Star } from 'lucide-react'
 import {
   formatWhisperMessage,
   getRecommendedLabel,
   RECOMMENDED_WHISPER_LANGUAGE,
-  WARFRAME_LANGUAGES,
   WHISPER_LANGUAGES
 } from '@shared/data/languages'
 import type { MarketPlatform } from '@shared/schemas/settings.schema'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
+import { WfPlatinumCrestIcon } from '@/components/settings/WarframeSettingsIcons'
 import { useUiTranslations } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/stores/useAppStore'
@@ -34,13 +34,16 @@ export function MarketTradingSettingsTab(): React.JSX.Element {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h3 className="text-sm font-semibold">{t.market.settingsTitle}</h3>
-        <p className="text-xs text-muted-foreground">{t.market.settingsDesc}</p>
-      </div>
+      <div className="space-y-3 rounded-lg border border-border/80 bg-card/60 p-3.5">
+        <div className="space-y-0.5">
+          <h3 className="flex items-center gap-2 text-sm font-semibold text-primary">
+            <WfPlatinumCrestIcon className="h-4 w-4 shrink-0" />
+            <span>{t.market.settingsTitle}</span>
+          </h3>
+          <p className="text-xs text-muted-foreground">{t.market.settingsDesc}</p>
+        </div>
 
-      <div className="space-y-3 rounded-md border border-border bg-background/50 p-3">
-        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs">
           <span>{t.market.platformLabel}</span>
           <div className="flex flex-wrap gap-1">
             {PLATFORMS.map((plat) => (
@@ -57,7 +60,7 @@ export function MarketTradingSettingsTab(): React.JSX.Element {
           </div>
         </div>
 
-        <label className="flex cursor-pointer items-center justify-between text-xs">
+        <label className="flex cursor-pointer items-center justify-between border-t border-border/60 pt-2.5 text-xs">
           <span>{t.market.crossplayLabel}</span>
           <Switch
             checked={market.crossplay}
@@ -65,7 +68,7 @@ export function MarketTradingSettingsTab(): React.JSX.Element {
           />
         </label>
 
-        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-2.5 text-xs">
           <span>{t.market.defaultSellerFilter}</span>
           <div className="flex flex-wrap gap-1">
             {(
@@ -88,41 +91,11 @@ export function MarketTradingSettingsTab(): React.JSX.Element {
         </div>
       </div>
 
-      <div className="space-y-3 rounded-md border border-border bg-background/50 p-3">
+      <div className="space-y-3 rounded-lg border border-border/80 bg-card/60 p-3.5">
         <div className="space-y-2">
-          <div className="flex items-center gap-1.5 text-xs font-medium">
-            <Globe className="h-3.5 w-3.5 text-primary" />
-            <span>{t.market.appLanguageLabel}</span>
-          </div>
-          <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 md:grid-cols-5">
-            {WARFRAME_LANGUAGES.map((entry) => {
-              const active = market.language === entry.id
-              return (
-                <button
-                  key={entry.id}
-                  type="button"
-                  onClick={() => void updateSettings({ market: { language: entry.id } })}
-                  className={cn(
-                    'flex items-center gap-1.5 rounded-md border px-2 py-1.5 text-left text-xs transition-colors',
-                    active
-                      ? 'border-primary bg-primary/15 font-semibold text-primary'
-                      : 'border-border bg-card/60 text-muted-foreground hover:bg-secondary hover:text-foreground'
-                  )}
-                >
-                  <span className="rounded bg-secondary px-1 py-0.5 font-mono text-[10px] font-bold">
-                    {entry.shortCode}
-                  </span>
-                  <span className="truncate">{entry.nativeLabel}</span>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
-        <div className="space-y-2 border-t border-border/60 pt-3">
-          <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-medium">
-            <div className="flex items-center gap-1.5">
-              <MessageSquare className="h-3.5 w-3.5 text-primary" />
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-semibold">
+            <div className="flex items-center gap-1.5 text-primary">
+              <MessageSquare className="h-3.5 w-3.5" />
               <span>{t.market.whisperLanguageLabel}</span>
             </div>
             <Badge
@@ -160,16 +133,14 @@ export function MarketTradingSettingsTab(): React.JSX.Element {
                     <span className="font-mono text-[10px] font-bold">{entry.shortCode}</span>
                     <span className="truncate">{entry.nativeLabel}</span>
                   </span>
-                  {isRec && (
-                    <Star className="h-3 w-3 shrink-0 fill-amber-400 text-amber-400" />
-                  )}
+                  {isRec && <Star className="h-3 w-3 shrink-0 fill-amber-400 text-amber-400" />}
                 </button>
               )
             })}
           </div>
         </div>
 
-        <div className="rounded border border-border bg-card p-2.5 text-[11px]">
+        <div className="rounded border border-border bg-background/70 p-2.5 text-[11px]">
           <div className="mb-1 flex items-center gap-1.5 font-semibold text-primary">
             <MessageSquare className="h-3 w-3" />
             <span>{t.market.whisperPreviewLabel}</span>

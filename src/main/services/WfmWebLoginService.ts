@@ -164,8 +164,11 @@ export class WfmWebLoginService {
         try {
           const cookies = await authSession.cookies.get({})
           for (const ck of cookies) {
-            const domain = (ck.domain ?? '').toLowerCase()
-            if (domain.includes('warframe.market') && ck.value) {
+            const domain = (ck.domain ?? '').toLowerCase().replace(/^\.+/, '')
+            if (
+              (domain === 'warframe.market' || domain.endsWith('.warframe.market')) &&
+              ck.value
+            ) {
               if (ck.name.toUpperCase() === 'JWT' || ck.value.split('.').length === 3) {
                 await tryVerifyCandidateToken(ck.value)
               }

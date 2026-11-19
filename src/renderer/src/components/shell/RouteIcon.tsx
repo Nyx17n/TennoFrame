@@ -7,6 +7,7 @@ import {
   Compass,
   Flame,
   Globe,
+  Hammer,
   History,
   LayoutDashboard,
   Package,
@@ -14,8 +15,11 @@ import {
   Sparkles,
   Star,
   Store,
+  TrendingUp,
   User,
-  UserCheck
+  UserCheck,
+  Wallet,
+  Wrench
 } from 'lucide-react'
 import type { RouteKind } from '@shared/schemas/navigation.schema'
 
@@ -57,6 +61,14 @@ export function RouteIcon({
       return <BookOpen className={className} />
     case 'codex-detail':
       return <Sparkles className={className} />
+    case 'profit-scanner':
+      return <TrendingUp className={className} />
+    case 'platinum-ledger':
+      return <Wallet className={className} />
+    case 'builds':
+      return <Wrench className={className} />
+    case 'foundry':
+      return <Hammer className={className} />
     case 'browser-history':
       return <History className={className} />
   }

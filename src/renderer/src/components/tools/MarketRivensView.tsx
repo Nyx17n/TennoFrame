@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ChevronDown, Flame, RefreshCw, Search } from 'lucide-react'
+import { ChevronDown, Dna, Flame, RefreshCw, Search } from 'lucide-react'
 import { pickMarketText } from '@shared/data/languages'
 import { toWfAssetUrl } from '@shared/schemas/market.schema'
 import type { RivenAuctionCard, RivenWeaponSummary } from '@shared/schemas/tools.schema'
@@ -9,7 +9,9 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ViewModeToggle } from '@/components/ui/view-mode-toggle'
 import { RivenAuctionsDisplay } from '@/components/tools/RivenAuctionsDisplay'
+import { RivenGraderPanel } from '@/components/tools/RivenGraderPanel'
 import { getCatalogGridClass, useCatalogDisplayPreferences } from '@/lib/catalog-layout'
+import { getProToolsStrings } from '@/lib/i18n/pro-tools-i18n'
 import { ipcClient } from '@/services/ipc-client'
 import { useAppStore } from '@/stores/useAppStore'
 import { normalizeSearchText, useMarketStore } from '@/stores/useMarketStore'
@@ -18,9 +20,11 @@ const PAGE_STEP = 24
 
 export function MarketRivensView(): React.JSX.Element {
   const lang = useAppStore((s) => s.settings.market.language)
+  const copy = getProToolsStrings(lang)
   const { layoutMode, cardSize, setLayoutMode, setCardSize } = useCatalogDisplayPreferences()
   const triggerWhisper = useMarketStore((s) => s.triggerWhisper)
 
+  const [subTab, setSubTab] = React.useState<'auctions' | 'grader'>('auctions')
   const [weapons, setWeapons] = React.useState<RivenWeaponSummary[]>([])
   const [weaponQuery, setWeaponQuery] = React.useState('Torid')
   const [selectedSlug, setSelectedSlug] = React.useState('torid')
@@ -76,22 +80,38 @@ export function MarketRivensView(): React.JSX.Element {
   return (
     <div className="mx-auto max-w-6xl space-y-4 p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <Flame className="h-4 w-4 text-primary" />
-          <h1 className="text-sm font-bold">Contrats — Enchères de Mods Riven</h1>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button size="sm" variant="outline" onClick={() => void runSearch()}>
-            <RefreshCw className="h-3.5 w-3.5" />
-            <span>Actualiser</span>
+        <div className="inline-flex rounded-lg border border-border bg-card/60 p-1">
+          <Button
+            size="sm"
+            variant={subTab === 'auctions' ? 'default' : 'ghost'}
+            onClick={() => setSubTab('auctions')}
+          >
+            <Flame className="h-3.5 w-3.5" />
+            <span>{copy.rivenTabAuctions}</span>
           </Button>
-          <ViewModeToggle
-            value={layoutMode}
-            onChange={setLayoutMode}
-            size={cardSize}
-            onSizeChange={setCardSize}
-          />
+          <Button
+            size="sm"
+            variant={subTab === 'grader' ? 'default' : 'ghost'}
+            onClick={() => setSubTab('grader')}
+          >
+            <Dna className="h-3.5 w-3.5" />
+            <span>{copy.rivenTabGrader}</span>
+          </Button>
         </div>
+        {subTab === 'auctions' && (
+          <div className="flex flex-wrap items-center gap-2">
+            <Button size="sm" variant="outline" onClick={() => void runSearch()}>
+              <RefreshCw className="h-3.5 w-3.5" />
+              <span>Actualiser</span>
+            </Button>
+            <ViewModeToggle
+              value={layoutMode}
+              onChange={setLayoutMode}
+              size={cardSize}
+              onSizeChange={setCardSize}
+            />
+          </div>
+        )}
       </div>
 
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -127,22 +147,30 @@ export function MarketRivensView(): React.JSX.Element {
           )}
         </div>
 
-        <div className="flex flex-wrap gap-1">
-          {(['all', 'madurai', 'vazarin', 'naramon'] as const).map((pol) => (
-            <Button
-              key={pol}
-              size="sm"
-              variant={polarity === pol ? 'default' : 'outline'}
-              onClick={() => setPolarity(pol)}
-              className="capitalize"
-            >
-              {pol === 'all' ? 'Toutes polarités' : pol}
-            </Button>
-          ))}
-        </div>
+        {subTab === 'auctions' && (
+          <div className="flex flex-wrap gap-1">
+            {(['all', 'madurai', 'vazarin', 'naramon'] as const).map((pol) => (
+              <Button
+                key={pol}
+                size="sm"
+                variant={polarity === pol ? 'default' : 'outline'}
+                onClick={() => setPolarity(pol)}
+                className="capitalize"
+              >
+                {pol === 'all' ? 'Toutes polarités' : pol}
+              </Button>
+            ))}
+          </div>
+        )}
       </div>
 
-      {loading ? (
+      {subTab === 'grader' ? (
+        <RivenGraderPanel
+          weaponSlug={selectedSlug}
+          selectedWeapon={selectedWeapon}
+          lang={lang}
+        />
+      ) : loading ? (
         <div className={getCatalogGridClass(layoutMode, cardSize)}>
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-36 w-full" />

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { MonitorCog, Play, Sparkles, Wand2, ZoomIn, ZoomOut } from 'lucide-react'
+import { MonitorCog, Sparkles, Wand2 } from 'lucide-react'
 import type { AnimationLevel } from '@shared/schemas/settings.schema'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -15,10 +15,7 @@ const ANIMATION_LEVELS: readonly { id: AnimationLevel; label: string; hint: stri
 
 export function MotionSettingsSection(): React.JSX.Element {
   const appearance = useAppStore((s) => s.settings.appearance)
-  const windowState = useAppStore((s) => s.windowState)
   const updateSettings = useAppStore((s) => s.updateSettings)
-  const setWindowZoom = useAppStore((s) => s.setWindowZoom)
-  const replayStartupAnimation = useAppStore((s) => s.replayStartupAnimation)
 
   const [osReduced, setOsReduced] = React.useState(() => isOsReducedMotionPreferred())
 
@@ -31,12 +28,12 @@ export function MotionSettingsSection(): React.JSX.Element {
   const activeHint = ANIMATION_LEVELS.find((l) => l.id === currentLevel)?.hint ?? ''
 
   return (
-    <div className="space-y-3 rounded-md border border-border bg-background/50 p-3">
+    <div className="space-y-3 rounded-lg border border-border/80 bg-card/60 p-3.5">
       <div className="space-y-2">
         <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-          <span className="flex items-center gap-2 font-medium text-foreground">
-            <Wand2 className="h-3.5 w-3.5 text-primary" />
-            <span>Animations de l’interface</span>
+          <span className="flex items-center gap-2 font-semibold text-primary">
+            <Wand2 className="h-4 w-4 text-primary" />
+            <span>Animations & Fluidité de l’interface</span>
           </span>
           <div className="flex flex-wrap gap-1">
             {ANIMATION_LEVELS.map((lvl) => (
@@ -80,7 +77,7 @@ export function MotionSettingsSection(): React.JSX.Element {
       <label className="flex cursor-pointer items-center justify-between border-t border-border/60 pt-2.5 text-xs">
         <span className="flex items-center gap-2">
           <Sparkles className="h-3.5 w-3.5 text-primary" />
-          <span>Effet de lueur subtile sur les cartes (Glow)</span>
+          <span>Effet de lueur subtile sur les cartes (Glow Orokin)</span>
         </span>
         <Switch
           checked={appearance.glowEnabled}
@@ -89,49 +86,6 @@ export function MotionSettingsSection(): React.JSX.Element {
           }
         />
       </label>
-
-      <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-        <span className="flex items-center gap-2">
-          <Play className="h-3.5 w-3.5 text-primary" />
-          <span>Animation d’ouverture « Tenno » au lancement</span>
-        </span>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={replayStartupAnimation}>
-            <Play className="h-3 w-3 text-primary" />
-            <span>Rejouer</span>
-          </Button>
-          <Switch
-            checked={appearance.startupAnimationEnabled}
-            onCheckedChange={(checked) =>
-              void updateSettings({ appearance: { startupAnimationEnabled: checked } })
-            }
-          />
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between border-t border-border/60 pt-2.5 text-xs">
-        <span>Zoom d’interface natif ({windowState.zoomPercent} %)</span>
-        <div className="flex items-center gap-1.5">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => void setWindowZoom(windowState.zoomPercent - 10)}
-          >
-            <ZoomOut className="h-3.5 w-3.5" />
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => void setWindowZoom(100)}>
-            100 %
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => void setWindowZoom(windowState.zoomPercent + 10)}
-          >
-            <ZoomIn className="h-3.5 w-3.5" />
-          </Button>
-        </div>
-      </div>
     </div>
   )
 }
-

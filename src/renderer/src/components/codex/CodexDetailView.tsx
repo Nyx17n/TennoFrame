@@ -1,17 +1,20 @@
 import * as React from 'react'
-import { ArrowLeft, Coins, Dna, ExternalLink, Package, Shield, Zap } from 'lucide-react'
+import { ArrowLeft, Coins, Dna, ExternalLink, Hammer, Package, Shield, Zap } from 'lucide-react'
 import { CodexCategorySchema, type CodexItemDetail } from '@shared/schemas/codex.schema'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { SafeAssetImage } from '@/components/ui/safe-asset-image'
 import { Skeleton } from '@/components/ui/skeleton'
+import { CodexArcaneDetailSection } from '@/components/codex/CodexArcaneDetailSection'
 import { CodexDropsAndCraftSection } from '@/components/codex/CodexDropsAndCraftSection'
 import { CodexMobDetailSection } from '@/components/codex/CodexMobDetailSection'
 import { CodexOverlayToolbar } from '@/components/codex/CodexOverlayToolbar'
 import { CodexVendorDetailSection } from '@/components/codex/CodexVendorDetailSection'
+import { getProToolsStrings } from '@/lib/i18n/pro-tools-i18n'
 import { ipcClient } from '@/services/ipc-client'
 import { useAppStore } from '@/stores/useAppStore'
+import { notify } from '@/stores/useNotificationStore'
 import { useTabsStore } from '@/stores/useTabsStore'
 import { useWfmAccountStore } from '@/stores/useWfmAccountStore'
 
@@ -100,34 +103,66 @@ export function CodexDetailView({
           <span>Codex ({category})</span>
         </Button>
 
-        {detail.marketSlug && (
-          <div className="flex flex-wrap items-center gap-1.5">
-            {wfmConnected && (
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() =>
-                  openCreateOrderModal({ prefillSlug: detail.marketSlug!, defaultType: 'sell' })
-                }
-                title="Mettre cet item en vente sur votre compte Warframe Market"
-              >
-                <Coins className="h-3.5 w-3.5 text-primary" />
-                <span>Mettre en vente</span>
-              </Button>
-            )}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {(detail.category === 'warframes' || detail.category === 'weapons') && (
             <Button
               size="sm"
-              onClick={(e) => {
-                const marketRoute = { kind: 'market-item' as const, slug: detail.marketSlug! }
-                if (e.ctrlKey || e.metaKey) openTab(marketRoute, { title: primaryTitle })
-                else navigateActive(marketRoute, primaryTitle)
+              variant="secondary"
+              onClick={() => {
+                void ipcClient.proTools
+                  .foundryAddProject({
+                    category: detail.category as 'warframes' | 'weapons',
+                    id: detail.id
+                  })
+                  .then(() => {
+                    notify({
+                      kind: 'success',
+                      title: 'Ajouté au Planificateur Fonderie',
+                      message: `${primaryTitle} ajouté à votre liste de courses multi-crafts.`,
+                      actions: [
+                        {
+                          label: 'Ouvrir Fonderie',
+                          onClick: () => navigateActive({ kind: 'foundry' }, 'Planificateur Fonderie')
+                        }
+                      ]
+                    })
+                  })
               }}
+              title="Ajouter cette Warframe/Arme au Planificateur Fonderie multi-crafts"
             >
-              <ExternalLink className="h-3.5 w-3.5" />
-              <span>Voir Prix Platinum sur le Marché</span>
+              <Hammer className="h-3.5 w-3.5 text-primary" />
+              <span>{getProToolsStrings(lang).foundryAddCodexBtn}</span>
             </Button>
-          </div>
-        )}
+          )}
+          {detail.marketSlug && (
+            <>
+              {wfmConnected && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() =>
+                    openCreateOrderModal({ prefillSlug: detail.marketSlug!, defaultType: 'sell' })
+                  }
+                  title="Mettre cet item en vente sur votre compte Warframe Market"
+                >
+                  <Coins className="h-3.5 w-3.5 text-primary" />
+                  <span>Mettre en vente</span>
+                </Button>
+              )}
+              <Button
+                size="sm"
+                onClick={(e) => {
+                  const marketRoute = { kind: 'market-item' as const, slug: detail.marketSlug! }
+                  if (e.ctrlKey || e.metaKey) openTab(marketRoute, { title: primaryTitle })
+                  else navigateActive(marketRoute, primaryTitle)
+                }}
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                <span>Voir Prix Platinum sur le Marché</span>
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
       <CodexOverlayToolbar detail={detail} />
@@ -300,6 +335,8 @@ export function CodexDetailView({
         <CodexMobDetailSection detail={detail} />
       ) : detail.vendorInfo ? (
         <CodexVendorDetailSection detail={detail} />
+      ) : detail.arcaneInfo ? (
+        <CodexArcaneDetailSection detail={detail} />
       ) : (
         <CodexDropsAndCraftSection detail={detail} />
       )}

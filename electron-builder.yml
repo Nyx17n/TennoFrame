@@ -19,6 +19,8 @@ extraResources:
     to: codex-craft-recipes.json
   - from: resources/codex-mobs-vendors.json
     to: codex-mobs-vendors.json
+  - from: resources/codex-arcanes.json
+    to: codex-arcanes.json
 
 asar: true
 

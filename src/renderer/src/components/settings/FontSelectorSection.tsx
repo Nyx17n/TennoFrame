@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { RotateCcw, Type } from 'lucide-react'
+import { WfPlatinumCrestIcon } from '@/components/settings/WarframeSettingsIcons'
 import {
   FONT_CATALOG,
   resolveFontStacks,
@@ -137,8 +138,9 @@ export function FontSelectorSection(): React.JSX.Element {
           <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">
             {strings.fontPreviewTitle}
           </span>
-          <span className="rounded border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-xs font-bold tabular-nums text-amber-300">
-            💎 145 Plat · 22.56 %
+          <span className="inline-flex items-center gap-1.5 rounded border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-xs font-bold tabular-nums text-amber-300">
+            <WfPlatinumCrestIcon className="h-3.5 w-3.5 text-amber-300" />
+            <span>145 Plat · 22.56 %</span>
           </span>
         </div>
         <h4 className="mt-1 text-sm font-bold text-foreground">

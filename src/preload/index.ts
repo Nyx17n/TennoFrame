@@ -28,6 +28,15 @@ import type {
   WindowState
 } from '@shared/schemas/window.schema'
 import type { WorldAlertRuleInput } from '@shared/schemas/world-rules.schema'
+import type {
+  AddLedgerEntryInput,
+  FoundryProjectInput,
+  FoundryUpdateOwnedInput,
+  ProfitScanRequest,
+  RivenGradeInput,
+  SavedBuild,
+  UpdateLedgerMetaInput
+} from '@shared/schemas/pro-tools.schema'
 
 const tennoframeApi: TennoFrameBridgeApi = Object.freeze({
   system: Object.freeze({
@@ -202,6 +211,35 @@ const tennoframeApi: TennoFrameBridgeApi = Object.freeze({
       ipcRenderer.invoke(IPC_CHANNELS.SUPPORT_PREPARE_ATTACHMENT, input),
     sendTicket: (input: SupportTicketInput) =>
       ipcRenderer.invoke(IPC_CHANNELS.SUPPORT_SEND_TICKET, input)
+  }),
+  proTools: Object.freeze({
+    profitScan: (input: ProfitScanRequest) =>
+      ipcRenderer.invoke(IPC_CHANNELS.PRO_PROFIT_SCAN, input),
+    ledgerGet: () => ipcRenderer.invoke(IPC_CHANNELS.PRO_LEDGER_GET),
+    ledgerAddEntry: (input: AddLedgerEntryInput) =>
+      ipcRenderer.invoke(IPC_CHANNELS.PRO_LEDGER_ADD_ENTRY, input),
+    ledgerDeleteEntry: (entryId: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.PRO_LEDGER_DELETE_ENTRY, { id: entryId }),
+    ledgerUpdateMeta: (input: UpdateLedgerMetaInput) =>
+      ipcRenderer.invoke(IPC_CHANNELS.PRO_LEDGER_UPDATE_META, input),
+    ledgerExportCsv: () => ipcRenderer.invoke(IPC_CHANNELS.PRO_LEDGER_EXPORT_CSV),
+    rivenGrade: (input: RivenGradeInput) =>
+      ipcRenderer.invoke(IPC_CHANNELS.PRO_RIVEN_GRADE, input),
+    buildsGetCatalog: () => ipcRenderer.invoke(IPC_CHANNELS.PRO_BUILDS_GET_CATALOG),
+    buildsList: () => ipcRenderer.invoke(IPC_CHANNELS.PRO_BUILDS_LIST),
+    buildsSave: (build: SavedBuild) => ipcRenderer.invoke(IPC_CHANNELS.PRO_BUILDS_SAVE, build),
+    buildsDelete: (buildId: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.PRO_BUILDS_DELETE, { id: buildId }),
+    buildsPriceCheck: (buildId: string, forceRefresh?: boolean) =>
+      ipcRenderer.invoke(IPC_CHANNELS.PRO_BUILDS_PRICE_CHECK, { buildId, forceRefresh }),
+    foundryGet: () => ipcRenderer.invoke(IPC_CHANNELS.PRO_FOUNDRY_GET),
+    foundryAddProject: (input: FoundryProjectInput) =>
+      ipcRenderer.invoke(IPC_CHANNELS.PRO_FOUNDRY_ADD_PROJECT, input),
+    foundryRemoveProject: (projectKey: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.PRO_FOUNDRY_REMOVE_PROJECT, { id: projectKey }),
+    foundrySetOwned: (input: FoundryUpdateOwnedInput) =>
+      ipcRenderer.invoke(IPC_CHANNELS.PRO_FOUNDRY_SET_OWNED, input),
+    foundryClear: () => ipcRenderer.invoke(IPC_CHANNELS.PRO_FOUNDRY_CLEAR)
   })
 })
 

@@ -1,105 +1,29 @@
 import * as React from 'react'
+import type { RouteKind } from '@shared/schemas/navigation.schema'
+import { normalizeBookmarksOrder } from '@shared/schemas/settings.schema'
 import {
-  BookOpen,
-  Clock,
-  Coins,
-  Flame,
-  History,
-  ShoppingCart,
-  Star,
-  Store,
-  UserCheck,
-  type LucideIcon
-} from 'lucide-react'
-import type { AppRoute, RouteKind } from '@shared/schemas/navigation.schema'
-import { useUiTranslations, type UiMessages } from '@/lib/i18n'
+  BOOKMARK_DEFINITIONS,
+  resolveBookmarkLabel,
+  type BookmarkDefinition
+} from '@/lib/bookmarks-catalog'
+import { useUiTranslations } from '@/lib/i18n'
 import { getTabCurrentRoute } from '@/lib/tab-helpers'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/stores/useAppStore'
 import { useTabsStore } from '@/stores/useTabsStore'
 import { useWfmAccountStore } from '@/stores/useWfmAccountStore'
 
-interface BookmarkShortcut {
-  readonly id: RouteKind
-  readonly labelKey: keyof UiMessages['bookmarks']
-  readonly tooltip: string
-  readonly icon: LucideIcon
-  readonly route: AppRoute
-}
-
-const HISTORY_SHORTCUT: BookmarkShortcut = {
-  id: 'browser-history',
-  labelKey: 'history',
-  tooltip: 'Ctrl+H · wf://history',
-  icon: History,
-  route: { kind: 'browser-history' }
-}
-
-const CENTER_SHORTCUTS: readonly BookmarkShortcut[] = [
-  {
-    id: 'market-home',
-    labelKey: 'market',
-    tooltip: 'wf://market',
-    icon: Store,
-    route: { kind: 'market-home' }
-  },
-  {
-    id: 'market-favorites',
-    labelKey: 'favorites',
-    tooltip: 'wf://market/favorites',
-    icon: Star,
-    route: { kind: 'market-favorites' }
-  },
-  {
-    id: 'market-cart',
-    labelKey: 'cart',
-    tooltip: 'wf://market/cart',
-    icon: ShoppingCart,
-    route: { kind: 'market-cart' }
-  },
-  {
-    id: 'market-recent',
-    labelKey: 'recent',
-    tooltip: 'wf://market/recent',
-    icon: Clock,
-    route: { kind: 'market-recent' }
-  },
-  {
-    id: 'codex-home',
-    labelKey: 'codex',
-    tooltip: 'wf://codex',
-    icon: BookOpen,
-    route: { kind: 'codex-home' }
-  },
-  {
-    id: 'market-ducats',
-    labelKey: 'ducats',
-    tooltip: 'wf://market/ducats',
-    icon: Coins,
-    route: { kind: 'market-ducats' }
-  },
-  {
-    id: 'market-rivens',
-    labelKey: 'rivens',
-    tooltip: 'wf://market/rivens',
-    icon: Flame,
-    route: { kind: 'market-rivens' }
-  },
-  {
-    id: 'wfm-account',
-    labelKey: 'wfmAccount',
-    tooltip: 'wf://wfm-account',
-    icon: UserCheck,
-    route: { kind: 'wfm-account' }
-  }
-]
-
 export function BookmarksBar(): React.JSX.Element | null {
   const { t } = useUiTranslations()
+  const lang = useAppStore((s) => s.settings.market.language)
+  const bookmarksBarVisible = useAppStore((s) => s.settings.appearance.bookmarksBarVisible)
+  const bookmarksOrder = useAppStore((s) => s.settings.appearance.bookmarksOrder)
+  const hiddenBookmarks = useAppStore((s) => s.settings.appearance.hiddenBookmarks)
+
   const navigateActive = useTabsStore((s) => s.navigateActive)
   const openTab = useTabsStore((s) => s.openTab)
   const hubActive = useTabsStore((s) => s.hubActive)
-  const activeTab = useTabsStore((s) => s.tabs.find((t) => t.id === s.activeTabId) ?? s.tabs[0])
+  const activeTab = useTabsStore((s) => s.tabs.find((tab) => tab.id === s.activeTabId) ?? s.tabs[0])
 
   const favoritesCount = useAppStore((s) => s.settings.favorites.length)
   const cartCount = useAppStore((s) => s.settings.cart.length)
@@ -107,7 +31,14 @@ export function BookmarksBar(): React.JSX.Element | null {
     s.session.connected && s.overview ? s.overview.sellOrders.length : 0
   )
 
-  if (hubActive) {
+  const visibleItems = React.useMemo(() => {
+    const hiddenSet = new Set(hiddenBookmarks)
+    return normalizeBookmarksOrder(bookmarksOrder)
+      .filter((id) => !hiddenSet.has(id))
+      .map((id) => BOOKMARK_DEFINITIONS[id])
+  }, [bookmarksOrder, hiddenBookmarks])
+
+  if (hubActive || !bookmarksBarVisible || visibleItems.length === 0) {
     return null
   }
 
@@ -120,10 +51,11 @@ export function BookmarksBar(): React.JSX.Element | null {
     return 0
   }
 
-  const renderShortcutButton = (item: BookmarkShortcut): React.JSX.Element => {
+  const renderShortcutButton = (item: BookmarkDefinition): React.JSX.Element => {
     const Icon = item.icon
     const isActive = currentKind === item.id
     const badgeCount = getBadgeCount(item.id)
+    const label = resolveBookmarkLabel(item, t, lang)
 
     return (
       <button
@@ -155,7 +87,7 @@ export function BookmarksBar(): React.JSX.Element | null {
         )}
       >
         <Icon className="h-3.5 w-3.5 shrink-0 text-primary" />
-        <span className="whitespace-nowrap">{t.bookmarks[item.labelKey]}</span>
+        <span className="whitespace-nowrap">{label}</span>
         {badgeCount > 0 && (
           <span className="rounded-full bg-primary/20 px-1.5 py-0 font-mono text-[10px] font-semibold text-primary">
             {badgeCount}
@@ -164,6 +96,13 @@ export function BookmarksBar(): React.JSX.Element | null {
       </button>
     )
   }
+
+  const historyItem = visibleItems.find((i) => i.id === 'browser-history')
+  const historyIsLast =
+    historyItem !== undefined && visibleItems[visibleItems.length - 1]?.id === 'browser-history'
+  const centerItems = historyIsLast
+    ? visibleItems.filter((i) => i.id !== 'browser-history')
+    : visibleItems
 
   return (
     <div
@@ -179,13 +118,12 @@ export function BookmarksBar(): React.JSX.Element | null {
       <div className="hidden lg:block" aria-hidden="true" />
 
       <div className="flex shrink-0 items-center justify-center gap-1 justify-self-center">
-        {CENTER_SHORTCUTS.map(renderShortcutButton)}
+        {centerItems.map(renderShortcutButton)}
       </div>
 
       <div className="ml-auto flex shrink-0 items-center justify-self-end lg:ml-0">
-        {renderShortcutButton(HISTORY_SHORTCUT)}
+        {historyIsLast && historyItem ? renderShortcutButton(historyItem) : null}
       </div>
     </div>
   )
 }
-
