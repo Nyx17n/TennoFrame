@@ -28,10 +28,21 @@ const CATEGORY_IDS: readonly CodexCategory[] = [
   'warframes',
   'weapons',
   'mods',
+  'arcanes',
   'relics',
   'mobs',
   'vendors'
 ]
+
+const ARCANE_SLOTS = [
+  { id: 'all', label: 'Tous' },
+  { id: 'warframe', label: 'Warframe' },
+  { id: 'primary', label: 'Principale' },
+  { id: 'secondary', label: 'Secondaire' },
+  { id: 'melee', label: 'Mêlée' },
+  { id: 'operator_amp', label: 'Opérateur & Amp' },
+  { id: 'zaw_kitgun', label: 'Zaw & Kitgun' }
+] as const
 
 const RELIC_ERAS = ['all', 'Lith', 'Meso', 'Neo', 'Axi', 'Requiem', 'Vanguard'] as const
 const WEAPON_SLOTS = [
@@ -92,6 +103,7 @@ export function CodexHomeView({
       { id: 'warframes' as const, label: t.codex.warframes },
       { id: 'weapons' as const, label: t.codex.weapons },
       { id: 'mods' as const, label: t.codex.mods },
+      { id: 'arcanes' as const, label: 'Arcanes' },
       { id: 'relics' as const, label: t.codex.relics },
       { id: 'mobs' as const, label: t.codex.mobs },
       { id: 'vendors' as const, label: t.codex.vendors }
@@ -278,7 +290,9 @@ export function CodexHomeView({
                       ? 'Chercher un mob, une planète ou un objet droppé (ex: Sargas Ruk, Néant, Continuité…)'
                       : activeTab === 'vendors'
                         ? 'Chercher un marchand, une planète OU un objet vendu (ex: Citrine, Nitain, Holoclef…)'
-                        : 'Filtrer FR / EN (ex: Cellule Orokin, Wisp, Acceltra, Lith A13...)'
+                        : activeTab === 'arcanes'
+                          ? 'Chercher un Arcane ou un effet (ex: Énergétique, Influence, Mue, Critique, Cadence…)'
+                          : 'Filtrer FR / EN (ex: Cellule Orokin, Wisp, Acceltra, Lith A13...)'
                   }
                   className="h-8 pl-8 text-xs"
                 />
@@ -393,6 +407,22 @@ export function CodexHomeView({
                     onClick={() => setHubFilter(hub.id)}
                   >
                     {hub.label}
+                  </Button>
+                ))}
+              </div>
+            )}
+
+            {activeTab === 'arcanes' && (
+              <div className="flex flex-wrap items-center gap-1 border-t border-border/60 pt-2">
+                {ARCANE_SLOTS.map((slot) => (
+                  <Button
+                    key={slot.id}
+                    size="sm"
+                    variant={slotFilter === slot.id ? 'default' : 'ghost'}
+                    className="h-6 px-2 text-[10px]"
+                    onClick={() => setSlotFilter(slot.id)}
+                  >
+                    {slot.label}
                   </Button>
                 ))}
               </div>

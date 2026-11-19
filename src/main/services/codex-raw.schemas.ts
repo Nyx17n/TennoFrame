@@ -180,7 +180,7 @@ export const RawMobDropSchema = z.object({
   rarity: z.string().default('Common'),
   typeLabelFr: z.string().default('Butin'),
   linkedCodexId: z.string().optional(),
-  linkedCategory: z.enum(['resources', 'warframes', 'weapons', 'mods', 'relics']).optional()
+  linkedCategory: z.enum(['resources', 'warframes', 'weapons', 'mods', 'arcanes', 'relics']).optional()
 })
 
 export const RawMobEntrySchema = z.object({
@@ -224,7 +224,7 @@ export const RawVendorOfferingSchema = z.object({
     )
     .default([]),
   linkedCodexId: z.string().optional(),
-  linkedCategory: z.enum(['resources', 'warframes', 'weapons', 'mods', 'relics']).optional(),
+  linkedCategory: z.enum(['resources', 'warframes', 'weapons', 'mods', 'arcanes', 'relics']).optional(),
   isTradable: z.boolean().default(false)
 })
 
@@ -258,9 +258,51 @@ export const CodexMobsVendorsDatabaseSchema = z.object({
   vendors: z.array(RawVendorEntrySchema).default([])
 })
 
+export const RawArcaneEntrySchema = z.object({
+  id: z.string(),
+  marketSlug: z.string().default(''),
+  nameFr: z.string(),
+  nameEn: z.string(),
+  img: z.string().default(''),
+  rarity: z.string().default('Rare'),
+  slotCategory: z.string().default('warframe'),
+  typeLabelFr: z.string().default('Arcane'),
+  typeLabelEn: z.string().default('Arcane'),
+  maxRank: z.number().int().nonnegative().default(5),
+  copiesForMaxRank: z.number().int().positive().default(21),
+  tradable: z.boolean().default(true),
+  vosforHintFr: z.string().default(''),
+  levelStatsFr: z.array(z.string()).default([]),
+  levelStatsEn: z.array(z.string()).default([]),
+  drops: z
+    .array(
+      z.object({
+        location: z.string(),
+        chancePct: z.number().min(0).max(100),
+        rarity: z.string().default('Rare')
+      })
+    )
+    .default([]),
+  vendorSources: z
+    .array(
+      z.object({
+        vendorNameFr: z.string(),
+        hubFr: z.string().default(''),
+        costFr: z.string().default('')
+      })
+    )
+    .default([])
+})
+
+export const CodexArcanesDatabaseSchema = z.object({
+  arcanes: z.array(RawArcaneEntrySchema).default([])
+})
+
 export type CodexRawDatabase = z.infer<typeof CodexRawDatabaseSchema>
 export type CodexCraftRecipesDatabase = z.infer<typeof CodexCraftRecipesDatabaseSchema>
 export type CodexMobsVendorsDatabase = z.infer<typeof CodexMobsVendorsDatabaseSchema>
+export type CodexArcanesDatabase = z.infer<typeof CodexArcanesDatabaseSchema>
+export type RawArcaneEntry = z.infer<typeof RawArcaneEntrySchema>
 export type RawMobEntry = z.infer<typeof RawMobEntrySchema>
 export type RawVendorEntry = z.infer<typeof RawVendorEntrySchema>
 export type RawCraftItemRecipe = z.infer<typeof RawCraftItemRecipeSchema>

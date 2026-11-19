@@ -5,6 +5,7 @@ export const CodexCategorySchema = z.enum([
   'warframes',
   'weapons',
   'mods',
+  'arcanes',
   'relics',
   'mobs',
   'vendors'
@@ -87,6 +88,7 @@ export const CodexSearchResultSchema = z.object({
     warframes: z.number().int().nonnegative(),
     weapons: z.number().int().nonnegative(),
     mods: z.number().int().nonnegative(),
+    arcanes: z.number().int().nonnegative().default(0),
     relics: z.number().int().nonnegative(),
     mobs: z.number().int().nonnegative(),
     vendors: z.number().int().nonnegative()
@@ -269,6 +271,17 @@ export const CodexVendorInfoSchema = z.object({
 
 export type CodexVendorInfo = z.infer<typeof CodexVendorInfoSchema>
 
+export const CodexArcaneInfoSchema = z.object({
+  rarity: z.string(),
+  slotCategory: z.string(),
+  maxRank: z.number().int().nonnegative(),
+  copiesForMaxRank: z.number().int().positive(),
+  vosforHintFr: z.string(),
+  levelStatsFr: z.array(z.string()),
+  levelStatsEn: z.array(z.string())
+})
+export type CodexArcaneInfo = z.infer<typeof CodexArcaneInfoSchema>
+
 export const CodexItemDetailSchema = z.object({
   id: z.string().min(1),
   category: CodexCategorySchema,
@@ -327,6 +340,7 @@ export const CodexItemDetailSchema = z.object({
     .nullable(),
   mobInfo: CodexMobInfoSchema.nullable().default(null),
   vendorInfo: CodexVendorInfoSchema.nullable().default(null),
+  arcaneInfo: CodexArcaneInfoSchema.nullable().default(null),
   drops: z.array(CodexDropEntrySchema),
   acquisitionSources: z.array(CodexAcquisitionSourceSchema).default([]),
   totalBuildCredits: z.number().int().nonnegative().nullable().default(null),

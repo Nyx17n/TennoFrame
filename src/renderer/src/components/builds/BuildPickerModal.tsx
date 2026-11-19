@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Search, X } from 'lucide-react'
+import { Package, Search, Sparkles, X } from 'lucide-react'
 import { toWfAssetUrl } from '@shared/schemas/market.schema'
 import type {
   BuildArcaneCatalogEntry,
@@ -69,7 +69,11 @@ export function BuildPickerModal({
     return catalog.arcanes
       .filter((a) => {
         if (!q) return true
-        return normalizeSearchText(a.nameFr).includes(q) || normalizeSearchText(a.nameEn).includes(q)
+        return (
+          normalizeSearchText(a.nameFr).includes(q) ||
+          normalizeSearchText(a.nameEn).includes(q) ||
+          normalizeSearchText(a.statsSummary).includes(q)
+        )
       })
       .slice(0, 60)
   }, [target.mode, catalog.arcanes, q])
@@ -126,7 +130,7 @@ export function BuildPickerModal({
                 onClick={() => onSelectEquipment(eq)}
                 className="flex items-center gap-2.5 rounded-md border border-border bg-card/60 p-2 text-left text-xs hover:border-primary/50 hover:bg-secondary/40"
               >
-                <SafeAssetImage src={eq.imageUrl} alt={eq.nameFr} className="h-9 w-9 rounded object-contain" />
+                <SafeAssetImage src={eq.imageUrl} alt={eq.nameFr} className="h-10 w-10 rounded object-contain" />
                 <div className="min-w-0">
                   <div className="truncate font-semibold">{eq.nameFr}</div>
                   <div className="truncate text-[11px] text-muted-foreground">
@@ -142,16 +146,28 @@ export function BuildPickerModal({
                 key={mod.id}
                 type="button"
                 onClick={() => onSelectMod(mod)}
-                className="flex flex-col justify-between gap-1 rounded-md border border-border bg-card/60 p-2 text-left text-xs hover:border-primary/50 hover:bg-secondary/40"
+                className="flex items-start gap-2.5 rounded-md border border-border bg-card/60 p-2 text-left text-xs hover:border-primary/50 hover:bg-secondary/40"
               >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="truncate font-semibold">{mod.nameFr}</span>
-                  <Badge variant="outline" className="shrink-0 text-[10px]">
-                    Drain {Math.abs(mod.baseDrain) + mod.maxRank} · {mod.polarity}
-                  </Badge>
-                </div>
-                <div className="line-clamp-2 text-[11px] text-muted-foreground">
-                  {mod.statsSummary || mod.typeLabel}
+                <SafeAssetImage
+                  src={mod.imageUrl}
+                  alt={mod.nameFr}
+                  className="h-12 w-10 shrink-0 rounded border border-border/60 bg-secondary/40 object-cover"
+                  fallback={
+                    <div className="flex h-12 w-10 shrink-0 items-center justify-center rounded border border-border/60 bg-secondary/40">
+                      <Package className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  }
+                />
+                <div className="min-w-0 flex-1 space-y-1">
+                  <div className="flex items-center justify-between gap-1.5">
+                    <span className="truncate font-semibold">{mod.nameFr}</span>
+                    <Badge variant="outline" className="shrink-0 text-[10px]">
+                      {Math.abs(mod.baseDrain) + mod.maxRank} · {mod.polarity}
+                    </Badge>
+                  </div>
+                  <div className="line-clamp-2 text-[11px] text-muted-foreground">
+                    {mod.statsSummary.replace(/\\n/g, ' · ') || mod.typeLabel}
+                  </div>
                 </div>
               </button>
             ))}
@@ -162,16 +178,28 @@ export function BuildPickerModal({
                 key={arc.slug}
                 type="button"
                 onClick={() => onSelectArcane(arc)}
-                className="flex items-center gap-2.5 rounded-md border border-border bg-card/60 p-2 text-left text-xs hover:border-primary/50 hover:bg-secondary/40"
+                className="flex items-start gap-2.5 rounded-md border border-border bg-card/60 p-2 text-left text-xs hover:border-primary/50 hover:bg-secondary/40"
               >
                 <SafeAssetImage
-                  src={toWfAssetUrl(arc.thumb)}
+                  src={arc.imageUrl ?? toWfAssetUrl(arc.thumb)}
                   alt={arc.nameFr}
-                  className="h-8 w-8 rounded object-contain"
+                  className="h-10 w-10 shrink-0 rounded border border-border/60 bg-secondary/40 object-contain p-0.5"
+                  fallback={
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded border border-border/60 bg-secondary/40">
+                      <Sparkles className="h-4 w-4 text-primary" />
+                    </div>
+                  }
                 />
-                <div className="min-w-0">
-                  <div className="truncate font-semibold">{arc.nameFr}</div>
-                  <div className="text-[11px] text-muted-foreground">Rang max R{arc.maxRank}</div>
+                <div className="min-w-0 flex-1 space-y-0.5">
+                  <div className="flex items-center justify-between gap-1.5">
+                    <span className="truncate font-semibold">{arc.nameFr}</span>
+                    <Badge variant="outline" className="shrink-0 text-[10px]">
+                      R{arc.maxRank} · {arc.rarity}
+                    </Badge>
+                  </div>
+                  <div className="line-clamp-2 text-[11px] text-muted-foreground">
+                    {arc.statsSummary || `Rang max R${arc.maxRank}`}
+                  </div>
                 </div>
               </button>
             ))}

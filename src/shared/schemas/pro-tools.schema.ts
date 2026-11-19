@@ -304,10 +304,16 @@ export type BuildModCatalogEntry = z.infer<typeof BuildModCatalogEntrySchema>
 
 export const BuildArcaneCatalogEntrySchema = z.object({
   slug: z.string(),
+  codexId: z.string().nullable().default(null),
   nameFr: z.string(),
   nameEn: z.string(),
   thumb: z.string().nullable(),
-  maxRank: z.number().int().nonnegative()
+  imageUrl: z.string().nullable().default(null),
+  rarity: z.string().default('Rare'),
+  slotCategory: z.string().default('warframe'),
+  maxRank: z.number().int().nonnegative(),
+  statsSummary: z.string().default(''),
+  topSources: z.array(CodexOverlayPinnedSourceSchema).max(4).default([])
 })
 export type BuildArcaneCatalogEntry = z.infer<typeof BuildArcaneCatalogEntrySchema>
 
@@ -335,6 +341,7 @@ export const BuildPriceCheckLineSchema = z.object({
   marketSlug: z.string().nullable(),
   nameFr: z.string(),
   nameEn: z.string(),
+  imageUrl: z.string().nullable().default(null),
   targetRank: z.number().int().nonnegative(),
   owned: z.boolean(),
   tradable: z.boolean(),

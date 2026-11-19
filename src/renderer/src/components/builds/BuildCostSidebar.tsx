@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Coins, ExternalLink, Pin, RefreshCw, ShoppingCart } from 'lucide-react'
 import type {
+  BuildCatalogPayload,
   BuildModCatalogEntry,
   BuildPriceQuote,
   SavedBuild
@@ -8,6 +9,7 @@ import type {
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { SafeAssetImage } from '@/components/ui/safe-asset-image'
 import { ipcClient } from '@/services/ipc-client'
 import { useFarmOverlayStore } from '@/stores/useFarmOverlayStore'
 import { useMarketStore } from '@/stores/useMarketStore'
@@ -15,12 +17,14 @@ import { notify } from '@/stores/useNotificationStore'
 
 export function BuildCostSidebar({
   build,
+  catalog,
   modById,
   quote,
   loadingQuote,
   onRunPriceCheck
 }: {
   build: SavedBuild
+  catalog: BuildCatalogPayload
   modById: ReadonlyMap<string, BuildModCatalogEntry>
   quote: BuildPriceQuote | null
   loadingQuote: boolean
@@ -68,6 +72,30 @@ export function BuildCostSidebar({
           requiredCount: 1,
           obtained: false,
           sources: mod.topSources
+        },
+        true
+      )
+      pinnedCount += 1
+    }
+    for (const arcSlot of build.arcaneSlots) {
+      if (!arcSlot.marketSlug || arcSlot.owned) continue
+      const arcMeta = catalog.arcanes.find((a) => a.slug === arcSlot.marketSlug)
+      if (!arcMeta || !arcMeta.codexId || arcMeta.topSources.length === 0) continue
+      await toggleOverlayEntry(
+        {
+          entryId: `arcanes:${arcMeta.codexId}:main`,
+          itemKey: `arcanes:${arcMeta.codexId}`,
+          category: 'arcanes',
+          itemId: arcMeta.codexId,
+          itemNameFr: arcMeta.nameFr,
+          partKey: null,
+          labelFr: arcMeta.nameFr,
+          groupLabelFr: `Build · ${build.equipmentNameFr}`,
+          imageUrl: arcMeta.imageUrl,
+          isResource: false,
+          requiredCount: arcSlot.useMaxRank ? 21 : 1,
+          obtained: false,
+          sources: arcMeta.topSources
         },
         true
       )
@@ -122,9 +150,17 @@ export function BuildCostSidebar({
                   ln.owned ? 'opacity-50 line-through' : 'bg-secondary/25'
                 }`}
               >
-                <span className="truncate">
-                  {ln.nameFr} <span className="text-[10px] text-muted-foreground">(R{ln.targetRank})</span>
-                </span>
+                <div className="flex min-w-0 items-center gap-2">
+                  <SafeAssetImage
+                    src={ln.imageUrl}
+                    alt={ln.nameFr}
+                    className="h-6 w-6 shrink-0 rounded object-contain"
+                  />
+                  <span className="truncate">
+                    {ln.nameFr}{' '}
+                    <span className="text-[10px] text-muted-foreground">(R{ln.targetRank})</span>
+                  </span>
+                </div>
                 <Badge variant="outline" className="shrink-0 text-[10px]">
                   {ln.unitPlat !== null ? `${ln.unitPlat}p` : ln.tradable ? '—' : 'Non échangeable'}
                 </Badge>

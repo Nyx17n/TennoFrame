@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { SafeAssetImage } from '@/components/ui/safe-asset-image'
 import { Skeleton } from '@/components/ui/skeleton'
+import { CodexArcaneDetailSection } from '@/components/codex/CodexArcaneDetailSection'
 import { CodexDropsAndCraftSection } from '@/components/codex/CodexDropsAndCraftSection'
 import { CodexMobDetailSection } from '@/components/codex/CodexMobDetailSection'
 import { CodexOverlayToolbar } from '@/components/codex/CodexOverlayToolbar'
@@ -334,6 +335,8 @@ export function CodexDetailView({
         <CodexMobDetailSection detail={detail} />
       ) : detail.vendorInfo ? (
         <CodexVendorDetailSection detail={detail} />
+      ) : detail.arcaneInfo ? (
+        <CodexArcaneDetailSection detail={detail} />
       ) : (
         <CodexDropsAndCraftSection detail={detail} />
       )}

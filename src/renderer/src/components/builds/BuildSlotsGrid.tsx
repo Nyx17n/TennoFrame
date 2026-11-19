@@ -1,7 +1,9 @@
 import * as React from 'react'
-import { Check, Dna, Flame, Plus, X } from 'lucide-react'
+import { Check, Dna, Flame, Package, Plus, Sparkles, X } from 'lucide-react'
+import { toWfAssetUrl } from '@shared/schemas/market.schema'
 import type {
   ArchonShardSlot,
+  BuildArcaneCatalogEntry,
   BuildArcaneSlot,
   BuildCatalogPayload,
   BuildModCatalogEntry,
@@ -10,6 +12,7 @@ import type {
 } from '@shared/schemas/pro-tools.schema'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
+import { SafeAssetImage } from '@/components/ui/safe-asset-image'
 import {
   computeSlotDrain,
   POLARITY_CYCLE,
@@ -27,6 +30,19 @@ const SHARD_COLORS: ReadonlyArray<{ id: ArchonShardSlot['color']; label: string;
   { id: 'violet', label: 'Violet (Crit Mêlée/Élec)', dotClass: 'bg-purple-400' }
 ]
 
+function rarityBorderClass(rarity: string | undefined): string {
+  switch (rarity) {
+    case 'Legendary':
+      return 'border-purple-400/60 bg-purple-950/25'
+    case 'Rare':
+      return 'border-amber-400/60 bg-amber-950/25'
+    case 'Uncommon':
+      return 'border-sky-400/50 bg-sky-950/20'
+    default:
+      return 'border-border bg-secondary/40'
+  }
+}
+
 export function BuildSlotsGrid({
   build,
   catalog,
@@ -40,6 +56,12 @@ export function BuildSlotsGrid({
   onChange: (next: SavedBuild) => void
   onOpenPicker: (target: PickerTarget) => void
 }): React.JSX.Element {
+  const arcaneBySlug = React.useMemo(() => {
+    const map = new Map<string, BuildArcaneCatalogEntry>()
+    for (const a of catalog.arcanes) map.set(a.slug, a)
+    return map
+  }, [catalog.arcanes])
+
   const renderModCard = (
     label: string,
     slot: BuildModSlot,
@@ -78,25 +100,48 @@ export function BuildSlotsGrid({
         </div>
 
         {mod ? (
-          <div className="space-y-1">
-            <div className="flex items-start justify-between gap-1">
+          <div className="space-y-2">
+            <div className="flex items-start gap-2.5">
               <button
                 type="button"
                 onClick={() => onOpenPicker({ mode: 'mod', targetSlot: targetKey })}
-                className="truncate text-left font-bold hover:text-primary"
+                className={`shrink-0 overflow-hidden rounded-md border p-0.5 transition-transform hover:scale-105 ${rarityBorderClass(mod.rarity)}`}
+                title={`Changer ${mod.nameFr}`}
               >
-                {mod.nameFr}
+                <SafeAssetImage
+                  src={mod.imageUrl}
+                  alt={mod.nameFr}
+                  className="h-12 w-10 rounded object-cover"
+                  fallback={
+                    <div className="flex h-12 w-10 items-center justify-center">
+                      <Package className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  }
+                />
               </button>
-              <button
-                type="button"
-                onClick={() => updateSlot({ modId: null })}
-                className="text-muted-foreground hover:text-destructive"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
+              <div className="min-w-0 flex-1 space-y-0.5">
+                <div className="flex items-start justify-between gap-1">
+                  <button
+                    type="button"
+                    onClick={() => onOpenPicker({ mode: 'mod', targetSlot: targetKey })}
+                    className="truncate text-left font-bold hover:text-primary"
+                  >
+                    {mod.nameFr}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateSlot({ modId: null })}
+                    className="shrink-0 text-muted-foreground hover:text-destructive"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                <p className="line-clamp-2 text-[10px] leading-snug text-muted-foreground">
+                  {mod.statsSummary.replace(/\\n/g, ' · ')}
+                </p>
+              </div>
             </div>
-            <p className="line-clamp-1 text-[10px] text-muted-foreground">{mod.statsSummary}</p>
-            <div className="flex items-center justify-between pt-1">
+            <div className="flex items-center justify-between pt-0.5">
               <button
                 type="button"
                 onClick={() => updateSlot({ useMaxRank: !slot.useMaxRank })}
@@ -120,7 +165,7 @@ export function BuildSlotsGrid({
           <button
             type="button"
             onClick={() => onOpenPicker({ mode: 'mod', targetSlot: targetKey })}
-            className="flex h-14 items-center justify-center gap-1 rounded border border-dashed border-border text-muted-foreground hover:border-primary/50 hover:text-primary"
+            className="flex h-16 items-center justify-center gap-1 rounded border border-dashed border-border text-muted-foreground hover:border-primary/50 hover:text-primary"
           >
             <Plus className="h-3.5 w-3.5" />
             <span>Choisir un Mod</span>
@@ -164,59 +209,90 @@ export function BuildSlotsGrid({
       </div>
 
       <div className="grid gap-2 sm:grid-cols-2">
-        {build.arcaneSlots.map((arc, idx) => (
-          <Card key={idx} className="flex items-center justify-between gap-2 p-2.5 text-xs">
-            <div className="min-w-0">
-              <div className="text-[10px] font-semibold uppercase text-muted-foreground">
-                Arcane {idx + 1}
+        {build.arcaneSlots.map((arc, idx) => {
+          const meta = arc.marketSlug ? arcaneBySlug.get(arc.marketSlug) : undefined
+          const arcImg = meta?.imageUrl ?? toWfAssetUrl(meta?.thumb)
+          return (
+            <Card key={idx} className="flex items-center justify-between gap-3 p-2.5 text-xs">
+              <div className="flex min-w-0 flex-1 items-center gap-2.5">
+                {arc.marketSlug && (
+                  <button
+                    type="button"
+                    onClick={() => onOpenPicker({ mode: 'arcane', slotIndex: idx })}
+                    className={`shrink-0 rounded-md border p-1 ${rarityBorderClass(meta?.rarity)}`}
+                  >
+                    <SafeAssetImage
+                      src={arcImg}
+                      alt={arc.nameFr || arc.marketSlug}
+                      className="h-9 w-9 object-contain"
+                      fallback={
+                        <div className="flex h-9 w-9 items-center justify-center">
+                          <Sparkles className="h-4 w-4 text-primary" />
+                        </div>
+                      }
+                    />
+                  </button>
+                )}
+                <div className="min-w-0 flex-1">
+                  <div className="text-[10px] font-semibold uppercase text-muted-foreground">
+                    Arcane {idx + 1}
+                  </div>
+                  {arc.marketSlug ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => onOpenPicker({ mode: 'arcane', slotIndex: idx })}
+                        className="truncate text-left font-bold text-primary hover:underline"
+                      >
+                        {meta?.nameFr ?? (arc.nameFr || arc.marketSlug)}
+                      </button>
+                      {meta?.statsSummary && (
+                        <p className="line-clamp-1 text-[10px] text-muted-foreground">
+                          {meta.statsSummary}
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => onOpenPicker({ mode: 'arcane', slotIndex: idx })}
+                      className="text-muted-foreground hover:text-primary"
+                    >
+                      + Choisir un Arcane
+                    </button>
+                  )}
+                </div>
               </div>
-              {arc.marketSlug ? (
-                <button
-                  type="button"
-                  onClick={() => onOpenPicker({ mode: 'arcane', slotIndex: idx })}
-                  className="truncate font-bold text-primary hover:underline"
-                >
-                  {arc.nameFr || arc.marketSlug}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => onOpenPicker({ mode: 'arcane', slotIndex: idx })}
-                  className="text-muted-foreground hover:text-primary"
-                >
-                  + Choisir un Arcane
-                </button>
+              {arc.marketSlug && (
+                <div className="flex shrink-0 items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => updateArcane(idx, { useMaxRank: !arc.useMaxRank })}
+                    className="rounded bg-secondary px-1.5 py-0.5 text-[10px]"
+                  >
+                    {arc.useMaxRank ? `R${meta?.maxRank ?? 5}` : 'R0'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateArcane(idx, { owned: !arc.owned })}
+                    className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
+                      arc.owned ? 'bg-emerald-600/85 text-white' : 'bg-secondary text-muted-foreground'
+                    }`}
+                  >
+                    {arc.owned ? 'Possédé' : 'À acheter'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateArcane(idx, { marketSlug: null, nameFr: '', nameEn: '' })}
+                    className="text-muted-foreground hover:text-destructive"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               )}
-            </div>
-            {arc.marketSlug && (
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => updateArcane(idx, { useMaxRank: !arc.useMaxRank })}
-                  className="rounded bg-secondary px-1.5 py-0.5 text-[10px]"
-                >
-                  {arc.useMaxRank ? 'Rang Max' : 'Rang 0'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => updateArcane(idx, { owned: !arc.owned })}
-                  className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
-                    arc.owned ? 'bg-emerald-600/85 text-white' : 'bg-secondary text-muted-foreground'
-                  }`}
-                >
-                  {arc.owned ? 'Possédé' : 'À acheter'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => updateArcane(idx, { marketSlug: null, nameFr: '', nameEn: '' })}
-                  className="text-muted-foreground hover:text-destructive"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            )}
-          </Card>
-        ))}
+            </Card>
+          )
+        })}
       </div>
 
       {build.equipmentCategory === 'warframes' && (

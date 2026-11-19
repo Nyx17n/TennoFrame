@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { SafeAssetImage } from '@/components/ui/safe-asset-image'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   computeBuildCapacitySummary,
@@ -114,6 +115,9 @@ export function BuildStudioView(): React.JSX.Element {
   }
 
   const cap = computeBuildCapacitySummary(activeBuild, modById)
+  const equipMeta = catalog.equipment.find(
+    (e) => e.category === activeBuild.equipmentCategory && e.id === activeBuild.equipmentId
+  )
 
   return (
     <main className="mx-auto max-w-6xl space-y-4 p-4">
@@ -205,9 +209,17 @@ export function BuildStudioView(): React.JSX.Element {
 
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-card/60 px-3 py-2 text-xs">
         <div className="flex flex-wrap items-center gap-3">
-          <Badge variant="default" className="gap-1">
-            <Shield className="h-3 w-3" />
-            {activeBuild.equipmentNameFr}
+          <Badge variant="default" className="gap-1.5 py-1 pl-1.5 pr-2.5">
+            {equipMeta?.imageUrl ? (
+              <SafeAssetImage
+                src={equipMeta.imageUrl}
+                alt={activeBuild.equipmentNameFr}
+                className="h-5 w-5 rounded object-contain"
+              />
+            ) : (
+              <Shield className="h-3.5 w-3.5" />
+            )}
+            <span>{activeBuild.equipmentNameFr}</span>
           </Badge>
           <span className={cap.remainingCapacity >= 0 ? 'font-bold text-emerald-400' : 'font-bold text-rose-400'}>
             Capacité restante : {cap.remainingCapacity} / {cap.baseCapacity + cap.auraBonus}
@@ -238,6 +250,7 @@ export function BuildStudioView(): React.JSX.Element {
         />
         <BuildCostSidebar
           build={activeBuild}
+          catalog={catalog}
           modById={modById}
           quote={quote}
           loadingQuote={loadingQuote}
