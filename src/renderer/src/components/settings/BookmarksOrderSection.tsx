@@ -16,6 +16,7 @@ export function BookmarksOrderSection(): React.JSX.Element {
   const { t } = useUiTranslations()
   const lang = useAppStore((s) => s.settings.market.language)
   const bookmarksBarVisible = useAppStore((s) => s.settings.appearance.bookmarksBarVisible)
+  const bookmarksIconsOnly = useAppStore((s) => s.settings.appearance.bookmarksIconsOnly)
   const bookmarksOrder = useAppStore((s) => s.settings.appearance.bookmarksOrder)
   const hiddenBookmarks = useAppStore((s) => s.settings.appearance.hiddenBookmarks)
   const updateSettings = useAppStore((s) => s.updateSettings)
@@ -48,6 +49,7 @@ export function BookmarksOrderSection(): React.JSX.Element {
     void updateSettings({
       appearance: {
         bookmarksBarVisible: true,
+        bookmarksIconsOnly: false,
         bookmarksOrder: [...BOOKMARK_ITEM_IDS],
         hiddenBookmarks: []
       }
@@ -72,7 +74,31 @@ export function BookmarksOrderSection(): React.JSX.Element {
           </p>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <div className="inline-flex rounded-md border border-border bg-background/60 p-0.5 text-xs">
+            <button
+              type="button"
+              onClick={() => void updateSettings({ appearance: { bookmarksIconsOnly: false } })}
+              className={`rounded px-2.5 py-1 font-medium transition-colors ${
+                !bookmarksIconsOnly
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Icônes + Texte
+            </button>
+            <button
+              type="button"
+              onClick={() => void updateSettings({ appearance: { bookmarksIconsOnly: true } })}
+              className={`rounded px-2.5 py-1 font-medium transition-colors ${
+                bookmarksIconsOnly
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Icônes uniquement
+            </button>
+          </div>
           <Button size="sm" variant="outline" onClick={resetDefaults} title="Rétablir l’ordre par défaut">
             <RotateCcw className="h-3.5 w-3.5" />
             <span>Par défaut</span>

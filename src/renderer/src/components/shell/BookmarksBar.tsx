@@ -17,6 +17,7 @@ export function BookmarksBar(): React.JSX.Element | null {
   const { t } = useUiTranslations()
   const lang = useAppStore((s) => s.settings.market.language)
   const bookmarksBarVisible = useAppStore((s) => s.settings.appearance.bookmarksBarVisible)
+  const bookmarksIconsOnly = useAppStore((s) => s.settings.appearance.bookmarksIconsOnly)
   const bookmarksOrder = useAppStore((s) => s.settings.appearance.bookmarksOrder)
   const hiddenBookmarks = useAppStore((s) => s.settings.appearance.hiddenBookmarks)
 
@@ -61,7 +62,8 @@ export function BookmarksBar(): React.JSX.Element | null {
       <button
         key={item.id}
         type="button"
-        title={`${item.tooltip} — Ctrl+Clic ou clic molette : nouvel onglet`}
+        aria-label={label}
+        title={`${label} (${item.tooltip}) — Ctrl+Clic ou clic molette : nouvel onglet`}
         onClick={(e) => {
           if (e.ctrlKey || e.metaKey) {
             openTab(item.route)
@@ -80,14 +82,15 @@ export function BookmarksBar(): React.JSX.Element | null {
         }}
         data-active={isActive ? 'true' : 'false'}
         className={cn(
-          'wf-bookmark-link wf-interactive-btn inline-flex h-6 shrink-0 items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium transition-colors',
+          'wf-bookmark-link wf-interactive-btn inline-flex h-6 shrink-0 items-center justify-center rounded-md border text-xs font-medium transition-colors',
+          bookmarksIconsOnly ? 'gap-1 px-2' : 'gap-1.5 px-2.5',
           isActive
             ? 'border-primary/50 bg-primary/15 text-foreground'
             : 'border-transparent text-muted-foreground hover:border-border/60 hover:bg-secondary/75 hover:text-foreground'
         )}
       >
         <Icon className="h-3.5 w-3.5 shrink-0 text-primary" />
-        <span className="whitespace-nowrap">{label}</span>
+        {!bookmarksIconsOnly && <span className="whitespace-nowrap">{label}</span>}
         {badgeCount > 0 && (
           <span className="rounded-full bg-primary/20 px-1.5 py-0 font-mono text-[10px] font-semibold text-primary">
             {badgeCount}

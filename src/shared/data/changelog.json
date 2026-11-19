@@ -1,5 +1,14 @@
 [
   {
+    "version": "2.17.1",
+    "date": "November 2026",
+    "title": "Compact Icons-Only Mode for the Bookmarks Bar",
+    "badge": "New in v2.17.1",
+    "highlights": [
+      "New **Icons-Only Bookmarks Bar Mode** (`Settings → General & Navigation → Bookmarks Bar`): switch between **Icons + Text** and an ultra-clean **Icons Only** layout so all 13 navigation shortcuts fit effortlessly in the center without overflowing, while keeping live numeric counter badges (*Favorites, Cart, My WFM Profile*) and full localized hover tooltips (`wf://...`)."
+    ]
+  },
+  {
     "version": "2.17.0",
     "date": "November 2026",
     "title": "Pro Trader & Builder Suite, Offline Codex Arcanes Tab & Warframe-Themed Settings Redesign",
