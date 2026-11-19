@@ -3,6 +3,7 @@ import { dirname, join } from 'node:path'
 import {
   DEFAULT_USER_SETTINGS,
   UserSettingsSchema,
+  type BookmarkItemId,
   type UserSettings,
   type UserSettingsPatch
 } from '@shared/schemas/settings.schema'
@@ -85,11 +86,29 @@ export class StorageService {
       appearance: {
         ...current.appearance,
         ...patch.appearance,
+        bookmarksOrder: patch.appearance?.bookmarksOrder
+          ? patch.appearance.bookmarksOrder.filter(
+              (id): id is BookmarkItemId => typeof id === 'string' && id.length > 0
+            )
+          : current.appearance.bookmarksOrder,
+        hiddenBookmarks: patch.appearance?.hiddenBookmarks
+          ? patch.appearance.hiddenBookmarks.filter(
+              (id): id is BookmarkItemId => typeof id === 'string' && id.length > 0
+            )
+          : current.appearance.hiddenBookmarks,
         backgroundGradient: {
           ...current.appearance.backgroundGradient,
           ...patch.appearance?.backgroundGradient
         },
-        compactTimers: { ...current.appearance.compactTimers, ...patch.appearance?.compactTimers }
+        compactTimers: {
+          ...current.appearance.compactTimers,
+          ...patch.appearance?.compactTimers,
+          pinned: patch.appearance?.compactTimers?.pinned
+            ? patch.appearance.compactTimers.pinned.filter(
+                (k): k is NonNullable<typeof k> => typeof k === 'string'
+              )
+            : current.appearance.compactTimers.pinned
+        }
       },
       audio: { ...current.audio, ...patch.audio },
       window: {

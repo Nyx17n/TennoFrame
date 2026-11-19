@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { BackgroundGradientSection } from '@/components/settings/BackgroundGradientSection'
+import { BookmarksOrderSection } from '@/components/settings/BookmarksOrderSection'
 import { ColorSwatchPicker } from '@/components/settings/ColorSwatchPicker'
 import { FontSelectorSection } from '@/components/settings/FontSelectorSection'
 import { GlassModeSection } from '@/components/settings/GlassModeSection'
@@ -18,6 +19,8 @@ export function AppearanceSettingsTab(): React.JSX.Element {
   return (
     <div className="space-y-4">
       <LayoutAndErgonomicsSection />
+
+      <BookmarksOrderSection />
 
       <GlassModeSection />
 

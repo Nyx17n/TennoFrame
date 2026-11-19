@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import {
   DEFAULT_USER_SETTINGS,
+  type BookmarkItemId,
   type UserSettings,
   type UserSettingsPatch
 } from '@shared/schemas/settings.schema'
@@ -210,13 +211,28 @@ export const useAppStore = create<AppStoreState>((set, get) => ({
         appearance: {
           ...get().settings.appearance,
           ...patch.appearance,
+          bookmarksOrder: patch.appearance?.bookmarksOrder
+            ? patch.appearance.bookmarksOrder.filter(
+                (id): id is BookmarkItemId => typeof id === 'string' && id.length > 0
+              )
+            : get().settings.appearance.bookmarksOrder,
+          hiddenBookmarks: patch.appearance?.hiddenBookmarks
+            ? patch.appearance.hiddenBookmarks.filter(
+                (id): id is BookmarkItemId => typeof id === 'string' && id.length > 0
+              )
+            : get().settings.appearance.hiddenBookmarks,
           backgroundGradient: {
             ...get().settings.appearance.backgroundGradient,
             ...patch.appearance?.backgroundGradient
           },
           compactTimers: {
             ...get().settings.appearance.compactTimers,
-            ...patch.appearance?.compactTimers
+            ...patch.appearance?.compactTimers,
+            pinned: patch.appearance?.compactTimers?.pinned
+              ? patch.appearance.compactTimers.pinned.filter(
+                  (k): k is NonNullable<typeof k> => typeof k === 'string'
+                )
+              : get().settings.appearance.compactTimers.pinned
           }
         },
         audio: { ...get().settings.audio, ...patch.audio },

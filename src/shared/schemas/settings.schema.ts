@@ -159,6 +159,43 @@ export const NewTabTargetSchema = z.enum([
 ])
 export type NewTabTarget = z.infer<typeof NewTabTargetSchema>
 
+export const BOOKMARK_ITEM_IDS = [
+  'market-home',
+  'market-favorites',
+  'market-cart',
+  'market-recent',
+  'codex-home',
+  'builds',
+  'foundry',
+  'profit-scanner',
+  'market-ducats',
+  'market-rivens',
+  'platinum-ledger',
+  'wfm-account',
+  'browser-history'
+] as const
+
+export const BookmarkItemIdSchema = z.enum(BOOKMARK_ITEM_IDS)
+export type BookmarkItemId = z.infer<typeof BookmarkItemIdSchema>
+
+export function normalizeBookmarksOrder(saved: readonly BookmarkItemId[] | undefined): BookmarkItemId[] {
+  const seen = new Set<BookmarkItemId>()
+  const result: BookmarkItemId[] = []
+  for (const id of saved ?? []) {
+    if ((BOOKMARK_ITEM_IDS as readonly string[]).includes(id) && !seen.has(id)) {
+      seen.add(id)
+      result.push(id)
+    }
+  }
+  for (const defId of BOOKMARK_ITEM_IDS) {
+    if (!seen.has(defId)) {
+      seen.add(defId)
+      result.push(defId)
+    }
+  }
+  return result
+}
+
 export const CompactTimersSettingsSchema = z.object({
   enabled: z.boolean().default(true),
   showOnDesktop: z.boolean().default(false),
@@ -192,6 +229,9 @@ export const UserSettingsSchema = z.object({
     cornerRadius: CornerRadiusStyleSchema.default('auto'),
     uiDensity: UiDensitySchema.default('comfortable'),
     newTabTarget: NewTabTargetSchema.default('market-home'),
+    bookmarksBarVisible: z.boolean().default(true),
+    bookmarksOrder: z.array(BookmarkItemIdSchema).max(30).default([...BOOKMARK_ITEM_IDS]),
+    hiddenBookmarks: z.array(BookmarkItemIdSchema).max(30).default([]),
     startupAnimationEnabled: z.boolean().default(true),
     animationLevel: AnimationLevelSchema.default('full'),
     respectOsReducedMotion: z.boolean().default(true),
