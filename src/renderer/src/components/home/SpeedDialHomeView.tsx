@@ -6,11 +6,15 @@ import {
   Compass,
   Flame,
   Globe,
+  Hammer,
   Search,
   ShoppingCart,
   Star,
   Store,
-  UserCheck
+  TrendingUp,
+  UserCheck,
+  Wallet,
+  Wrench
 } from 'lucide-react'
 import {
   formatSlugTitle,
@@ -20,6 +24,7 @@ import {
 import { SpeedDialCyclesStrip } from '@/components/home/SpeedDialCyclesStrip'
 import { Button } from '@/components/ui/button'
 import { getLayoutErgonomicsStrings } from '@/lib/i18n/layout-ergonomics-i18n'
+import { getProToolsStrings } from '@/lib/i18n/pro-tools-i18n'
 import { useAppStore } from '@/stores/useAppStore'
 import { useTabsStore } from '@/stores/useTabsStore'
 
@@ -35,6 +40,7 @@ export function SpeedDialHomeView(): React.JSX.Element {
 
   const [query, setQuery] = React.useState('')
   const strings = React.useMemo(() => getLayoutErgonomicsStrings(language), [language])
+  const proStrings = React.useMemo(() => getProToolsStrings(language), [language])
 
   const handleSearchSubmit = (e: React.FormEvent): void => {
     e.preventDefault()
@@ -75,6 +81,34 @@ export function SpeedDialHomeView(): React.JSX.Element {
       desc: strings.tileCodexDesc,
       Icon: BookOpen,
       onClick: () => navigateActive({ kind: 'codex-home' })
+    },
+    {
+      id: 'builds',
+      title: proStrings.navBuilds,
+      desc: proStrings.buildsSubtitle,
+      Icon: Wrench,
+      onClick: () => navigateActive({ kind: 'builds' })
+    },
+    {
+      id: 'foundry',
+      title: proStrings.navFoundry,
+      desc: proStrings.foundrySubtitle,
+      Icon: Hammer,
+      onClick: () => navigateActive({ kind: 'foundry' })
+    },
+    {
+      id: 'profit-scanner',
+      title: proStrings.navProfitScanner,
+      desc: proStrings.scannerSubtitle,
+      Icon: TrendingUp,
+      onClick: () => navigateActive({ kind: 'profit-scanner' })
+    },
+    {
+      id: 'ledger',
+      title: proStrings.navLedger,
+      desc: proStrings.ledgerSubtitle,
+      Icon: Wallet,
+      onClick: () => navigateActive({ kind: 'platinum-ledger' })
     },
     {
       id: 'account',

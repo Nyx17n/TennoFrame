@@ -55,6 +55,28 @@ import {
   type SupportTicketResult
 } from '@shared/schemas/support.schema'
 import {
+  BuildCatalogPayloadSchema,
+  BuildPriceQuoteSchema,
+  FoundryStateSchema,
+  LedgerStateSchema,
+  ProfitScanResponseSchema,
+  RivenGradeResultSchema,
+  SavedBuildSchema,
+  type AddLedgerEntryInput,
+  type BuildCatalogPayload,
+  type BuildPriceQuote,
+  type FoundryProjectInput,
+  type FoundryState,
+  type FoundryUpdateOwnedInput,
+  type LedgerState,
+  type ProfitScanRequest,
+  type ProfitScanResponse,
+  type RivenGradeInput,
+  type RivenGradeResult,
+  type SavedBuild,
+  type UpdateLedgerMetaInput
+} from '@shared/schemas/pro-tools.schema'
+import {
   CommunityStatsSnapshotSchema,
   SystemStatusSchema,
   type CommunityStatsSnapshot,
@@ -524,6 +546,127 @@ export const ipcClient = {
         }
       }
       return SupportTicketResultSchema.parse(await bridge.support.sendTicket(input))
+    }
+  },
+  proTools: {
+    async profitScan(input: ProfitScanRequest): Promise<ProfitScanResponse> {
+      const bridge = getBridge()
+      if (!bridge.proTools?.profitScan) {
+        throw new Error('Relance npm.cmd run dev pour activer le Scanner de Profits.')
+      }
+      return ProfitScanResponseSchema.parse(await bridge.proTools.profitScan(input))
+    },
+    async ledgerGet(): Promise<LedgerState> {
+      const bridge = getBridge()
+      if (!bridge.proTools?.ledgerGet) {
+        throw new Error('Relance npm.cmd run dev pour activer la Comptabilité Platinum.')
+      }
+      return LedgerStateSchema.parse(await bridge.proTools.ledgerGet())
+    },
+    async ledgerAddEntry(input: AddLedgerEntryInput): Promise<LedgerState> {
+      const bridge = getBridge()
+      if (!bridge.proTools?.ledgerAddEntry) {
+        throw new Error('Relance npm.cmd run dev pour activer la Comptabilité Platinum.')
+      }
+      return LedgerStateSchema.parse(await bridge.proTools.ledgerAddEntry(input))
+    },
+    async ledgerDeleteEntry(entryId: string): Promise<LedgerState> {
+      const bridge = getBridge()
+      if (!bridge.proTools?.ledgerDeleteEntry) {
+        throw new Error('Relance npm.cmd run dev pour activer la Comptabilité Platinum.')
+      }
+      return LedgerStateSchema.parse(await bridge.proTools.ledgerDeleteEntry(entryId))
+    },
+    async ledgerUpdateMeta(input: UpdateLedgerMetaInput): Promise<LedgerState> {
+      const bridge = getBridge()
+      if (!bridge.proTools?.ledgerUpdateMeta) {
+        throw new Error('Relance npm.cmd run dev pour activer la Comptabilité Platinum.')
+      }
+      return LedgerStateSchema.parse(await bridge.proTools.ledgerUpdateMeta(input))
+    },
+    async ledgerExportCsv(): Promise<boolean> {
+      const bridge = getBridge()
+      if (!bridge.proTools?.ledgerExportCsv) return false
+      return z.boolean().parse(await bridge.proTools.ledgerExportCsv())
+    },
+    async rivenGrade(input: RivenGradeInput): Promise<RivenGradeResult> {
+      const bridge = getBridge()
+      if (!bridge.proTools?.rivenGrade) {
+        throw new Error('Relance npm.cmd run dev pour activer l’Évaluateur Riven.')
+      }
+      return RivenGradeResultSchema.parse(await bridge.proTools.rivenGrade(input))
+    },
+    async buildsGetCatalog(): Promise<BuildCatalogPayload> {
+      const bridge = getBridge()
+      if (!bridge.proTools?.buildsGetCatalog) {
+        throw new Error('Relance npm.cmd run dev pour activer le Studio de Builds.')
+      }
+      return BuildCatalogPayloadSchema.parse(await bridge.proTools.buildsGetCatalog())
+    },
+    async buildsList(): Promise<SavedBuild[]> {
+      const bridge = getBridge()
+      if (!bridge.proTools?.buildsList) {
+        throw new Error('Relance npm.cmd run dev pour activer le Studio de Builds.')
+      }
+      return z.array(SavedBuildSchema).parse(await bridge.proTools.buildsList())
+    },
+    async buildsSave(build: SavedBuild): Promise<SavedBuild[]> {
+      const bridge = getBridge()
+      if (!bridge.proTools?.buildsSave) {
+        throw new Error('Relance npm.cmd run dev pour activer le Studio de Builds.')
+      }
+      return z.array(SavedBuildSchema).parse(await bridge.proTools.buildsSave(build))
+    },
+    async buildsDelete(buildId: string): Promise<SavedBuild[]> {
+      const bridge = getBridge()
+      if (!bridge.proTools?.buildsDelete) {
+        throw new Error('Relance npm.cmd run dev pour activer le Studio de Builds.')
+      }
+      return z.array(SavedBuildSchema).parse(await bridge.proTools.buildsDelete(buildId))
+    },
+    async buildsPriceCheck(buildId: string, forceRefresh?: boolean): Promise<BuildPriceQuote> {
+      const bridge = getBridge()
+      if (!bridge.proTools?.buildsPriceCheck) {
+        throw new Error('Relance npm.cmd run dev pour activer le Studio de Builds.')
+      }
+      return BuildPriceQuoteSchema.parse(
+        await bridge.proTools.buildsPriceCheck(buildId, forceRefresh)
+      )
+    },
+    async foundryGet(): Promise<FoundryState> {
+      const bridge = getBridge()
+      if (!bridge.proTools?.foundryGet) {
+        throw new Error('Relance npm.cmd run dev pour activer le Planificateur Fonderie.')
+      }
+      return FoundryStateSchema.parse(await bridge.proTools.foundryGet())
+    },
+    async foundryAddProject(input: FoundryProjectInput): Promise<FoundryState> {
+      const bridge = getBridge()
+      if (!bridge.proTools?.foundryAddProject) {
+        throw new Error('Relance npm.cmd run dev pour activer le Planificateur Fonderie.')
+      }
+      return FoundryStateSchema.parse(await bridge.proTools.foundryAddProject(input))
+    },
+    async foundryRemoveProject(projectKey: string): Promise<FoundryState> {
+      const bridge = getBridge()
+      if (!bridge.proTools?.foundryRemoveProject) {
+        throw new Error('Relance npm.cmd run dev pour activer le Planificateur Fonderie.')
+      }
+      return FoundryStateSchema.parse(await bridge.proTools.foundryRemoveProject(projectKey))
+    },
+    async foundrySetOwned(input: FoundryUpdateOwnedInput): Promise<FoundryState> {
+      const bridge = getBridge()
+      if (!bridge.proTools?.foundrySetOwned) {
+        throw new Error('Relance npm.cmd run dev pour activer le Planificateur Fonderie.')
+      }
+      return FoundryStateSchema.parse(await bridge.proTools.foundrySetOwned(input))
+    },
+    async foundryClear(): Promise<FoundryState> {
+      const bridge = getBridge()
+      if (!bridge.proTools?.foundryClear) {
+        throw new Error('Relance npm.cmd run dev pour activer le Planificateur Fonderie.')
+      }
+      return FoundryStateSchema.parse(await bridge.proTools.foundryClear())
     }
   }
 } as const

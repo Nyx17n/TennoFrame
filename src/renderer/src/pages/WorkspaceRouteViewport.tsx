@@ -4,8 +4,10 @@ import { formatRouteUri, type AppRoute } from '@shared/schemas/navigation.schema
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AlertsCenterView } from '@/components/alerts/AlertsCenterView'
+import { BuildStudioView } from '@/components/builds/BuildStudioView'
 import { CodexDetailView } from '@/components/codex/CodexDetailView'
 import { CodexHomeView } from '@/components/codex/CodexHomeView'
+import { FoundryPlannerView } from '@/components/foundry/FoundryPlannerView'
 import { SpeedDialHomeView } from '@/components/home/SpeedDialHomeView'
 import { HubRootView } from '@/components/hub/HubRootView'
 import { MarketCatalogView } from '@/components/market/MarketCatalogView'
@@ -17,6 +19,8 @@ import { MarketUserProfileView } from '@/components/market/MarketUserProfileView
 import { MarketCartView } from '@/components/tools/MarketCartView'
 import { MarketDucatsView } from '@/components/tools/MarketDucatsView'
 import { MarketRivensView } from '@/components/tools/MarketRivensView'
+import { PlatinumLedgerView } from '@/components/tools/PlatinumLedgerView'
+import { ProfitScannerView } from '@/components/tools/ProfitScannerView'
 import { BrowserHistoryView } from '@/components/shell/BrowserHistoryView'
 import { WfmAccountView } from '@/components/wfm-account/WfmAccountView'
 import { getTabCurrentRoute } from '@/lib/tab-helpers'
@@ -103,6 +107,14 @@ export function WorkspaceRouteViewport(): React.JSX.Element {
         return <CodexHomeView initialCategory={route.category} initialQuery={route.query} />
       case 'codex-detail':
         return <CodexDetailView categoryRaw={route.category} id={route.slug ?? 'wisp'} />
+      case 'profit-scanner':
+        return <ProfitScannerView />
+      case 'platinum-ledger':
+        return <PlatinumLedgerView />
+      case 'builds':
+        return <BuildStudioView />
+      case 'foundry':
+        return <FoundryPlannerView />
       case 'browser-history':
         return <BrowserHistoryView />
     }

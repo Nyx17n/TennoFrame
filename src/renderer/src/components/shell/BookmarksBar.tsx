@@ -4,15 +4,20 @@ import {
   Clock,
   Coins,
   Flame,
+  Hammer,
   History,
   ShoppingCart,
   Star,
   Store,
+  TrendingUp,
   UserCheck,
+  Wallet,
+  Wrench,
   type LucideIcon
 } from 'lucide-react'
 import type { AppRoute, RouteKind } from '@shared/schemas/navigation.schema'
 import { useUiTranslations, type UiMessages } from '@/lib/i18n'
+import { getProToolsStrings, type ProToolsStrings } from '@/lib/i18n/pro-tools-i18n'
 import { getTabCurrentRoute } from '@/lib/tab-helpers'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/stores/useAppStore'
@@ -21,7 +26,8 @@ import { useWfmAccountStore } from '@/stores/useWfmAccountStore'
 
 interface BookmarkShortcut {
   readonly id: RouteKind
-  readonly labelKey: keyof UiMessages['bookmarks']
+  readonly labelKey?: keyof UiMessages['bookmarks']
+  readonly proLabelKey?: keyof ProToolsStrings
   readonly tooltip: string
   readonly icon: LucideIcon
   readonly route: AppRoute
@@ -72,6 +78,27 @@ const CENTER_SHORTCUTS: readonly BookmarkShortcut[] = [
     route: { kind: 'codex-home' }
   },
   {
+    id: 'builds',
+    proLabelKey: 'navBuilds',
+    tooltip: 'wf://builds',
+    icon: Wrench,
+    route: { kind: 'builds' }
+  },
+  {
+    id: 'foundry',
+    proLabelKey: 'navFoundry',
+    tooltip: 'wf://foundry',
+    icon: Hammer,
+    route: { kind: 'foundry' }
+  },
+  {
+    id: 'profit-scanner',
+    proLabelKey: 'navProfitScanner',
+    tooltip: 'wf://market/profit-scanner',
+    icon: TrendingUp,
+    route: { kind: 'profit-scanner' }
+  },
+  {
     id: 'market-ducats',
     labelKey: 'ducats',
     tooltip: 'wf://market/ducats',
@@ -86,6 +113,13 @@ const CENTER_SHORTCUTS: readonly BookmarkShortcut[] = [
     route: { kind: 'market-rivens' }
   },
   {
+    id: 'platinum-ledger',
+    proLabelKey: 'navLedger',
+    tooltip: 'wf://market/ledger',
+    icon: Wallet,
+    route: { kind: 'platinum-ledger' }
+  },
+  {
     id: 'wfm-account',
     labelKey: 'wfmAccount',
     tooltip: 'wf://wfm-account',
@@ -96,6 +130,8 @@ const CENTER_SHORTCUTS: readonly BookmarkShortcut[] = [
 
 export function BookmarksBar(): React.JSX.Element | null {
   const { t } = useUiTranslations()
+  const lang = useAppStore((s) => s.settings.market.language)
+  const proStrings = getProToolsStrings(lang)
   const navigateActive = useTabsStore((s) => s.navigateActive)
   const openTab = useTabsStore((s) => s.openTab)
   const hubActive = useTabsStore((s) => s.hubActive)
@@ -155,7 +191,13 @@ export function BookmarksBar(): React.JSX.Element | null {
         )}
       >
         <Icon className="h-3.5 w-3.5 shrink-0 text-primary" />
-        <span className="whitespace-nowrap">{t.bookmarks[item.labelKey]}</span>
+        <span className="whitespace-nowrap">
+          {item.proLabelKey
+            ? proStrings[item.proLabelKey]
+            : item.labelKey
+              ? t.bookmarks[item.labelKey]
+              : item.id}
+        </span>
         {badgeCount > 0 && (
           <span className="rounded-full bg-primary/20 px-1.5 py-0 font-mono text-[10px] font-semibold text-primary">
             {badgeCount}

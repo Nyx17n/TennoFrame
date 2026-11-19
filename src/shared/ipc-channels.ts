@@ -61,6 +61,21 @@ import type {
   WfmSessionState,
   WfmSignInWebInput
 } from './schemas/wfm-account.schema'
+import type {
+  AddLedgerEntryInput,
+  BuildCatalogPayload,
+  BuildPriceQuote,
+  FoundryProjectInput,
+  FoundryState,
+  FoundryUpdateOwnedInput,
+  LedgerState,
+  ProfitScanRequest,
+  ProfitScanResponse,
+  RivenGradeInput,
+  RivenGradeResult,
+  SavedBuild,
+  UpdateLedgerMetaInput
+} from './schemas/pro-tools.schema'
 
 export const IPC_CHANNELS = {
   SYSTEM_GET_STATUS: 'system:getStatus',
@@ -131,7 +146,24 @@ export const IPC_CHANNELS = {
   UPDATER_ON_STATUS: 'updater:onStatus',
   SUPPORT_GET_STATUS: 'support:getStatus',
   SUPPORT_PREPARE_ATTACHMENT: 'support:prepareAttachment',
-  SUPPORT_SEND_TICKET: 'support:sendTicket'
+  SUPPORT_SEND_TICKET: 'support:sendTicket',
+  PRO_PROFIT_SCAN: 'proTools:profitScan',
+  PRO_LEDGER_GET: 'proTools:ledgerGet',
+  PRO_LEDGER_ADD_ENTRY: 'proTools:ledgerAddEntry',
+  PRO_LEDGER_DELETE_ENTRY: 'proTools:ledgerDeleteEntry',
+  PRO_LEDGER_UPDATE_META: 'proTools:ledgerUpdateMeta',
+  PRO_LEDGER_EXPORT_CSV: 'proTools:ledgerExportCsv',
+  PRO_RIVEN_GRADE: 'proTools:rivenGrade',
+  PRO_BUILDS_GET_CATALOG: 'proTools:buildsGetCatalog',
+  PRO_BUILDS_LIST: 'proTools:buildsList',
+  PRO_BUILDS_SAVE: 'proTools:buildsSave',
+  PRO_BUILDS_DELETE: 'proTools:buildsDelete',
+  PRO_BUILDS_PRICE_CHECK: 'proTools:buildsPriceCheck',
+  PRO_FOUNDRY_GET: 'proTools:foundryGet',
+  PRO_FOUNDRY_ADD_PROJECT: 'proTools:foundryAddProject',
+  PRO_FOUNDRY_REMOVE_PROJECT: 'proTools:foundryRemoveProject',
+  PRO_FOUNDRY_SET_OWNED: 'proTools:foundrySetOwned',
+  PRO_FOUNDRY_CLEAR: 'proTools:foundryClear'
 } as const
 
 export interface TennoFrameBridgeApi {
@@ -229,5 +261,24 @@ export interface TennoFrameBridgeApi {
     getStatus: () => Promise<SupportStatus>
     prepareAttachment: (input: SupportRawAttachmentInput) => Promise<SupportPrepareAttachmentResult>
     sendTicket: (input: SupportTicketInput) => Promise<SupportTicketResult>
+  }
+  readonly proTools: {
+    profitScan: (input: ProfitScanRequest) => Promise<ProfitScanResponse>
+    ledgerGet: () => Promise<LedgerState>
+    ledgerAddEntry: (input: AddLedgerEntryInput) => Promise<LedgerState>
+    ledgerDeleteEntry: (entryId: string) => Promise<LedgerState>
+    ledgerUpdateMeta: (input: UpdateLedgerMetaInput) => Promise<LedgerState>
+    ledgerExportCsv: () => Promise<boolean>
+    rivenGrade: (input: RivenGradeInput) => Promise<RivenGradeResult>
+    buildsGetCatalog: () => Promise<BuildCatalogPayload>
+    buildsList: () => Promise<SavedBuild[]>
+    buildsSave: (build: SavedBuild) => Promise<SavedBuild[]>
+    buildsDelete: (buildId: string) => Promise<SavedBuild[]>
+    buildsPriceCheck: (buildId: string, forceRefresh?: boolean) => Promise<BuildPriceQuote>
+    foundryGet: () => Promise<FoundryState>
+    foundryAddProject: (input: FoundryProjectInput) => Promise<FoundryState>
+    foundryRemoveProject: (projectKey: string) => Promise<FoundryState>
+    foundrySetOwned: (input: FoundryUpdateOwnedInput) => Promise<FoundryState>
+    foundryClear: () => Promise<FoundryState>
   }
 }

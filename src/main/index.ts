@@ -6,18 +6,24 @@ import { registerCodexAndUpdaterHandlers } from './ipc/registerCodexAndUpdaterHa
 import { registerIpcHandlers } from './ipc/registerIpcHandlers'
 import { registerMarketHandlers } from './ipc/registerMarketHandlers'
 import { registerOverlayHandlers } from './ipc/registerOverlayHandlers'
+import { registerProToolsHandlers } from './ipc/registerProToolsHandlers'
 import { registerSupportHandlers } from './ipc/registerSupportHandlers'
 import { registerToolsAndAlertsHandlers } from './ipc/registerToolsAndAlertsHandlers'
 import { registerWfmAccountHandlers } from './ipc/registerWfmAccountHandlers'
 import { registerWorldstateHandlers } from './ipc/registerWorldstateHandlers'
 import { AlertSchedulerService } from './services/AlertSchedulerService'
+import { BuildsService } from './services/BuildsService'
 import { CacheService } from './services/CacheService'
 import { CartBundlerService } from './services/CartBundlerService'
 import { CodexRepository } from './services/CodexRepository'
 import { CommunityStatsService } from './services/CommunityStatsService'
 import { FarmOverlayWindowService } from './services/FarmOverlayWindowService'
+import { FoundryPlannerService } from './services/FoundryPlannerService'
 import { MarketApiService } from './services/MarketApiService'
 import { MarketFacetedSearchService } from './services/MarketFacetedSearchService'
+import { PlatinumLedgerService } from './services/PlatinumLedgerService'
+import { ProfitScannerService } from './services/ProfitScannerService'
+import { RivenGraderService } from './services/RivenGraderService'
 import { SetCalculatorService } from './services/SetCalculatorService'
 import { StorageService } from './services/StorageService'
 import { SupportService } from './services/SupportService'
@@ -88,10 +94,19 @@ async function bootstrap(): Promise<void> {
   const marketFacetedSearch = new MarketFacetedSearchService(marketApi)
   const wfmAuth = new WfmAuthService(userDataPath, httpClient)
   const wfmWebLogin = new WfmWebLoginService(wfmAuth, windowService)
-  const wfmAccount = new WfmAccountService(httpClient, cacheService, marketApi, wfmAuth)
+  const ledgerService = new PlatinumLedgerService(userDataPath)
+  const wfmAccount = new WfmAccountService(
+    httpClient,
+    cacheService,
+    marketApi,
+    wfmAuth,
+    ledgerService
+  )
   const setCalculator = new SetCalculatorService(marketApi)
   const cartBundler = new CartBundlerService(marketApi, storageService)
   const tradingTools = new TradingToolsService(httpClient, cacheService, storageService, marketApi)
+  const profitScanner = new ProfitScannerService(marketApi, setCalculator, cacheService)
+  const rivenGrader = new RivenGraderService(tradingTools, cacheService)
   const worldstateService = new WorldstateService(
     httpClient,
     cacheService,
@@ -100,6 +115,8 @@ async function bootstrap(): Promise<void> {
     storageService
   )
   const codexRepository = new CodexRepository(marketApi)
+  const buildsService = new BuildsService(userDataPath, codexRepository, marketApi)
+  const foundryPlanner = new FoundryPlannerService(userDataPath, codexRepository)
   const updaterService = new UpdaterService(windowService)
   const supportService = new SupportService(httpClient, storageService, windowService, userDataPath)
   const alertScheduler = new AlertSchedulerService(
@@ -214,6 +231,15 @@ async function bootstrap(): Promise<void> {
   registerSupportHandlers({
     supportService,
     windowService
+  })
+  registerProToolsHandlers({
+    windowService,
+    profitScanner,
+    ledgerService,
+    rivenGrader,
+    codexRepository,
+    buildsService,
+    foundryPlanner
   })
 
   const iconPath = resolveAppIconPath()

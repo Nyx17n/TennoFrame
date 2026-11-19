@@ -6,6 +6,8 @@ const ALLOWED_EXTERNAL_HOSTS = new Set([
   'warframe.com',
   'forums.warframe.com',
   'wiki.warframe.com',
+  'overframe.gg',
+  'www.overframe.gg',
   'discord.gg',
   'discord.com',
   'github.com'
