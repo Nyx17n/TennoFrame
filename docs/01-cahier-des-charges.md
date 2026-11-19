@@ -1056,9 +1056,10 @@ Pour épurer l'interface tout en accélérant les actions fréquentes à la sour
    - Ajouter le raccourci **`🛠 Builds` (`wf://builds`) juste à droite de `📖 Codex`** dans `BookmarksBar` (ainsi que dans `Speed Dial` et l'Omnibox `Ctrl+K`).
    - **Éditeur Visuel Complet basé sur les 3 810 entrées hors-ligne du Codex** (`BuildsService` → fichier local atomique `builds.json`) :
      1. **Sélecteur d'Équipement** : Warframe ou Arme (*Principale, Secondaire, Mêlée*) avec affichage des statistiques de base, polarités innées et passif/compétences.
-     2. **Grille Authentique de Modding & Capacité Temps Réel** :
+     2. **Grille Authentique de Modding, Vignettes Visuelles & Capacité Temps Réel** :
         - *Warframe* : **Aura** + **Exilus** + **8 emplacements de Mods** + **2 Arcanes** + **Compétence Helminth subsumée** + **5 Fragments d'Archonte** (*Écarlate, Ambre, Azur, Violet, Topaze, Émeraude*).
         - *Arme* : **Posture / Exilus** + **8 emplacements de Mods** + **1 Arcane d'arme**.
+        - **Vignettes Visuelles Mods & Arcanes (`wf-asset://`)** : chaque carte de slot Mod équipée, chaque slot Arcane équipé, la modale de sélection (`BuildPickerModal`), le bandeau d'équipement et le récapitulatif de chiffrage Platinum affichent l'**illustration officielle du Mod ou de l'Arcane** (`SafeAssetImage` avec bordure teintée selon la rareté *Commun / Inhabituel / Rare / Légendaire*) et nettoient les retours à la ligne bruts (`\n`) des descriptions d'effets.
         - **Calculateur de Capacité (`60` avec Réacteur/Catalyseur Orokin + bonus Aura/Posture ×2)**, polarités personnalisables par slot (`Forma` : coût divisé par 2 à l'arrondi supérieur) et compteur automatique du **nombre de Formas requis**.
      3. **Chiffrage Platinum Warframe Market & Actions 1-Clic Exclusives** :
         - Résout en direct (via cache/lot `RateLimitedHttpClient`) le prix Platinum `min sell ingame` (Rang 0 ou Rang Max au choix) de chaque Mod et Arcane échangeable du build.
@@ -1081,6 +1082,24 @@ Pour épurer l'interface tout en accélérant les actions fréquentes à la sour
      4. **Envoi Groupé vers l'Overlay en Jeu (`Alt+O`)** :
         - Bouton **`🎯 Épingler toutes les ressources manquantes dans l'Overlay Farm`** en 1 clic !
 2. **Mode Compact (`460×660`) & 4 États UI** : liste de courses verticale compacte avec compteurs `[-]` / `[+]` rapides ; 4 états (*Chargement résolution Codex*, *Aucun projet Fonderie avec recherche rapide d'ajout*, *Liste consolidée nominale*, *Alerte ressource spéciale ex. Cristaux d'Argon périssables / Extrait de Nitain Nightwave*).
+
+### 3.29. Module 29 — Onglet Codex « Arcanes » Complet & Intégration Hors-Ligne (`wf://codex/arcanes`)
+
+1. **Objectif Métier & Nouvel Onglet `Arcanes` dans le Codex** :
+   - Ajouter une **8ᵉ catégorie officielle `arcanes`** dans `CodexCategorySchema` (placée juste à côté de `Mods` dans la barre d'onglets de `CodexHomeView` : `Ressources · Warframes · Armes · Mods · ✨ Arcanes · Reliques · Mobs · Marchands · Helminth`), accessible via `wf://codex` (onglet `Arcanes`), la recherche rapide `Omnibox (Ctrl+K)` et les fiches détaillées `wf://codex/arcanes/:id`.
+2. **Base de Données Hors-Ligne Exhaustive (`resources/codex-arcanes.json` embarquée via `extraResources`)** :
+   - Générée proprement par script Node (`scripts/extract-arcanes.mjs`) en croisant `WFCD/warframe-items` (`Arcanes.json`), l'export officiel bilingue FR/EN Digital Extremes (`ExportRelicArcane_fr.json` / `dict.fr.json`) et l'index des Marchands/Syndicats (`codex-mobs-vendors.json`) :
+     - Couvre **100 % des Arcanes de Warframe** (*Warframe, Arme Principale, Arme Secondaire, Mêlée, Zaw, Kitgun, Opérateur, Amplificateur, Archgun*).
+     - Contient pour chaque Arcane : `id`, `nameFr`, `nameEn`, `img` (`wf-asset://cdn.warframestat.us/img/...`), `rarity` (*Commun, Inhabituel, Rare, Légendaire*), `slotCategory` (*warframe, primary, secondary, melee, operator_amp, zaw_kitgun*), `maxRank` (`5` ou `3`), `copiesForMaxRank` (`21` pour R5, `10` pour R3), `vosforYield` / **Pack de Dissolution Vosfor chez Loid (Sanctum Anatomica)**, progression complète des effets **Rang 0 → Rang Max** (`levelStatsFr[]` & `levelStatsEn[]`), `tradable`, `drops[]` (Eidolons, Cascade du Néant, Acolytes de la Route de l'Acier, Murmure, 1999 Höllvanie, etc.) et marchands associés (*Cavalero, Little Duck, Hok, Rude Zuud, Onkko, Bird 3, Eleanor, Acrithis, Loid*).
+3. **Filtres Dédiés, Fiche Détail Arcane & Synergie Studio de Builds / Overlay `Alt+O`** :
+   - **Filtres rapides dans l'onglet `✨ Arcanes`** : par emplacement (`Tous · Warframe · Principale · Secondaire · Mêlée · Opérateur & Amp · Zaw & Kitgun`) + filtre de rareté/échangeabilité + recherche par nom FR/EN ou par effet (*ex. « Énergie », « Critique », « Cadence », « Influence »*).
+   - **Fiche Détail Arcane (`CodexDetailView`)** :
+     - Grande icône officielle de l'Arcane, badge de rareté & emplacement, rappel **`21× exemplaires R0 = 1× Rang 5`**.
+     - **Tableau de progression Rang 0 → Rang 5** affichant l'effet exact à chaque rang.
+     - **Sources d'acquisition complètes** (*Boss / Eidolons / Missions + % de drop*, *Marchands Syndicats* et *Collection de Dissolution Vosfor chez Loid*) épinglables en **1 clic dans l'Overlay Farm en jeu (`Alt+O`)**.
+     - Boutons directs **`Voir Prix Platinum sur le Marché`** (`wf://market/item/:slug`), **`Mettre en vente`** (si connecté WFM) et **`Analyser Fusion R0 → R5`** (`wf://market/profit-scanner`).
+   - **Enrichissement du Studio de Builds (`wf://builds`)** : `CodexRepository.getBuildStudioCatalog()` alimente désormais les Arcanes directement depuis `codex-arcanes.json` (100 % disponible hors-ligne dès l'ouverture avec icône officielle, effet Rang Max en français/anglais et épinglage `Alt+O` des sources de farm d'Arcanes !).
+4. **Mode Compact (`460×660`) & 4 États UI** : cartes condensées avec miniature Arcane + effet Rang Max sur 2 lignes + badge de rareté ; 4 états obligatoires (*Skeleton de chargement*, *Aucun Arcane trouvé avec réinitialisation des filtres*, *Catalogue & Fiche nominale*, *Erreur lecture ressource avec bouton Réessayer*).
 
 ---
 
@@ -1178,7 +1197,7 @@ Tous les paramètres d'entrée et toutes les réponses API passent par une valid
 
 ## 5. Plan des Maquettes Excalidraw (`docs/02-tennoframe/` — Synchronisées `v2.10+`)
 
-L'ensemble des **29 planches Excalidraw** dans `docs/02-tennoframe/` documente fidèlement l'architecture de **TennoFrame**, chacune présentant côte à côte la version **Desktop (`1440×900`)**, son adaptation **Compact Overlay (`460×660`)**, et **les 4 états UI obligatoires** (*Chargement / Skeleton*, *Vide*, *Nominal*, *Erreur*) :
+L'ensemble des **30 planches Excalidraw** dans `docs/02-tennoframe/` documente fidèlement l'architecture de **TennoFrame**, chacune présentant côte à côte la version **Desktop (`1440×900`)**, son adaptation **Compact Overlay (`460×660`)**, et **les 4 états UI obligatoires** (*Chargement / Skeleton*, *Vide*, *Nominal*, *Erreur*) :
 
 1. `01-app-shell-navigation.excalidraw` : Fenêtre *Frameless* `v2.6.0`, `TitleTabsBar` (défilement molette + chevrons `‹ / ›` + fermeture clic molette), `ClickThroughBanner` (`👻` `Alt+G` + maintien `0.5s`), `CommandNavBar` (`Ctrl+K`, cloche `🔔`, `PC · Cross · FR ▾`, Zoom, `📌`, `👻`, `🗖`, `⚙`), `BookmarksBar` centrée + `Historique` (`Ctrl+H`), Omnibox, Organisateur d'onglets, bandeau `/w`, `CompactTimersBar`, bouton Discord et `StatusBar v2.6.0`.
 2. `02-market-home-catalog-item.excalidraw` : Accueil Marché (flux d'annonces récentes en direct, `ViewModeToggle` `[⊞|▭|☰] + [S|M|L]`, badges `Min · Moy · Max` Platinum), Catalogue, Favoris, Profil joueur, et **Fiche Item complète** (Ordres Vente/Achat, Comparateur *Set vs Pièces*, Pont bidirectionnel *Codex*, Statistiques 48h/90j + pagination *Afficher plus*).
@@ -1209,6 +1228,7 @@ L'ensemble des **29 planches Excalidraw** dans `docs/02-tennoframe/` documente f
 27. `27-riven-grader-estimator.excalidraw` *(Module 26 — Évaluateur & Simulateur de Riven Multi-Plateformes dans `wf://market/rivens`)* : **Sous-onglet `🧬 Évaluateur & Simulateur Riven`** (choix d'arme + variantes & Disposition exacte, 2–3 bonus + 0–1 malus avec barres de qualité de jet `[Min…Max]`, badge de Note Méta `S+ → C`, estimation de valeur Platinum `Plancher · Médiane · Top` et enchères similaires), **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
 28. `28-build-planner-studio.excalidraw` *(Module 27 — Studio de Builds Chiffré en Platinum + Pont Panier & Farm `wf://builds`)* : **Nouvel onglet `🛠 Builds` à droite de `Codex`**, **Vue Desktop `1440×900`** (sélecteur Warframe/Arme, grille 8 Mods + Aura/Posture + Exilus + Arcanes + Helminth + Fragments d'Archonte, capacité `60` & Formas, chiffrage Platinum temps réel avec cases `✓ Possédé`, boutons `🛒 Panier Bundler`, `🎯 Overlay Farm`, partage `tf-build://...` et lien `Overframe.gg ↗`), **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
 29. `29-foundry-craft-planner.excalidraw` *(Module 28 — Planificateur de Fonderie & Liste de Courses Agrégée `wf://foundry`)* : **Vue Desktop `1440×900`** (colonne gauche des Warframes/Armes ciblées + colonne droite de la Liste de Courses Consolidée additionnant récursivement toutes les ressources, compteurs `Possédé / Requis`, meilleurs spots de drop Codex et bouton `🎯 Tout épingler dans l'Overlay Farm`), **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
+30. `30-codex-arcanes-and-build-visuals.excalidraw` *(Module 29 + Enrichissement Visuel Module 27 — Onglet Codex « ✨ Arcanes » Complet & Vignettes d'Illustrations Mods/Arcanes dans le Studio de Builds)* : **Vue Desktop `1440×900` du Codex onglet `✨ Arcanes`** (filtres par emplacement *Warframe / Principale / Secondaire / Mêlée / Opérateur & Amp / Zaw & Kitgun*, cartes avec icône officielle + rareté + effet Rang Max + sources de drop/Loid Vosfor, et **Fiche Détail Arcane** avec progression `Rang 0 → Rang 5`, épinglage `Alt+O` et pont Platinum), **Vue Desktop améliorée du `Studio de Builds`** affichant les miniatures `wf-asset://` sur les 10 slots de Mods, les slots d'Arcanes, la modale de sélection et le panneau de coût Platinum, **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
 
 ---
 
