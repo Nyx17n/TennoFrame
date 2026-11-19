@@ -48,7 +48,18 @@ export type MarketPlatform = z.infer<typeof PlatformSchema>
 export const AppLanguageSchema = z.enum(APP_LANGUAGE_IDS)
 export type AppLanguage = z.infer<typeof AppLanguageSchema>
 
-export const SoundChoiceSchema = z.enum(['classic', 'bell'])
+export const SoundChoiceSchema = z.enum([
+  'classic',
+  'bell',
+  'orokin-chime',
+  'cephalon-ping',
+  'lotus-transmission',
+  'pom2-retro',
+  'platinum-coin',
+  'eidolon-pulse',
+  'stalker-whisper',
+  'soft-drop'
+])
 export type SoundChoice = z.infer<typeof SoundChoiceSchema>
 
 export const SellerStatusFilterSchema = z.enum(['ingame', 'online', 'all'])
