@@ -1,5 +1,16 @@
 [
   {
+    "version": "2.18.0",
+    "date": "November 2026",
+    "title": "Dockable Left/Right Bookmarks Bar, Hover-Expand Labels & 10 Warframe Notification Sounds",
+    "badge": "New in v2.18.0",
+    "highlights": [
+      "Dockable **Bookmarks Bar Position (`Top`, `Left Edge`, or `Right Edge`)** (`Settings → General & Navigation → Bookmarks Bar`): dock your shortcuts horizontally under the address bar or as a sleek vertical rail on either the **left** or **right** edge of TennoFrame.",
+      "New **Name on Hover (`Hover-Expand`) Display Mode**: alongside *Icons + Text* and *Icons Only*, smoothly expand any shortcut's title on mouse hover (`180 ms` CSS transition) — including floating unclipped pills with zero page layout shift when docked on the left or right edge.",
+      "Expanded **10 Warframe Notification Sounds Catalog** (`Settings → Market & Alerts → Audio & Price Sniper`): choose from **10 Warframe-inspired alert ringtones** (*Tenno Classic, Crystal Bell, Orokin Golden Chime, Cephalon Telemetry Ping, Lotus Transmission, POM-2 Terminal 1999, Platinum Shimmer, Eidolon Resonance, Acolyte / Stalker Alert,* and *Zen Soft Droplet*), synthesized offline in real time via polyphonic Web Audio API with custom Warframe vector emblems and instant one-click preview."
+    ]
+  },
+  {
     "version": "2.17.1",
     "date": "November 2026",
     "title": "Compact Icons-Only Mode for the Bookmarks Bar",

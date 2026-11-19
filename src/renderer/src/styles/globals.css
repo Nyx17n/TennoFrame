@@ -451,6 +451,61 @@ html:not([data-motion='reduced']):not([data-motion='off']) .wf-bookmark-link[dat
   transform: scaleX(1);
 }
 
+.wf-bookmark-expand-wrap {
+  display: inline-grid;
+  grid-template-columns: 0fr;
+  opacity: 0;
+  margin-left: 0;
+  transition:
+    grid-template-columns 185ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 150ms ease,
+    margin-left 185ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.wf-bookmark-expand-inner {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.wf-bookmark-link:hover .wf-bookmark-expand-wrap,
+.wf-bookmark-link:focus-visible .wf-bookmark-expand-wrap {
+  grid-template-columns: 1fr;
+  opacity: 1;
+  margin-left: 0.375rem;
+}
+
+@keyframes wf-pill-expand-right {
+  from {
+    opacity: 0;
+    transform: translateX(-6px) scaleX(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scaleX(1);
+  }
+}
+
+@keyframes wf-pill-expand-left {
+  from {
+    opacity: 0;
+    transform: translateX(6px) scaleX(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scaleX(1);
+  }
+}
+
+.wf-dock-pill-right {
+  transform-origin: left center;
+  animation: wf-pill-expand-right 165ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.wf-dock-pill-left {
+  transform-origin: right center;
+  animation: wf-pill-expand-left 165ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 /* Niveau Désactivées : coupe 100 % des animations et transitions SAUF les spinners de chargement */
 html[data-motion='off'] *,
 html[data-motion='off'] *::before,
