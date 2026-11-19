@@ -1006,6 +1006,82 @@ Pour épurer l'interface tout en accélérant les actions fréquentes à la sour
      3. *État Nominal Opaque & Transparent* (bascule instantanée entre les 6 styles et leurs palettes dédiées dans les **15 langues Warframe**),
      4. *Lisibilité garantie Clair / Sombre* (contraste WCAG préservé même sur *Ivoire & Or Prime* clair ou *Phosphore Vert* sombre, et nombres de trading toujours alignés en `tabular-nums`).
 
+### 3.24. Module 24 — Scanner d'Opportunités « Fusion d'Arcanes, Endo & Flip » (`Platinum Profit Scanner` — `wf://market/profit-scanner`)
+
+1. **Objectif Métier & Les 3 Moteurs d'Arbitrage Temps Réel (15 Langues)** :
+   - Offrir un scanner financier exclusif (absent d'AlecaFrame) identifiant en direct sur `api.warframe.market` les meilleures opportunités de **création de valeur en Platinum** par fusion ou assemblage, tout en respectant strictement la limite officielle de **3 requêtes / seconde** (`RateLimitedHttpClient` + scan progressif par lots + cache TTL `5 min`) :
+     1. **Onglet `✨ Fusion d'Arcanes (21× Rang 0 → 1× Rang 5)`** :
+        - Sur les Arcanes échangeables (`maxRank = 5`) : un seul appel `/v2/orders/item/:slug` extrait les offres `sell` `ingame` au `rank === 0` (calcul du coût cumulé réel des **21 unités les moins chères** en sommant `quantity` vendeur par vendeur) et le prix `min sell ingame` au `rank === 5`.
+        - **Indicateurs calculés** : `Coût 21× R0`, `Prix Vente R5`, **`Bénéfice Net (+Xp)`**, `ROI (%)`, nombre de vendeurs/échanges nécessaires et taxe Crédits estimée.
+     2. **Onglet `⚡ Valorisation Endo (Mods Rang 0 → Rang 10)`** :
+        - Sur les Mods `maxRank === 10` (*Primed / Accrus*, *Galvanisés*, *Corrompus*, *Archonte*) : applique la table officielle exacte de coût de fusion Warframe (`Commun : 10 230 Endo / 493 620 Cr` · `Inhabituel : 20 460 Endo / 987 240 Cr` · `Rare : 30 690 Endo / 1 480 860 Cr` · `Légendaire : 40 920 Endo / 1 974 480 Cr`).
+        - **Indicateurs calculés** : `Prix R0`, `Prix R10`, `Gain Net (+Xp)` et **`Rentabilité Platinum / 1 000 Endo`** (classement direct des meilleurs Mods où investir son Endo !).
+     3. **Onglet `🧩 Arbitrage Sets Prime (Pièces Détachées → Set Complet)`** :
+        - Compare sur une sélection de Sets Prime populaires (ou tout Set ajouté par le joueur) la somme des pièces détachées `ingame` face au prix `min sell ingame` du Set complet (`Gain Net = Prix_Set − Somme_Pièces`) avec envoi 1-clic des pièces vers le **Panier Bundler**.
+2. **Adaptation Mode Compact (`460×660`) & 4 États UI Obligatoires** :
+   - **Mode Compact (`460×660`)** : cartes d'opportunités condensées sur 1 colonne affichant `Coût → Revente`, badge vert `+Xp` / `Plat/1k Endo` et ouverture directe de la fiche Marché.
+   - **4 États UI** : *Scan progressif avec barre d'avancement `X / N` sans blocage*, *Aucun arbitrage rentable selon le filtre min (+Xp)*, *Classement nominal triable (Marge / ROI / Endo)*, *Erreur API avec conservation des résultats déjà scannés + bouton Réessayer*.
+
+### 3.25. Module 25 — Livre de Comptes Trader, Compteur d'Échanges MR & Objectifs (`Platinum Ledger` — `wf://market/ledger`)
+
+1. **Objectif Métier & Persistance Locale Atomique Dédiée (`platinum-ledger.json`)** :
+   - Fournir un véritable **journal comptable de trading Warframe** isolé dans `%APPDATA%/TennoFrame/platinum-ledger.json` (écriture atomique `.tmp` + validation stricte `zod` via `PlatinumLedgerService`, jusqu'à `2 000` écritures sans alourdir `config.json`).
+   - **Synchronisation automatique avec `Mon Profil WFM` + Saisie manuelle rapide** :
+     - Chaque clic sur **`✓ Vendu -1`** dans `WfmAccountView` (`wfmAccount:closeOrderUnit`) enregistre automatiquement la transaction (`sell` ou `buy`, slug, nom, rang, quantité, Platinum, date ISO) dans le Livre de Comptes **et** consomme `1` échange quotidien !
+     - Formulaire d'ajout manuel (*Vente* ou *Achat*, autocomplétion catalogue WFM, Platinum unitaire, quantité, pseudo partenaire optionnel, note) + suppression/édition unitaire et export JSON/CSV local.
+2. **KPIs Financiers, Compteur d'Échanges Quotidiens (`MR`) & Calculateur de Taxe Crédits** :
+   - **4 KPIs filtrables (`Aujourd'hui · 7j · 30j · Tout`)** : *Total Ventes (`+Xp`)*, *Total Achats (`−Xp`)*, **`Bénéfice Net (`±Xp`)`** + graphique d'évolution quotidienne sur 14 jours, et **Jauge d'Objectif Platinum personnalisable** (ex. *« Pack Heirloom : 280 / 425p (66 %) »*).
+   - **Compteur d'Échanges Quotidiens (`MR 2 → LR5`)** : saisissez votre Palier de Maîtrise (`tradesMax = MR`), suivez vos échanges restants du jour (`[-1]` / `[+1]`) avec **remise à zéro automatique à `00:00 UTC`**.
+   - **Calculateur Instantané de Taxe en Crédits** : barème officiel Warframe (*Mod Légendaire / Arcane Légendaire R5 : `1 000 000 Cr`*, *Mod Rare : `8 000 Cr`*, *Pièce Prime : `2 000–4 000 Cr`*, *Mod Riven : `8 000 Cr`*, *Platinum reçu : `500 Cr / p`*) pour ne jamais manquer de Crédits au Dojo.
+3. **Mode Compact (`460×660`) & 4 États UI Obligatoires** :
+   - Bandeau compact `Échanges restants + Objectif Plat + Bénéfice du jour` + liste condensée des dernières transactions ; 4 états (*Chargement Skeleton*, *Journal vierge guidé*, *Nominal avec courbe & KPIs*, *Erreur lecture/import avec récupération sûre*).
+
+### 3.26. Module 26 — Évaluateur & Simulateur de Riven Multi-Plateformes (`Riven Grader & Price Estimator` — `wf://market/rivens`)
+
+1. **Objectif Métier & Fonctionnement Multi-Plateformes (`PC, PS5, Xbox, Switch, Mobile`)** :
+   - Enrichir `wf://market/rivens` d'un second sous-onglet **`🧬 Évaluateur & Simulateur Riven`** fonctionnant **sans Overwolf** sur toutes les plateformes :
+     1. **Sélection de l'arme & Disposition exacte** : recherche parmi les 400+ armes Riven (`/v2/riven/attributes` & `/v2/riven/weapons` + variantes *Prime / Incarnon / Kuva / Tenet* issues du Codex avec leur **Disposition exacte `0.50` → `1.55`**).
+     2. **Sélection des Stats (`2` ou `3` Bonus + `0` ou `1` Malus) & Plages Min/Max Officielles** :
+        - Applique les multiplicateurs mathématiques officiels des Rivens Rang 8 selon le type d'arme (*Fusil, Pompe, Pistolet, Mêlée, Archgun, Kitgun, Zaw*), la Disposition et la structure (`2+0-` `×0.99`, `2+1-` `×1.2375`, `3+0-` `×0.75`, `3+1-` `×0.9375`).
+        - Affiche pour chaque stat choisie sa **plage exacte `[Min … Max]`** et, si le joueur saisit sa valeur réelle, calcule la **Qualité du Jet (`Roll Quality : 0 % → 100 %`)** !
+     3. **Note Méta Automatique (`Grade S+ · S · A · B · C · Reroll`)** :
+        - Évalue la synergie des stats (*Crit Chance, Crit Damage, Multishot, Damage, Toxin/Cold/Heat, Range/Attack Speed*) + bonus d'un malus inoffensif (`-Zoom`, `-Impact`, `-Puncture`, `+Recoil`) vs pénalité forte d'un malus destructeur (`-Damage`, `-Multishot`, `-Crit Damage`, `-Faction Grineer`).
+     4. **Estimation de Valeur Platinum en Direct** :
+        - Analyse les enchères actives de l'arme sur `api.warframe.market`, isole le **Prix Plancher (*Unrolled / Trash*)** et les **annonces partageant ≥ 2 stats positives identiques**, pour afficher une **Fourchette Estimée (`Plancher · Médiane Similaire · Top Roll`)** + cartes des Rivens comparables en vente !
+2. **Mode Compact (`460×660`) & 4 États UI** : formulaire empilé sur 1 colonne utilisable pendant l'écran de recyclage Kuva en jeu ; 4 états (*Chargement armes/attributs*, *État initial guidé*, *Note S+→C + plages + enchères comparables*, *Repli hors-ligne : calcul mathématique des plages & de la Note S–C 100 % fonctionnel même sans réseau !*).
+
+### 3.27. Module 27 — Studio de Builds Chiffré en Platinum + Pont Panier & Farm (`Build Planner` — `wf://builds`)
+
+1. **Objectif Métier & Nouvel Onglet `🛠 Builds` à droite de `Codex` (`BookmarksBar`)** :
+   - Ajouter le raccourci **`🛠 Builds` (`wf://builds`) juste à droite de `📖 Codex`** dans `BookmarksBar` (ainsi que dans `Speed Dial` et l'Omnibox `Ctrl+K`).
+   - **Éditeur Visuel Complet basé sur les 3 810 entrées hors-ligne du Codex** (`BuildsService` → fichier local atomique `builds.json`) :
+     1. **Sélecteur d'Équipement** : Warframe ou Arme (*Principale, Secondaire, Mêlée*) avec affichage des statistiques de base, polarités innées et passif/compétences.
+     2. **Grille Authentique de Modding & Capacité Temps Réel** :
+        - *Warframe* : **Aura** + **Exilus** + **8 emplacements de Mods** + **2 Arcanes** + **Compétence Helminth subsumée** + **5 Fragments d'Archonte** (*Écarlate, Ambre, Azur, Violet, Topaze, Émeraude*).
+        - *Arme* : **Posture / Exilus** + **8 emplacements de Mods** + **1 Arcane d'arme**.
+        - **Calculateur de Capacité (`60` avec Réacteur/Catalyseur Orokin + bonus Aura/Posture ×2)**, polarités personnalisables par slot (`Forma` : coût divisé par 2 à l'arrondi supérieur) et compteur automatique du **nombre de Formas requis**.
+     3. **Chiffrage Platinum Warframe Market & Actions 1-Clic Exclusives** :
+        - Résout en direct (via cache/lot `RateLimitedHttpClient`) le prix Platinum `min sell ingame` (Rang 0 ou Rang Max au choix) de chaque Mod et Arcane échangeable du build.
+        - Case `✓ Possédé` par slot → affiche **Coût Total du Build** ET **Coût Restant à Acheter (`Xp`)**.
+        - **Pont Panier 1-Clic** : bouton **`🛒 Ajouter tous les manquants au Panier Bundler`** (pour trouver un vendeur unique possédant plusieurs mods du build !).
+        - **Pont Farm 1-Clic** : bouton **`🎯 Épingler les sources des mods manquants dans l'Overlay Farm (Alt+O)`**.
+     4. **Bibliothèque Locale, Builds Méta de Référence, Code de Partage (`tf-build://...`) & Lien `Overframe.gg ↗`** :
+        - Sauvegarde locale illimitée (plafond sécurité `200` builds), **export/import instantané par code texte compact `tf-build://...`** copiable sur Discord, sélection de **Builds Méta prêts à l'emploi** inclus hors-ligne, et bouton sécurisé **`Voir l'équipement sur Overframe.gg ↗`** (`https://overframe.gg` ajouté à la liste blanche explicite des domaines HTTPS externes dans `security.ts`).
+2. **Mode Compact (`460×660`) & 4 États UI** : grille de 2 colonnes compactes lisible en jeu + résumé Plat/Formas ; 4 états (*Skeleton prix WFM sans bloquer l'éditeur*, *Bibliothèque vierge avec modèles Méta*, *Éditeur nominal complet*, *Hors-ligne : création/partage/farm 100 % actifs avec mention « Prix WFM hors-ligne »*).
+
+### 3.28. Module 28 — Planificateur de Fonderie & Liste de Courses Agrégée (`Foundry Multi-Craft Planner` — `wf://foundry`)
+
+1. **Objectif Métier & Agrégation Récursive des Recettes du Codex (`FoundryPlannerService`)** :
+   - Permettre au joueur de planifier la fabrication simultanée de plusieurs **Warframes et Armes** (`wf://foundry`, accessible depuis `BookmarksBar`, `Speed Dial`, Omnibox, et via un bouton **`🔨 + Projet Fonderie`** sur chaque fiche Warframe/Arme du Codex) :
+     1. **Projets de Fabrication Actifs** : liste des équipements ciblés (jusqu'à `30` projets simultanés persistés dans `foundry-planner.json`).
+     2. **Agrégation Récursive Exacte** : `CodexRepository` parcourt chaque projet, extrait ses sous-composants (*Neuroptiques, Châssis, Systèmes, Canon, Culasse, Lame…*) **ainsi que leurs sous-ressources de fonderie** (`CodexComponentEntry.subResources`), et fusionne le tout en **une Liste de Courses Consolidée de Matériaux Bruts** (*Cellules Orokin, Tellurium, Extrait de Nitain, Plastides, Oxium, Cryotique, Crédits totaux*).
+     3. **Suivi des Quantités Possédées & Meilleurs Spots de Farm** :
+        - Saisie rapide `Possédé / Requis` (ex. `4 / 12 Cellules Orokin` → barre de progression + calcul du `Manquant : 8`) ou bouton `✓ Tout obtenu`.
+        - Pour chaque ressource manquante : affiche directement **la planète / mission / marchand recommandé** (issu de `CodexAcquisitionResolver`) et son prix Platinum si échangeable.
+     4. **Envoi Groupé vers l'Overlay en Jeu (`Alt+O`)** :
+        - Bouton **`🎯 Épingler toutes les ressources manquantes dans l'Overlay Farm`** en 1 clic !
+2. **Mode Compact (`460×660`) & 4 États UI** : liste de courses verticale compacte avec compteurs `[-]` / `[+]` rapides ; 4 états (*Chargement résolution Codex*, *Aucun projet Fonderie avec recherche rapide d'ajout*, *Liste consolidée nominale*, *Alerte ressource spéciale ex. Cristaux d'Argon périssables / Extrait de Nitain Nightwave*).
+
 ---
 
 ## 4. Architecture Technique, Contrats IPC & Sécurité
@@ -1071,6 +1147,11 @@ Tous les paramètres d'entrée et toutes les réponses API passent par une valid
 | **`wfmAccount`** | `wfmAccount:getSession`, `wfmAccount:signInWeb`, `wfmAccount:signOut`, `wfmAccount:setStatus`, `wfmAccount:getOverview`, `wfmAccount:createOrder`, `wfmAccount:updateOrder`, `wfmAccount:closeOrderUnit`, `wfmAccount:deleteOrder`, `wfmAccount:onSessionChanged` *(event Main → Renderer)* | Connexion optionnelle WFM 100 % automatique via fenêtre navigateur isolée chiffrée (`safeStorage` DPAPI, zéro mot de passe ni cookie manuel), statut temps réel (`En jeu / En ligne / Invisible`), profil complet & mise en vente / gestion d'annonces |
 | **`worldstate`** | `worldstate:getCurrent`, `worldstate:getBaroWithPrices` | État du monde Warframe et enrichissement Platinum de Baro |
 | **`codex`** | `codex:search`, `codex:getItemDetail`, `codex:getHelminthData` | Requêtes rapides paginées dans la base Codex locale (Ressources, Warframes, Armes, Mods, Reliques, **Mobs** & **Marchands**) sans charger plusieurs Mo dans chaque onglet React |
+| **`profitScanner`** | `profitScanner:scan` | Scan progressif anti-429 (`≤ 3 req/s`, cache `5 min`) des opportunités **Fusion d'Arcanes (`21× R0 → R5`)**, **Rentabilité Endo (`R0 → R10`)** et **Flip Sets Prime** |
+| **`ledger`** | `ledger:getState`, `ledger:addEntry`, `ledger:deleteEntry`, `ledger:updateSettings`, `ledger:adjustDailyTrades` | Livre de comptes Platinum atomique (`platinum-ledger.json`), synchronisation auto avec `✓ Vendu -1`, compteur d'échanges quotidiens par `MR` (reset `00:00 UTC`) et objectifs d'épargne |
+| **`rivenGrader`** | `tools:gradeRiven` | Calcul mathématique officiel des plages Riven par Disposition, notation Méta (`S+ → C`) et estimation de prix Platinum sur enchères comparables |
+| **`builds`** | `builds:list`, `builds:save`, `builds:delete`, `builds:importCode`, `builds:priceCheck` | Studio de Builds local (`builds.json`), codes de partage `tf-build://...` et chiffrage Platinum temps réel des Mods & Arcanes |
+| **`foundry`** | `foundry:getState`, `foundry:addProject`, `foundry:removeProject`, `foundry:setOwnedCount`, `foundry:clearCompleted` | Planificateur multi-crafts (`foundry-planner.json`) agrégeant récursivement toutes les ressources et sous-composants du Codex |
 | **`alerts`** | `alerts:list`, `alerts:upsertPriceAlert`, `alerts:deletePriceAlert`, `alerts:updateWorldAlerts`, `alerts:onTriggered` *(event Main → Renderer)* | Gestion et réception temps réel des alertes *Price Sniper* et cycles |
 | **`settings`** | `settings:get`, `settings:update` | Lecture/écriture typée des préférences utilisateur, panier, favoris et thèmes |
 | **`window`** | `window:minimize`, `window:toggleMaximize`, `window:close`, `window:setAlwaysOnTop`, `window:setCompactMode`, `window:setZoom`, `window:openExternalUrl`, `window:onStateChanged` *(event)* | Pilotage natif de la fenêtre, du mode Overlay et ouverture sécurisée de liens externes |
@@ -1086,7 +1167,7 @@ Tous les paramètres d'entrée et toutes les réponses API passent par une valid
    - **Content-Security-Policy (CSP)** stricte : `default-src 'self'; img-src 'self' wf-asset: data:; font-src 'self' data:; media-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'none'` (le Renderer ne fait **aucune** connexion Internet directe : `connect-src 'none'`, 100 % passe par le Main Process, polices `.woff2` 100 % locales !).
    - **TLS strict** : validation systématique des certificats HTTPS du système d'exploitation.
    - **Chiffrement OS des jetons (`safeStorage`)** : tout jeton de session optionnel (`warframe.market`) est chiffré via DPAPI Windows dans le Main Process et n'est jamais exposé au Renderer ni inclus dans les exports JSON.
-   - **Ouverture de liens externes filtrée** : seuls les domaines explicitement autorisés (`https://warframe.market/...`, `https://www.warframe.com/...`, `https://wiki.warframe.com/...`) peuvent être ouverts dans le navigateur par défaut de Windows via `shell.openExternal`.
+   - **Ouverture de liens externes filtrée** : seuls les domaines explicitement autorisés (`https://warframe.market/...`, `https://www.warframe.com/...`, `https://wiki.warframe.com/...`, `https://overframe.gg/...`, `https://discord.gg/DhGwHPf82n`) peuvent être ouverts dans le navigateur par défaut de Windows via `shell.openExternal`.
 2. **Qualité & Standards de Code** :
    - TypeScript `strict: true`, `noUncheckedIndexedAccess: true`, zéro `any`, zéro `dangerouslySetInnerHTML`.
    - Chaque vue React implémente obligatoirement ses **4 états visuels** : *Chargement (`Skeleton` shadcn)*, *Vide (`EmptyState`)*, *Nominal*, et *Erreur avec bouton Réessayer*.
@@ -1097,7 +1178,7 @@ Tous les paramètres d'entrée et toutes les réponses API passent par une valid
 
 ## 5. Plan des Maquettes Excalidraw (`docs/02-tennoframe/` — Synchronisées `v2.10+`)
 
-L'ensemble des **24 planches Excalidraw** dans `docs/02-tennoframe/` documente fidèlement l'architecture de **TennoFrame**, chacune présentant côte à côte la version **Desktop (`1440×900`)**, son adaptation **Compact Overlay (`460×660`)**, et **les 4 états UI obligatoires** (*Chargement / Skeleton*, *Vide*, *Nominal*, *Erreur*) :
+L'ensemble des **29 planches Excalidraw** dans `docs/02-tennoframe/` documente fidèlement l'architecture de **TennoFrame**, chacune présentant côte à côte la version **Desktop (`1440×900`)**, son adaptation **Compact Overlay (`460×660`)**, et **les 4 états UI obligatoires** (*Chargement / Skeleton*, *Vide*, *Nominal*, *Erreur*) :
 
 1. `01-app-shell-navigation.excalidraw` : Fenêtre *Frameless* `v2.6.0`, `TitleTabsBar` (défilement molette + chevrons `‹ / ›` + fermeture clic molette), `ClickThroughBanner` (`👻` `Alt+G` + maintien `0.5s`), `CommandNavBar` (`Ctrl+K`, cloche `🔔`, `PC · Cross · FR ▾`, Zoom, `📌`, `👻`, `🗖`, `⚙`), `BookmarksBar` centrée + `Historique` (`Ctrl+H`), Omnibox, Organisateur d'onglets, bandeau `/w`, `CompactTimersBar`, bouton Discord et `StatusBar v2.6.0`.
 2. `02-market-home-catalog-item.excalidraw` : Accueil Marché (flux d'annonces récentes en direct, `ViewModeToggle` `[⊞|▭|☰] + [S|M|L]`, badges `Min · Moy · Max` Platinum), Catalogue, Favoris, Profil joueur, et **Fiche Item complète** (Ordres Vente/Achat, Comparateur *Set vs Pièces*, Pont bidirectionnel *Codex*, Statistiques 48h/90j + pagination *Afficher plus*).
@@ -1123,6 +1204,11 @@ L'ensemble des **24 planches Excalidraw** dans `docs/02-tennoframe/` documente f
 22. `22-hub-hex-gifting-guide.excalidraw` *(Module 21 — Onglet Hub « Cadeaux L'Hexagone 1999 » / The Hex KIM Gifting Guide)* : **Barre du Hub enrichie du 7e onglet `🎁 Cadeaux 1999 (Hex)`**, **bandeau supérieur** (recherche instantanée bilingue FR/EN par cadeau ou personnage + filtres rapides des 6 membres + compteur Daily Reset UTC `00:00`), **Vue Desktop `1440×900`** présentant les **6 cartes membres de L'Hexagone** (*Arthur / Broadsword, Eleanor / Salem, Lettie / Belladonna, Amir / H16h V0l7463, Aoi / Glimmer + alerte piège Enceinte, Quincy / Soldja1Shot1kil*) avec **portrait officiel + glyphe pixel**, **traduction complète de la bio**, **grille visuelle des cadeaux avec photo, nom FR + sous-titre EN, prix Höllars, Stock et bonus Chimie `❤️ +20 / +10 / +5`** + case `✓ Offert aujourd'hui`, **Adaptation Mode Compact `460×660`** par-dessus le terminal POM-2 en jeu et **les 4 états UI obligatoires**.
 23. `23-ui-layout-tabs-density-newtab.excalidraw` *(Module 22 — Personnalisation de la Disposition & Ergonomie : Onglets Verticaux Arc/Zen, Forme des Coins & Densité UI, et Page Nouvel Onglet « Speed Dial »)* : **Carte `LayoutAndErgonomicsSection` dans `SettingsModal → Apparence`** (bascule Position des Onglets `Haut Classique | Barre Latérale Gauche`, sélecteur Forme des Coins `Auto | 0px Tactique | 4px Subtil | 8px Standard | 14px Pilule`, sélecteur Densité `Compacte | Confortable | Aérée` et Cible `+` Nouvel Onglet `Speed Dial | Marché | Hub | Codex | Profil WFM`), **Vue Desktop `1440×900`** combinant **`VerticalTabsSidebar` (`216 px` dépliée / `48 px` rail d'icônes)** et la nouvelle page **`SpeedDialHomeView` (`wf://home`)** (recherche centrale, 7 tuiles d'accès rapide, cycles Worldstate en direct, favoris Marché & pages récentes), **comparatif visuel Coins & Densités**, **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
 24. `24-warframe-faction-ui-styles.excalidraw` *(Module 23 — Styles Visuels Thématiques Warframe : `Orokin Impérial`, `Céphalon / HUD Tactique` & `Terminal POM-2 1999`)* : **Grille unifiée des 6 Styles Visuels dans `SettingsModal → Apparence`** (`✨ Liquid Glass`, `◻ Transparence Simple`, `🏰 Style Médiéval`, `✦ Orokin Impérial`, `⬢ Céphalon HUD`, `📼 Terminal POM-2 1999`) avec **3 palettes thématiques 1-clic par style**, **Anatomie CSS & Typographie `Auto` comparées côte à côte sur Desktop `1440×900`** (filigranes dorés & lueur du Néant Orokin, coins tactiques & grille holographique Céphalon, scanlines CRT douces & police monospace POM-2), **Adaptation Mode Compact `460×660` + `Codex Farm Overlay` en jeu (`Alt+O`)**, et **les 4 états UI obligatoires**.
+25. `25-platinum-profit-scanner.excalidraw` *(Module 24 — Scanner d'Opportunités « Fusion d'Arcanes, Endo & Flip » `wf://market/profit-scanner`)* : **Vue Desktop `1440×900` à 3 onglets** (`✨ Fusion d'Arcanes 21×R0→R5`, `⚡ Valorisation Endo R0→R10` en `Plat / 1 000 Endo`, `🧩 Arbitrage Sets Prime`), barre d'ajout d'item ciblé + jauge de scan respectant `3 req/s`, **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
+26. `26-platinum-ledger-tracker.excalidraw` *(Module 25 — Livre de Comptes Trader, Compteur d'Échanges MR & Objectifs `wf://market/ledger`)* : **Vue Desktop `1440×900`** (4 KPIs Ventes / Achats / Bénéfice Net / Meilleur Flip, graphique 14 jours, compteur d'échanges quotidiens `MR` auto-reset `00:00 UTC`, jauge d'Objectif Platinum, calculateur de Taxe Crédits et journal synchronisé avec `✓ Vendu -1`), **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
+27. `27-riven-grader-estimator.excalidraw` *(Module 26 — Évaluateur & Simulateur de Riven Multi-Plateformes dans `wf://market/rivens`)* : **Sous-onglet `🧬 Évaluateur & Simulateur Riven`** (choix d'arme + variantes & Disposition exacte, 2–3 bonus + 0–1 malus avec barres de qualité de jet `[Min…Max]`, badge de Note Méta `S+ → C`, estimation de valeur Platinum `Plancher · Médiane · Top` et enchères similaires), **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
+28. `28-build-planner-studio.excalidraw` *(Module 27 — Studio de Builds Chiffré en Platinum + Pont Panier & Farm `wf://builds`)* : **Nouvel onglet `🛠 Builds` à droite de `Codex`**, **Vue Desktop `1440×900`** (sélecteur Warframe/Arme, grille 8 Mods + Aura/Posture + Exilus + Arcanes + Helminth + Fragments d'Archonte, capacité `60` & Formas, chiffrage Platinum temps réel avec cases `✓ Possédé`, boutons `🛒 Panier Bundler`, `🎯 Overlay Farm`, partage `tf-build://...` et lien `Overframe.gg ↗`), **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
+29. `29-foundry-craft-planner.excalidraw` *(Module 28 — Planificateur de Fonderie & Liste de Courses Agrégée `wf://foundry`)* : **Vue Desktop `1440×900`** (colonne gauche des Warframes/Armes ciblées + colonne droite de la Liste de Courses Consolidée additionnant récursivement toutes les ressources, compteurs `Possédé / Requis`, meilleurs spots de drop Codex et bouton `🎯 Tout épingler dans l'Overlay Farm`), **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
 
 ---
 
