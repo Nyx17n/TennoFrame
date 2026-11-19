@@ -1144,6 +1144,25 @@ Pour épurer l'interface tout en accélérant les actions fréquentes à la sour
    - Tous les boutons existants de l'application (`openSettingsModal('audio')`, `openSettingsModal('extensions')`, `openSettingsModal('system')`, `openSettingsModal('market')`) sélectionnent automatiquement la bonne catégorie racine **ET le bon sous-onglet horizontal** correspondant.
 3. **Mode Compact (`460×660`) & 4 États UI** : barre des 5 catégories en ruban horizontal compact + barre de sous-onglets condensée juste en dessous ; 4 états couverts (*Chargement statut système/updater*, *État replié propre des palettes custom*, *Navigation nominale instantanée*, *Feedback d'erreur/succès sur sauvegarde, MAJ et cache*).
 
+### 3.32. Module 32 — Catalogue Étendu de 10 Sons de Notification Thématiques Warframe (Synthèse Polyphonique Web Audio Hors-Ligne)
+
+1. **Objectif Métier & Architecture Audio Zéro-Binaire (`audio-preview.service.ts`)** :
+   - Étendre `SoundChoiceSchema` de 2 à **10 sonneries de notification thématiques Warframe** pour le *Price Sniper*, les alertes *Worldstate* et les tests d'alertes dans `Paramètres → Marché & Alertes → Audio & Price Sniper` :
+     - Conserve les **2 échantillons existants** (`classic` *Classique Tenno*, `bell` *Cloche Claire*) et ajoute **8 signatures sonores synthétisées en temps réel via Web Audio API** (`AudioContext`, oscillateurs polyphoniques, filtres passe-bas et enveloppes ADSR douces — **0 Ko de binaire ajouté dans Git**, latence `0 ms`, 100 % hors-ligne et conforme à la CSP stricte) :
+       1. **`classic`** : *Classique Tenno* (alerte standard équilibrée).
+       2. **`bell`** : *Cloche Cristalline* (tintement clair).
+       3. **`orokin-chime`** : *Carillon d'Or Orokin* (arpège harmonique lumineux type cache rare du Néant / Lua).
+       4. **`cephalon-ping`** : *Impulsion Céphalon* (double impulsion numérique nette façon Ordis / Simaris).
+       5. **`lotus-transmission`** : *Transmission du Lotus* (accord doux montant en quarte avec résonance chaude).
+       6. **`pom2-retro`** : *Terminal POM-2 (1999)* (arpège synthé rétro 16-bit façon messagerie KIM d'Höllvanie).
+       7. **`platinum-coin`** : *Éclat de Platine* (double tintement métallique brillant d'échange conclu).
+       8. **`eidolon-pulse`** : *Résonance Eidolon* (onde grave harmonique inspirée des Plaines la nuit).
+       9. **`stalker-whisper`** : *Alerte Acolyte / Stalker* (pulsation grave tendue idéale pour les alertes urgentes Route de l'Acier).
+       10. **`soft-drop`** : *Goutte Zen Discrète* (sonar feutré minimaliste pour sessions nocturnes).
+2. **Grille Interactive avec Écoute Instantanée au Clic (`AudioAlertsSettingsTab`)** :
+   - Grille visuelle de **10 cartes sonores** affichant le nom, le sous-titre d'ambiance et un bouton d'écoute : cliquer sur une carte la sélectionne **et joue immédiatement un aperçu au volume configuré** (avec possibilité d'interrompre proprement le son précédent sans superposition).
+3. **Mode Compact (`460×660`) & 4 États UI** : grille 2 colonnes compacte ; 4 états couverts (*Initialisation paresseuse de l'AudioContext au premier geste*, *Mode silencieux `soundEnabled: false` grisant visuellement la grille*, *Sélection & lecture nominale avec indicateur « En écoute »*, *Repli silencieux propre si aucun périphérique audio Windows n'est connecté*).
+
 ---
 
 ## 4. Architecture Technique, Contrats IPC & Sécurité
@@ -1240,7 +1259,7 @@ Tous les paramètres d'entrée et toutes les réponses API passent par une valid
 
 ## 5. Plan des Maquettes Excalidraw (`docs/02-tennoframe/` — Synchronisées `v2.10+`)
 
-L'ensemble des **32 planches Excalidraw** dans `docs/02-tennoframe/` documente fidèlement l'architecture de **TennoFrame**, chacune présentant côte à côte la version **Desktop (`1440×900`)**, son adaptation **Compact Overlay (`460×660`)**, et **les 4 états UI obligatoires** (*Chargement / Skeleton*, *Vide*, *Nominal*, *Erreur*) :
+L'ensemble des **33 planches Excalidraw** dans `docs/02-tennoframe/` documente fidèlement l'architecture de **TennoFrame**, chacune présentant côte à côte la version **Desktop (`1440×900`)**, son adaptation **Compact Overlay (`460×660`)**, et **les 4 états UI obligatoires** (*Chargement / Skeleton*, *Vide*, *Nominal*, *Erreur*) :
 
 1. `01-app-shell-navigation.excalidraw` : Fenêtre *Frameless* `v2.6.0`, `TitleTabsBar` (défilement molette + chevrons `‹ / ›` + fermeture clic molette), `ClickThroughBanner` (`👻` `Alt+G` + maintien `0.5s`), `CommandNavBar` (`Ctrl+K`, cloche `🔔`, `PC · Cross · FR ▾`, Zoom, `📌`, `👻`, `🗖`, `⚙`), `BookmarksBar` centrée + `Historique` (`Ctrl+H`), Omnibox, Organisateur d'onglets, bandeau `/w`, `CompactTimersBar`, bouton Discord et `StatusBar v2.6.0`.
 2. `02-market-home-catalog-item.excalidraw` : Accueil Marché (flux d'annonces récentes en direct, `ViewModeToggle` `[⊞|▭|☰] + [S|M|L]`, badges `Min · Moy · Max` Platinum), Catalogue, Favoris, Profil joueur, et **Fiche Item complète** (Ordres Vente/Achat, Comparateur *Set vs Pièces*, Pont bidirectionnel *Codex*, Statistiques 48h/90j + pagination *Afficher plus*).
@@ -1274,6 +1293,7 @@ L'ensemble des **32 planches Excalidraw** dans `docs/02-tennoframe/` documente f
 30. `30-codex-arcanes-and-build-visuals.excalidraw` *(Module 29 + Enrichissement Visuel Module 27 — Onglet Codex « ✨ Arcanes » Complet & Vignettes d'Illustrations Mods/Arcanes dans le Studio de Builds)* : **Vue Desktop `1440×900` du Codex onglet `✨ Arcanes`** (filtres par emplacement *Warframe / Principale / Secondaire / Mêlée / Opérateur & Amp / Zaw & Kitgun*, cartes avec icône officielle + rareté + effet Rang Max + sources de drop/Loid Vosfor, et **Fiche Détail Arcane** avec progression `Rang 0 → Rang 5`, épinglage `Alt+O` et pont Platinum), **Vue Desktop améliorée du `Studio de Builds`** affichant les miniatures `wf-asset://` sur les 10 slots de Mods, les slots d'Arcanes, la modale de sélection et le panneau de coût Platinum, **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
 31. `31-customizable-bookmarks-bar.excalidraw` *(Module 30 — Barre de Raccourcis Personnalisable dans les Paramètres : Ordre par Boutons `↑`/`↓` & Masquage, Zéro Drag & Drop UI)* : **Vue Desktop `1440×900`** montrant `BookmarksBar` épurée (sans Drag & Drop ni icône parasite) pilotée exclusivement depuis la carte **`BookmarksOrderSection` dans `SettingsModal → Apparence`** (interrupteur global, liste ordonnée avec flèches `↑` / `↓`, bascule `👁 Afficher / Masquer` par onglet et bouton `↺ Par défaut`), **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
 32. `32-settings-reorganization-v2.excalidraw` *(Module 31 — Refonte Architecturale des Paramètres en 5 Catégories + Sous-Onglets Horizontaux)* : **Vue Desktop `1440×900`** de la nouvelle `SettingsModal` avec rail latéral de **5 catégories claires** (`🧭 Général & Navigation`, `🎨 Apparence`, `🎯 En Jeu & Overlay`, `🏪 Marché & Alertes`, `💾 Système`) + **barre de sous-onglets horizontaux épinglée en haut** éliminant tout scroll long + accordéon repliable pour les pastilles de couleurs personnalisées, **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
+33. `33-notification-sounds-catalog.excalidraw` *(Module 32 — Catalogue de 10 Sons de Notification Thématiques Warframe dans `Paramètres → Marché & Alertes → Audio & Price Sniper`)* : **Vue Desktop `1440×900`** présentant la grille interactive des **10 sonneries** (*Classique, Cloche, Carillon Orokin, Impulsion Céphalon, Transmission Lotus, Terminal POM-2 1999, Éclat de Platine, Résonance Eidolon, Alerte Acolyte, Goutte Zen*) avec écoute immédiate au clic + curseur de volume, **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
 
 ---
 
