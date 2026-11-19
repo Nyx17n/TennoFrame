@@ -1101,18 +1101,19 @@ Pour épurer l'interface tout en accélérant les actions fréquentes à la sour
    - **Enrichissement du Studio de Builds (`wf://builds`)** : `CodexRepository.getBuildStudioCatalog()` alimente désormais les Arcanes directement depuis `codex-arcanes.json` (100 % disponible hors-ligne dès l'ouverture avec icône officielle, effet Rang Max en français/anglais et épinglage `Alt+O` des sources de farm d'Arcanes !).
 4. **Mode Compact (`460×660`) & 4 États UI** : cartes condensées avec miniature Arcane + effet Rang Max sur 2 lignes + badge de rareté ; 4 états obligatoires (*Skeleton de chargement*, *Aucun Arcane trouvé avec réinitialisation des filtres*, *Catalogue & Fiche nominale*, *Erreur lecture ressource avec bouton Réessayer*).
 
-### 3.30. Module 30 — Barre de Raccourcis / Onglets de Navigation Personnalisable dans les Paramètres (`BookmarksBar` : Ordre & Masquage)
+### 3.30. Module 30 — Barre de Raccourcis / Onglets de Navigation Personnalisable dans les Paramètres (`BookmarksBar` : Mode « Icônes uniquement », Ordre & Masquage)
 
 1. **Objectif Métier & Persistance (`UserSettings.appearance`)** :
-   - Permettre au joueur de **réorganiser librement** tous les onglets/raccourcis de `BookmarksBar` (`Marché`, `Favoris`, `Panier`, `Récents`, `Codex`, `Builds`, `Fonderie`, `Scanner Profits`, `Ducats`, `Rivens`, `Comptabilité`, `Mon Profil WFM`, `Historique`) dans l'ordre exact qu'il préfère **et d'en masquer** autant qu'il le souhaite :
-     - Stockage typé et validé par `zod` dans `UserSettingsSchema.shape.appearance` (`bookmarksBarVisible: z.boolean()`, `bookmarksOrder: z.array(RouteKindSchema)`, `hiddenBookmarks: z.array(RouteKindSchema)`), persisté atomiquement dans `%APPDATA%/TennoFrame/config.json` et inclus dans l'Export/Import JSON des paramètres.
+   - Permettre au joueur de **réorganiser librement** tous les onglets/raccourcis de `BookmarksBar` (`Marché`, `Favoris`, `Panier`, `Récents`, `Codex`, `Builds`, `Fonderie`, `Scanner Profits`, `Ducats`, `Rivens`, `Comptabilité`, `Mon Profil WFM`, `Historique`), **d'en masquer** autant qu'il le souhaite, **et de basculer en mode « Icônes uniquement »** pour afficher une barre ultra-compacte ne prenant presque aucune largeur :
+     - Stockage typé et validé par `zod` dans `UserSettingsSchema.shape.appearance` (`bookmarksBarVisible: z.boolean()`, `bookmarksIconsOnly: z.boolean().default(false)`, `bookmarksOrder: z.array(RouteKindSchema)`, `hiddenBookmarks: z.array(RouteKindSchema)`), persisté atomiquement dans `%APPDATA%/TennoFrame/config.json` et inclus dans l'Export/Import JSON des paramètres.
      - Compatibilité ascendante automatique : tout nouveau raccourci ajouté lors d'une future mise à jour s'insère automatiquement s'il n'est ni dans `bookmarksOrder` ni dans `hiddenBookmarks`.
-2. **Gestion 100 % Centralisée dans `Paramètres → Apparence` (Zéro Drag & Drop sur l'UI)** :
-   - **Barre `BookmarksBar` épurée** : aucun glisser-déposer (*drag & drop*) ni bouton d'édition encombrant sur la barre principale afin d'éviter toute manipulation accidentelle en jeu. `BookmarksBar` se contente d'afficher proprement les raccourcis actifs dans l'ordre défini par l'utilisateur.
-   - **Carte dédiée `BookmarksOrderSection` dans `SettingsModal → Apparence`** :
-     - Interrupteur global **`Afficher la barre de raccourcis`** (ON / OFF).
+2. **Gestion 100 % Centralisée dans `Paramètres → Général & Navigation → Barre de Raccourcis` (Zéro Drag & Drop sur l'UI)** :
+   - **Barre `BookmarksBar` épurée & Mode « Icônes uniquement »** :
+     - Lorsque `bookmarksIconsOnly === true`, chaque bouton de `BookmarksBar` masque son libellé texte et n'affiche que son **icône centrée** (plus son éventuel badge numérique compact `5` pour *Favoris / Panier / Mon Profil WFM*), tout en affichant **son nom complet + son URI `wf://...` en infobulle au survol**.
+   - **Carte dédiée `BookmarksOrderSection` dans `SettingsModal → Général & Navigation → Barre de Raccourcis`** :
+     - Sélecteur rapide **`Affichage : [Icônes + Texte | Icônes uniquement]`** + interrupteur global **`Barre affichée / Barre masquée`**.
      - Liste ordonnée claire de tous les raccourcis avec leur icône et leur nom traduit dans les 15 langues, munie de boutons **`↑` (Monter)** et **`↓` (Descendre)** pour régler l'ordre exact, et d'un bouton **`👁 Afficher / Masquer`** pour cacher individuellement n'importe quel raccourci.
-     - Bouton **`↺ Réinitialiser par défaut`** restaurant l'ordre et la visibilité d'origine en 1 clic.
+     - Bouton **`↺ Réinitialiser par défaut`** restaurant le mode d'affichage, l'ordre et la visibilité d'origine en 1 clic.
 3. **Mode Compact (`460×660`) & 4 États UI** : barre défilable horizontalement à la molette ne rendant que les raccourcis non masqués (ou entièrement masquée si tous les raccourcis / l'interrupteur global sont désactivés) ; 4 états UI couverts (*Hydratation initiale sans saut visuel*, *État barre entièrement masquée réactivable à tout moment depuis Paramètres `⚙`*, *État nominal personnalisé*, *Validation `zod` tolérante aux anciennes configurations avec repli propre sur l'ordre par défaut*).
 
 ### 3.31. Module 31 — Refonte Architecturale des Paramètres : 5 Catégories & Sous-Onglets Horizontaux (Zéro Scroll Long)
