@@ -1101,6 +1101,20 @@ Pour épurer l'interface tout en accélérant les actions fréquentes à la sour
    - **Enrichissement du Studio de Builds (`wf://builds`)** : `CodexRepository.getBuildStudioCatalog()` alimente désormais les Arcanes directement depuis `codex-arcanes.json` (100 % disponible hors-ligne dès l'ouverture avec icône officielle, effet Rang Max en français/anglais et épinglage `Alt+O` des sources de farm d'Arcanes !).
 4. **Mode Compact (`460×660`) & 4 États UI** : cartes condensées avec miniature Arcane + effet Rang Max sur 2 lignes + badge de rareté ; 4 états obligatoires (*Skeleton de chargement*, *Aucun Arcane trouvé avec réinitialisation des filtres*, *Catalogue & Fiche nominale*, *Erreur lecture ressource avec bouton Réessayer*).
 
+### 3.30. Module 30 — Barre de Raccourcis / Onglets de Navigation Personnalisable dans les Paramètres (`BookmarksBar` : Ordre & Masquage)
+
+1. **Objectif Métier & Persistance (`UserSettings.appearance`)** :
+   - Permettre au joueur de **réorganiser librement** tous les onglets/raccourcis de `BookmarksBar` (`Marché`, `Favoris`, `Panier`, `Récents`, `Codex`, `Builds`, `Fonderie`, `Scanner Profits`, `Ducats`, `Rivens`, `Comptabilité`, `Mon Profil WFM`, `Historique`) dans l'ordre exact qu'il préfère **et d'en masquer** autant qu'il le souhaite :
+     - Stockage typé et validé par `zod` dans `UserSettingsSchema.shape.appearance` (`bookmarksBarVisible: z.boolean()`, `bookmarksOrder: z.array(RouteKindSchema)`, `hiddenBookmarks: z.array(RouteKindSchema)`), persisté atomiquement dans `%APPDATA%/TennoFrame/config.json` et inclus dans l'Export/Import JSON des paramètres.
+     - Compatibilité ascendante automatique : tout nouveau raccourci ajouté lors d'une future mise à jour s'insère automatiquement s'il n'est ni dans `bookmarksOrder` ni dans `hiddenBookmarks`.
+2. **Gestion 100 % Centralisée dans `Paramètres → Apparence` (Zéro Drag & Drop sur l'UI)** :
+   - **Barre `BookmarksBar` épurée** : aucun glisser-déposer (*drag & drop*) ni bouton d'édition encombrant sur la barre principale afin d'éviter toute manipulation accidentelle en jeu. `BookmarksBar` se contente d'afficher proprement les raccourcis actifs dans l'ordre défini par l'utilisateur.
+   - **Carte dédiée `BookmarksOrderSection` dans `SettingsModal → Apparence`** :
+     - Interrupteur global **`Afficher la barre de raccourcis`** (ON / OFF).
+     - Liste ordonnée claire de tous les raccourcis avec leur icône et leur nom traduit dans les 15 langues, munie de boutons **`↑` (Monter)** et **`↓` (Descendre)** pour régler l'ordre exact, et d'un bouton **`👁 Afficher / Masquer`** pour cacher individuellement n'importe quel raccourci.
+     - Bouton **`↺ Réinitialiser par défaut`** restaurant l'ordre et la visibilité d'origine en 1 clic.
+3. **Mode Compact (`460×660`) & 4 États UI** : barre défilable horizontalement à la molette ne rendant que les raccourcis non masqués (ou entièrement masquée si tous les raccourcis / l'interrupteur global sont désactivés) ; 4 états UI couverts (*Hydratation initiale sans saut visuel*, *État barre entièrement masquée réactivable à tout moment depuis Paramètres `⚙`*, *État nominal personnalisé*, *Validation `zod` tolérante aux anciennes configurations avec repli propre sur l'ordre par défaut*).
+
 ---
 
 ## 4. Architecture Technique, Contrats IPC & Sécurité
@@ -1197,7 +1211,7 @@ Tous les paramètres d'entrée et toutes les réponses API passent par une valid
 
 ## 5. Plan des Maquettes Excalidraw (`docs/02-tennoframe/` — Synchronisées `v2.10+`)
 
-L'ensemble des **30 planches Excalidraw** dans `docs/02-tennoframe/` documente fidèlement l'architecture de **TennoFrame**, chacune présentant côte à côte la version **Desktop (`1440×900`)**, son adaptation **Compact Overlay (`460×660`)**, et **les 4 états UI obligatoires** (*Chargement / Skeleton*, *Vide*, *Nominal*, *Erreur*) :
+L'ensemble des **31 planches Excalidraw** dans `docs/02-tennoframe/` documente fidèlement l'architecture de **TennoFrame**, chacune présentant côte à côte la version **Desktop (`1440×900`)**, son adaptation **Compact Overlay (`460×660`)**, et **les 4 états UI obligatoires** (*Chargement / Skeleton*, *Vide*, *Nominal*, *Erreur*) :
 
 1. `01-app-shell-navigation.excalidraw` : Fenêtre *Frameless* `v2.6.0`, `TitleTabsBar` (défilement molette + chevrons `‹ / ›` + fermeture clic molette), `ClickThroughBanner` (`👻` `Alt+G` + maintien `0.5s`), `CommandNavBar` (`Ctrl+K`, cloche `🔔`, `PC · Cross · FR ▾`, Zoom, `📌`, `👻`, `🗖`, `⚙`), `BookmarksBar` centrée + `Historique` (`Ctrl+H`), Omnibox, Organisateur d'onglets, bandeau `/w`, `CompactTimersBar`, bouton Discord et `StatusBar v2.6.0`.
 2. `02-market-home-catalog-item.excalidraw` : Accueil Marché (flux d'annonces récentes en direct, `ViewModeToggle` `[⊞|▭|☰] + [S|M|L]`, badges `Min · Moy · Max` Platinum), Catalogue, Favoris, Profil joueur, et **Fiche Item complète** (Ordres Vente/Achat, Comparateur *Set vs Pièces*, Pont bidirectionnel *Codex*, Statistiques 48h/90j + pagination *Afficher plus*).
@@ -1229,6 +1243,7 @@ L'ensemble des **30 planches Excalidraw** dans `docs/02-tennoframe/` documente f
 28. `28-build-planner-studio.excalidraw` *(Module 27 — Studio de Builds Chiffré en Platinum + Pont Panier & Farm `wf://builds`)* : **Nouvel onglet `🛠 Builds` à droite de `Codex`**, **Vue Desktop `1440×900`** (sélecteur Warframe/Arme, grille 8 Mods + Aura/Posture + Exilus + Arcanes + Helminth + Fragments d'Archonte, capacité `60` & Formas, chiffrage Platinum temps réel avec cases `✓ Possédé`, boutons `🛒 Panier Bundler`, `🎯 Overlay Farm`, partage `tf-build://...` et lien `Overframe.gg ↗`), **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
 29. `29-foundry-craft-planner.excalidraw` *(Module 28 — Planificateur de Fonderie & Liste de Courses Agrégée `wf://foundry`)* : **Vue Desktop `1440×900`** (colonne gauche des Warframes/Armes ciblées + colonne droite de la Liste de Courses Consolidée additionnant récursivement toutes les ressources, compteurs `Possédé / Requis`, meilleurs spots de drop Codex et bouton `🎯 Tout épingler dans l'Overlay Farm`), **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
 30. `30-codex-arcanes-and-build-visuals.excalidraw` *(Module 29 + Enrichissement Visuel Module 27 — Onglet Codex « ✨ Arcanes » Complet & Vignettes d'Illustrations Mods/Arcanes dans le Studio de Builds)* : **Vue Desktop `1440×900` du Codex onglet `✨ Arcanes`** (filtres par emplacement *Warframe / Principale / Secondaire / Mêlée / Opérateur & Amp / Zaw & Kitgun*, cartes avec icône officielle + rareté + effet Rang Max + sources de drop/Loid Vosfor, et **Fiche Détail Arcane** avec progression `Rang 0 → Rang 5`, épinglage `Alt+O` et pont Platinum), **Vue Desktop améliorée du `Studio de Builds`** affichant les miniatures `wf-asset://` sur les 10 slots de Mods, les slots d'Arcanes, la modale de sélection et le panneau de coût Platinum, **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
+31. `31-customizable-bookmarks-bar.excalidraw` *(Module 30 — Barre de Raccourcis Personnalisable dans les Paramètres : Ordre par Boutons `↑`/`↓` & Masquage, Zéro Drag & Drop UI)* : **Vue Desktop `1440×900`** montrant `BookmarksBar` épurée (sans Drag & Drop ni icône parasite) pilotée exclusivement depuis la carte **`BookmarksOrderSection` dans `SettingsModal → Apparence`** (interrupteur global, liste ordonnée avec flèches `↑` / `↓`, bascule `👁 Afficher / Masquer` par onglet et bouton `↺ Par défaut`), **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
 
 ---
 
