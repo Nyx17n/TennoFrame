@@ -18,6 +18,7 @@ export function BookmarksBar(): React.JSX.Element | null {
   const lang = useAppStore((s) => s.settings.market.language)
   const bookmarksBarVisible = useAppStore((s) => s.settings.appearance.bookmarksBarVisible)
   const bookmarksIconsOnly = useAppStore((s) => s.settings.appearance.bookmarksIconsOnly)
+  const bookmarksExpandOnHover = useAppStore((s) => s.settings.appearance.bookmarksExpandOnHover)
   const bookmarksOrder = useAppStore((s) => s.settings.appearance.bookmarksOrder)
   const hiddenBookmarks = useAppStore((s) => s.settings.appearance.hiddenBookmarks)
 
@@ -83,16 +84,27 @@ export function BookmarksBar(): React.JSX.Element | null {
         data-active={isActive ? 'true' : 'false'}
         className={cn(
           'wf-bookmark-link wf-interactive-btn inline-flex h-6 shrink-0 items-center justify-center rounded-md border text-xs font-medium transition-colors',
-          bookmarksIconsOnly ? 'gap-1 px-2' : 'gap-1.5 px-2.5',
+          bookmarksIconsOnly ? 'px-2' : 'gap-1.5 px-2.5',
           isActive
             ? 'border-primary/50 bg-primary/15 text-foreground'
             : 'border-transparent text-muted-foreground hover:border-border/60 hover:bg-secondary/75 hover:text-foreground'
         )}
       >
         <Icon className="h-3.5 w-3.5 shrink-0 text-primary" />
-        {!bookmarksIconsOnly && <span className="whitespace-nowrap">{label}</span>}
+        {!bookmarksIconsOnly ? (
+          <span className="whitespace-nowrap">{label}</span>
+        ) : bookmarksExpandOnHover ? (
+          <span className="wf-bookmark-expand-wrap">
+            <span className="wf-bookmark-expand-inner">{label}</span>
+          </span>
+        ) : null}
         {badgeCount > 0 && (
-          <span className="rounded-full bg-primary/20 px-1.5 py-0 font-mono text-[10px] font-semibold text-primary">
+          <span
+            className={cn(
+              'rounded-full bg-primary/20 px-1.5 py-0 font-mono text-[10px] font-semibold text-primary',
+              bookmarksIconsOnly && 'ml-1'
+            )}
+          >
             {badgeCount}
           </span>
         )}

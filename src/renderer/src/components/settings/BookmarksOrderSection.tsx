@@ -17,6 +17,7 @@ export function BookmarksOrderSection(): React.JSX.Element {
   const lang = useAppStore((s) => s.settings.market.language)
   const bookmarksBarVisible = useAppStore((s) => s.settings.appearance.bookmarksBarVisible)
   const bookmarksIconsOnly = useAppStore((s) => s.settings.appearance.bookmarksIconsOnly)
+  const bookmarksExpandOnHover = useAppStore((s) => s.settings.appearance.bookmarksExpandOnHover)
   const bookmarksOrder = useAppStore((s) => s.settings.appearance.bookmarksOrder)
   const hiddenBookmarks = useAppStore((s) => s.settings.appearance.hiddenBookmarks)
   const updateSettings = useAppStore((s) => s.updateSettings)
@@ -50,6 +51,7 @@ export function BookmarksOrderSection(): React.JSX.Element {
       appearance: {
         bookmarksBarVisible: true,
         bookmarksIconsOnly: false,
+        bookmarksExpandOnHover: false,
         bookmarksOrder: [...BOOKMARK_ITEM_IDS],
         hiddenBookmarks: []
       }
@@ -78,7 +80,11 @@ export function BookmarksOrderSection(): React.JSX.Element {
           <div className="inline-flex rounded-md border border-border bg-background/60 p-0.5 text-xs">
             <button
               type="button"
-              onClick={() => void updateSettings({ appearance: { bookmarksIconsOnly: false } })}
+              onClick={() =>
+                void updateSettings({
+                  appearance: { bookmarksIconsOnly: false, bookmarksExpandOnHover: false }
+                })
+              }
               className={`rounded px-2.5 py-1 font-medium transition-colors ${
                 !bookmarksIconsOnly
                   ? 'bg-primary text-primary-foreground'
@@ -89,9 +95,28 @@ export function BookmarksOrderSection(): React.JSX.Element {
             </button>
             <button
               type="button"
-              onClick={() => void updateSettings({ appearance: { bookmarksIconsOnly: true } })}
+              onClick={() =>
+                void updateSettings({
+                  appearance: { bookmarksIconsOnly: true, bookmarksExpandOnHover: true }
+                })
+              }
               className={`rounded px-2.5 py-1 font-medium transition-colors ${
-                bookmarksIconsOnly
+                bookmarksIconsOnly && bookmarksExpandOnHover
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Nom au survol
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                void updateSettings({
+                  appearance: { bookmarksIconsOnly: true, bookmarksExpandOnHover: false }
+                })
+              }
+              className={`rounded px-2.5 py-1 font-medium transition-colors ${
+                bookmarksIconsOnly && !bookmarksExpandOnHover
                   ? 'bg-primary text-primary-foreground'
                   : 'text-muted-foreground hover:text-foreground'
               }`}

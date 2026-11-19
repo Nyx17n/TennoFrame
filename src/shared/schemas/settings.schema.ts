@@ -231,6 +231,7 @@ export const UserSettingsSchema = z.object({
     newTabTarget: NewTabTargetSchema.default('market-home'),
     bookmarksBarVisible: z.boolean().default(true),
     bookmarksIconsOnly: z.boolean().default(false),
+    bookmarksExpandOnHover: z.boolean().default(false),
     bookmarksOrder: z.array(BookmarkItemIdSchema).max(30).default([...BOOKMARK_ITEM_IDS]),
     hiddenBookmarks: z.array(BookmarkItemIdSchema).max(30).default([]),
     startupAnimationEnabled: z.boolean().default(true),
