@@ -35,6 +35,7 @@ export function App(): React.JSX.Element {
   const initialize = useAppStore((s) => s.initialize)
   const initWfmAccount = useWfmAccountStore((s) => s.initialize)
   const isAppLoading = useAppStore((s) => s.isLoading)
+  const bookmarksPosition = useAppStore((s) => s.settings.appearance.bookmarksPosition)
   const marketLang = useAppStore((s) => s.settings.market.language)
   const marketPlatform = useAppStore((s) => s.settings.market.platform)
   const marketCrossplay = useAppStore((s) => s.settings.market.crossplay)
@@ -168,10 +169,11 @@ export function App(): React.JSX.Element {
         <TitleTabsBar />
         <ClickThroughBanner />
         <CommandNavBar />
-        <BookmarksBar />
+        {bookmarksPosition === 'top' && <BookmarksBar />}
         <UpdateBanner />
         <div className="relative flex min-h-0 flex-1 overflow-hidden">
           <VerticalTabsSidebar />
+          {bookmarksPosition === 'left' && <BookmarksBar />}
           <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
             <PageTransitionLoader />
             <div
@@ -182,6 +184,7 @@ export function App(): React.JSX.Element {
             </div>
             <DiscordCornerButton />
           </div>
+          {bookmarksPosition === 'right' && <BookmarksBar />}
         </div>
         <WhisperBar />
         <CompactTimersBar />

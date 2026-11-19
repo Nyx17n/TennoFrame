@@ -144,6 +144,9 @@ export type FontFamilyId = z.infer<typeof FontFamilyIdSchema>
 export const TabsPositionSchema = z.enum(['top', 'sidebar-left'])
 export type TabsPosition = z.infer<typeof TabsPositionSchema>
 
+export const BookmarksPositionSchema = z.enum(['top', 'left', 'right'])
+export type BookmarksPosition = z.infer<typeof BookmarksPositionSchema>
+
 export const CornerRadiusStyleSchema = z.enum(['auto', 'sharp', 'subtle', 'rounded', 'pill'])
 export type CornerRadiusStyle = z.infer<typeof CornerRadiusStyleSchema>
 
@@ -230,6 +233,7 @@ export const UserSettingsSchema = z.object({
     uiDensity: UiDensitySchema.default('comfortable'),
     newTabTarget: NewTabTargetSchema.default('market-home'),
     bookmarksBarVisible: z.boolean().default(true),
+    bookmarksPosition: BookmarksPositionSchema.default('top'),
     bookmarksIconsOnly: z.boolean().default(false),
     bookmarksExpandOnHover: z.boolean().default(false),
     bookmarksOrder: z.array(BookmarkItemIdSchema).max(30).default([...BOOKMARK_ITEM_IDS]),

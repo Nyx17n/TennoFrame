@@ -3,7 +3,8 @@ import { ArrowDown, ArrowUp, Compass, Eye, EyeOff, RotateCcw } from 'lucide-reac
 import {
   BOOKMARK_ITEM_IDS,
   normalizeBookmarksOrder,
-  type BookmarkItemId
+  type BookmarkItemId,
+  type BookmarksPosition
 } from '@shared/schemas/settings.schema'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -16,6 +17,7 @@ export function BookmarksOrderSection(): React.JSX.Element {
   const { t } = useUiTranslations()
   const lang = useAppStore((s) => s.settings.market.language)
   const bookmarksBarVisible = useAppStore((s) => s.settings.appearance.bookmarksBarVisible)
+  const bookmarksPosition = useAppStore((s) => s.settings.appearance.bookmarksPosition)
   const bookmarksIconsOnly = useAppStore((s) => s.settings.appearance.bookmarksIconsOnly)
   const bookmarksExpandOnHover = useAppStore((s) => s.settings.appearance.bookmarksExpandOnHover)
   const bookmarksOrder = useAppStore((s) => s.settings.appearance.bookmarksOrder)
@@ -50,6 +52,7 @@ export function BookmarksOrderSection(): React.JSX.Element {
     void updateSettings({
       appearance: {
         bookmarksBarVisible: true,
+        bookmarksPosition: 'top',
         bookmarksIconsOnly: false,
         bookmarksExpandOnHover: false,
         bookmarksOrder: [...BOOKMARK_ITEM_IDS],
@@ -77,6 +80,28 @@ export function BookmarksOrderSection(): React.JSX.Element {
         </div>
 
         <div className="flex flex-wrap items-center gap-1.5">
+          <div className="inline-flex rounded-md border border-border bg-background/60 p-0.5 text-xs">
+            {(
+              [
+                { id: 'top', label: 'En haut' },
+                { id: 'left', label: 'Bord gauche' },
+                { id: 'right', label: 'Bord droit' }
+              ] as readonly { id: BookmarksPosition; label: string }[]
+            ).map((pos) => (
+              <button
+                key={pos.id}
+                type="button"
+                onClick={() => void updateSettings({ appearance: { bookmarksPosition: pos.id } })}
+                className={`rounded px-2.5 py-1 font-medium transition-colors ${
+                  bookmarksPosition === pos.id
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {pos.label}
+              </button>
+            ))}
+          </div>
           <div className="inline-flex rounded-md border border-border bg-background/60 p-0.5 text-xs">
             <button
               type="button"
