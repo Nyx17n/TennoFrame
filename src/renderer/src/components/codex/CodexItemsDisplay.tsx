@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card'
 import { SafeAssetImage } from '@/components/ui/safe-asset-image'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CodexCardRequirements } from '@/components/codex/CodexCardRequirements'
+import { PlanetChipsRow } from '@/components/codex/CodexLocationVisuals'
 import {
   CodexItemContextMenu,
   type CodexContextMenuState
@@ -269,7 +270,16 @@ export function CodexItemsDisplay({
                         {primaryName}
                       </span>
                       {card.isPrime && <Sparkles className="h-3 w-3 shrink-0 text-amber-400" />}
-                      <span className="truncate text-[11px] text-primary/90">{card.subtitle}</span>
+                      {card.category === 'resources' || card.category === 'mobs' ? (
+                        <PlanetChipsRow
+                          text={card.subtitle}
+                          compact
+                          showRawNote={false}
+                          className="truncate text-[11px] text-primary/90"
+                        />
+                      ) : (
+                        <span className="truncate text-[11px] text-primary/90">{card.subtitle}</span>
+                      )}
                     </div>
                     <CodexCardRequirements card={card} maxItems={5} />
                   </div>
@@ -372,7 +382,16 @@ export function CodexItemsDisplay({
                     </span>
                     {card.isPrime && <Sparkles className="h-3 w-3 shrink-0 text-amber-400" />}
                   </div>
-                  <div className="truncate text-[11px] text-primary/90">{card.subtitle}</div>
+                  {card.category === 'resources' || card.category === 'mobs' ? (
+                    <PlanetChipsRow
+                      text={card.subtitle}
+                      compact
+                      showRawNote={false}
+                      className="truncate text-[11px] text-primary/90"
+                    />
+                  ) : (
+                    <div className="truncate text-[11px] text-primary/90">{card.subtitle}</div>
+                  )}
                   <CodexCardRequirements card={card} maxItems={cardSize === 'lg' ? 5 : 3} />
                   {card.isTradable && marketSlug && (
                     <ItemPriceRangeBadges slug={marketSlug} compact={cardSize === 'sm'} />

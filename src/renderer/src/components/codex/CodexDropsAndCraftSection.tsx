@@ -8,6 +8,7 @@ import { SafeAssetImage } from '@/components/ui/safe-asset-image'
 import { ChanceBadgeWithUnderBar } from '@/components/codex/ChanceBadgeWithUnderBar'
 import { CodexAcquisitionSourcesCard } from '@/components/codex/CodexAcquisitionSourcesCard'
 import { CodexCraftComponentsSection } from '@/components/codex/CodexCraftComponentsSection'
+import { WarframeLocationRich } from '@/components/codex/CodexLocationVisuals'
 import { useTabsStore } from '@/stores/useTabsStore'
 
 export function CodexDropsAndCraftSection({
@@ -127,10 +128,10 @@ export function CodexDropsAndCraftSection({
             <div className="max-h-96 divide-y divide-border/60 overflow-y-auto pr-2 text-xs">
               {detail.drops.slice(0, visibleDrops).map((drop, idx) => (
                 <div key={idx} className="flex items-center justify-between gap-3 py-2">
-                  <div className="min-w-0">
-                    <div className="truncate font-medium text-foreground">{drop.location}</div>
+                  <div className="min-w-0 space-y-0.5">
+                    <WarframeLocationRich text={drop.location} />
                     <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-                      {drop.part && <span className="text-primary">{drop.part}</span>}
+                      {drop.part && <span className="font-medium text-primary">{drop.part}</span>}
                       {drop.rarity && <span>{drop.rarity}</span>}
                     </div>
                   </div>

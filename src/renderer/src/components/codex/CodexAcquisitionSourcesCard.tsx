@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ChanceBadgeWithUnderBar } from '@/components/codex/ChanceBadgeWithUnderBar'
+import { WarframeLocationRich } from '@/components/codex/CodexLocationVisuals'
 import {
   buildItemKey,
   buildSingleItemOverlayEntry,
@@ -91,7 +92,7 @@ export function CodexAcquisitionSourcesCard({
                       {src.partNameFr}
                     </Badge>
                   )}
-                  <span className="font-semibold text-foreground">{src.labelFr}</span>
+                  <WarframeLocationRich text={src.labelFr} />
                 </div>
                 {src.sublabelFr && (
                   <p className="text-[11px] text-muted-foreground">{src.sublabelFr}</p>

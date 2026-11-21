@@ -1,5 +1,15 @@
 [
   {
+    "version": "2.19.0",
+    "date": "November 2026",
+    "title": "Star Chart Planet Cutouts & Color-Coded Mission Nodes Across Codex, Foundry & Farm Overlay",
+    "badge": "New in v2.19.0",
+    "highlights": [
+      "Official **Star Chart Planet & Region Cutout Icons** (`27` Planets, Moons, Open-World Hubs & Railjack Proxima Regions cached offline for 7 days via `wf-asset://wiki/`): every planetary drop source, key resource planet list, mob spawn, and vendor location now displays crisp inline planet icons (*Mercury, Venus, Earth, Lua, Mars, Phobos, Deimos, Ceres, Jupiter, Europa, Saturn, Uranus, Neptune, Pluto, Sedna, Eris, Void, Kuva Fortress, Zariman, Duviri, Höllvania 1999,* and *Proxima sectors*).",
+      "At-a-Glance **Color-Coded Mission & Node Badges**: instantly spot where to launch your mission across **Resources, Warframes, Weapons, Mods, Arcanes, Relics, Mobs, Vendors, Foundry Planner (`wf://foundry`),** and the in-game **`Alt+O` Codex Farm Overlay** — featuring **Sky-Blue** planet pills, bright **Amber/Gold** node names (*Helene, Themisto, Olympus, Ani / Mot, Cetus…*), **Cyan** mission modes (*Survival, Defense, Disruption, Spy, Assassination, Bounty…*), **Violet** rotation tags (`Rot. A / B / C`), and **Crimson** *Steel Path* indicators."
+    ]
+  },
+  {
     "version": "2.18.0",
     "date": "November 2026",
     "title": "Dockable Left/Right Bookmarks Bar, Hover-Expand Labels & 10 Warframe Notification Sounds",

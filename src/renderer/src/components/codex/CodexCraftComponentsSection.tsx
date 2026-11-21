@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { SafeAssetImage } from '@/components/ui/safe-asset-image'
 import { ChanceBadgeWithUnderBar } from '@/components/codex/ChanceBadgeWithUnderBar'
+import { WarframeLocationRich } from '@/components/codex/CodexLocationVisuals'
 import {
   buildComponentOverlayEntry,
   getEquipmentEntriesByMode
@@ -86,8 +87,8 @@ export function CodexCraftComponentsSection({
                       <div className="min-w-0">
                         <div className="truncate font-semibold">{comp.nameFr}</div>
                         {topSource && (
-                          <div className="truncate text-[10px] text-muted-foreground">
-                            {topSource.labelFr}
+                          <div className="mt-0.5">
+                            <WarframeLocationRich text={topSource.labelFr} compact />
                           </div>
                         )}
                       </div>
@@ -227,8 +228,8 @@ export function CodexCraftComponentsSection({
                         {comp.nameFr} {clickable && <span className="text-primary">↗</span>}
                       </div>
                       {topSource && (
-                        <div className="truncate text-[10px] text-muted-foreground">
-                          {topSource.labelFr}
+                        <div className="mt-0.5">
+                          <WarframeLocationRich text={topSource.labelFr} compact />
                         </div>
                       )}
                     </div>
