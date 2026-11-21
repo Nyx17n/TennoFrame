@@ -3,6 +3,7 @@ import { Coins, MapPin, Sparkles, Wrench } from 'lucide-react'
 import type { CodexSummaryCard } from '@shared/schemas/codex.schema'
 import { SafeAssetImage } from '@/components/ui/safe-asset-image'
 import { ChanceBadgeWithUnderBar } from '@/components/codex/ChanceBadgeWithUnderBar'
+import { PlanetChipsRow, WarframeLocationRich } from '@/components/codex/CodexLocationVisuals'
 import { formatResourceCount } from '@/lib/catalog-layout'
 import { cn } from '@/lib/utils'
 import { useCodexCardMetaStore } from '@/stores/useCodexCardMetaStore'
@@ -65,7 +66,7 @@ export function CodexCardRequirements({
           </div>
         ) : (
           card.acquisitionText && (
-            <div className="truncate text-[10px] text-muted-foreground">{card.acquisitionText}</div>
+            <PlanetChipsRow text={card.acquisitionText} compact />
           )
         )}
         {currencies.length > 0 && (
@@ -162,14 +163,20 @@ export function CodexCardRequirements({
       <div
         ref={hostRef}
         className={cn(
-          'flex items-center gap-1 text-[10px] text-muted-foreground',
+          'flex min-w-0 items-center gap-1 text-[10px] text-muted-foreground',
           centered && 'justify-center',
           className
         )}
         title={acquisitionText ? `Obtention : ${acquisitionText}` : undefined}
       >
-        <MapPin className="h-2.5 w-2.5 shrink-0 text-primary/80" />
-        <span className="truncate">{acquisitionText ?? 'Lecture recettes…'}</span>
+        {acquisitionText ? (
+          <WarframeLocationRich text={acquisitionText} compact />
+        ) : (
+          <>
+            <MapPin className="h-2.5 w-2.5 shrink-0 text-primary/80" />
+            <span className="truncate">Lecture recettes…</span>
+          </>
+        )}
       </div>
     )
   }

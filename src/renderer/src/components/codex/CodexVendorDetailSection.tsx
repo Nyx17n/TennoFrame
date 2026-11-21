@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { SafeAssetImage } from '@/components/ui/safe-asset-image'
+import { PlanetChipsRow } from '@/components/codex/CodexLocationVisuals'
 import { buildVendorOfferingOverlayEntry } from '@/lib/codex-overlay-entries'
 import { useAppStore } from '@/stores/useAppStore'
 import { useFarmOverlayStore } from '@/stores/useFarmOverlayStore'
@@ -85,8 +86,9 @@ export function CodexVendorDetailSection({
 
         <div className="grid grid-cols-1 gap-2.5 text-xs md:grid-cols-2">
           <div className="space-y-1 rounded-lg border border-border/60 bg-background/60 p-3">
-            <div>
-              <strong className="text-primary">Planète / Région :</strong> {vendor.planetFr}
+            <div className="flex flex-wrap items-center gap-1.5">
+              <strong className="text-primary">Planète / Région :</strong>
+              <PlanetChipsRow text={vendor.planetFr} compact />
             </div>
             <div>
               <strong className="text-primary">Hub / Relais :</strong> {vendor.hubFr}

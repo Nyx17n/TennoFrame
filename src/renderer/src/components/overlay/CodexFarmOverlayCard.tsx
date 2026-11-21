@@ -7,6 +7,7 @@ import type {
 import { Badge } from '@/components/ui/badge'
 import { SafeAssetImage } from '@/components/ui/safe-asset-image'
 import { ChanceBadgeWithUnderBar } from '@/components/codex/ChanceBadgeWithUnderBar'
+import { WarframeLocationRich } from '@/components/codex/CodexLocationVisuals'
 import { getSourceTypePrefix } from '@/lib/codex-overlay-entries'
 import { cn } from '@/lib/utils'
 
@@ -136,7 +137,7 @@ export function CodexFarmOverlayCard({
                   >
                     {prefix.tagFr}
                   </Badge>
-                  <span className="truncate text-foreground/95">{src.labelFr}</span>
+                  <WarframeLocationRich text={src.labelFr} compact className="min-w-0" />
                 </div>
                 {idx > 0 && (
                   <span className="shrink-0 font-mono text-[10px] text-muted-foreground">

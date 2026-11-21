@@ -8,6 +8,7 @@ import { SafeAssetImage } from '@/components/ui/safe-asset-image'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CodexArcaneDetailSection } from '@/components/codex/CodexArcaneDetailSection'
 import { CodexDropsAndCraftSection } from '@/components/codex/CodexDropsAndCraftSection'
+import { PlanetChipsRow } from '@/components/codex/CodexLocationVisuals'
 import { CodexMobDetailSection } from '@/components/codex/CodexMobDetailSection'
 import { CodexOverlayToolbar } from '@/components/codex/CodexOverlayToolbar'
 import { CodexVendorDetailSection } from '@/components/codex/CodexVendorDetailSection'
@@ -202,10 +203,11 @@ export function CodexDetailView({
           )}
 
           {(detail.planets || detail.utility) && (
-            <div className="space-y-1 rounded-md border border-primary/30 bg-primary/5 p-2.5 text-xs">
+            <div className="space-y-1.5 rounded-md border border-primary/30 bg-primary/5 p-2.5 text-xs">
               {detail.planets && (
-                <div>
-                  <strong className="text-primary">Planètes clés :</strong> {detail.planets}
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <strong className="text-primary">Planètes clés :</strong>
+                  <PlanetChipsRow text={detail.planets} />
                 </div>
               )}
               {detail.utility && (

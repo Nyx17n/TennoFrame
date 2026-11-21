@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { SafeAssetImage } from '@/components/ui/safe-asset-image'
+import { WarframeLocationRich } from '@/components/codex/CodexLocationVisuals'
 
 export function FoundryResourceList({
   resources,
@@ -68,9 +69,10 @@ export function FoundryResourceList({
                     </Badge>
                   )}
                 </div>
-                <p className="truncate text-[11px] text-muted-foreground">
-                  Meilleur spot : <span className="text-foreground/90">{spot}</span>
-                </p>
+                <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <span>Meilleur spot :</span>
+                  <WarframeLocationRich text={spot} compact />
+                </div>
                 <p className="truncate text-[10px] text-muted-foreground">
                   Requis par : {res.usedByNames.join(', ')}
                 </p>

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { ChanceBadgeWithUnderBar } from '@/components/codex/ChanceBadgeWithUnderBar'
+import { WarframeLocationRich } from '@/components/codex/CodexLocationVisuals'
 import { buildMobDropOverlayEntry } from '@/lib/codex-overlay-entries'
 import { useAppStore } from '@/stores/useAppStore'
 import { useFarmOverlayStore } from '@/stores/useFarmOverlayStore'
@@ -53,8 +54,8 @@ export function CodexMobDetailSection({
               key={`${sp.locationFr}-${idx}`}
               className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/65 bg-background/65 px-3 py-2.5 text-xs"
             >
-              <div className="min-w-0 flex-1 space-y-0.5">
-                <div className="font-semibold text-foreground">{sp.locationFr}</div>
+              <div className="min-w-0 flex-1 space-y-1">
+                <WarframeLocationRich text={sp.locationFr} />
                 {sp.conditionFr && (
                   <div className="text-[11px] text-muted-foreground">{sp.conditionFr}</div>
                 )}
