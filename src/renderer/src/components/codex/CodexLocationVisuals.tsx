@@ -32,10 +32,12 @@ export function PlanetCutoutPill({
         src={planet.imageUrl}
         alt={planetName}
         className={cn(
-          'shrink-0 rounded-full object-contain drop-shadow-xs',
-          compact ? 'h-3.5 w-3.5' : 'h-4.5 w-4.5'
+          'shrink-0 rounded-full object-contain',
+          compact ? 'h-3 w-3 max-h-3 max-w-3' : 'h-3.5 w-3.5 max-h-3.5 max-w-3.5'
         )}
-        fallback={<Globe className={cn('shrink-0 text-sky-300', compact ? 'h-3 w-3' : 'h-3.5 w-3.5')} />}
+        fallback={
+          <Globe className={cn('shrink-0 text-sky-300', compact ? 'h-2.5 w-2.5' : 'h-3 w-3')} />
+        }
       />
       <span>{planetName}</span>
       {subRegion && !compact && (
