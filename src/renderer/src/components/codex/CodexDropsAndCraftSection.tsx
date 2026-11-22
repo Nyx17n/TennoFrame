@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ChevronDown, Hammer, MapPin, Sparkles } from 'lucide-react'
+import { ArrowUpRight, ChevronDown, Hammer, MapPin, Sparkles } from 'lucide-react'
 import type { CodexItemDetail } from '@shared/schemas/codex.schema'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -9,6 +9,7 @@ import { ChanceBadgeWithUnderBar } from '@/components/codex/ChanceBadgeWithUnder
 import { CodexAcquisitionSourcesCard } from '@/components/codex/CodexAcquisitionSourcesCard'
 import { CodexCraftComponentsSection } from '@/components/codex/CodexCraftComponentsSection'
 import { WarframeLocationRich } from '@/components/codex/CodexLocationVisuals'
+import { CodexResourceMobsCard } from '@/components/codex/CodexResourceMobsCard'
 import { useTabsStore } from '@/stores/useTabsStore'
 
 export function CodexDropsAndCraftSection({
@@ -17,6 +18,7 @@ export function CodexDropsAndCraftSection({
   detail: CodexItemDetail
 }): React.JSX.Element {
   const navigateActive = useTabsStore((s) => s.navigateActive)
+  const openTab = useTabsStore((s) => s.openTab)
   const [visibleDrops, setVisibleDrops] = React.useState(60)
 
   React.useEffect(() => {
@@ -71,6 +73,8 @@ export function CodexDropsAndCraftSection({
       )}
 
       <CodexCraftComponentsSection detail={detail} />
+
+      <CodexResourceMobsCard detail={detail} />
 
       {detail.usedFor.length > 0 && (
         <Card className="space-y-3 p-4">
@@ -128,8 +132,46 @@ export function CodexDropsAndCraftSection({
             <div className="max-h-96 divide-y divide-border/60 overflow-y-auto pr-2 text-xs">
               {detail.drops.slice(0, visibleDrops).map((drop, idx) => (
                 <div key={idx} className="flex items-center justify-between gap-3 py-2">
-                  <div className="min-w-0 space-y-0.5">
-                    <WarframeLocationRich text={drop.location} />
+                  <div className="min-w-0 space-y-1">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {drop.mobNameFr ? (
+                        <span className="font-semibold text-foreground">{drop.mobNameFr}</span>
+                      ) : (
+                        <WarframeLocationRich text={drop.location} />
+                      )}
+                      {drop.mobId && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            const route = {
+                              kind: 'codex-detail' as const,
+                              category: 'mobs' as const,
+                              slug: drop.mobId!
+                            }
+                            const title = `Mob : ${drop.mobNameFr ?? drop.location}`
+                            if (e.ctrlKey || e.metaKey) openTab(route, { title })
+                            else navigateActive(route, title)
+                          }}
+                          className="inline-flex items-center gap-0.5 rounded border border-emerald-500/40 bg-emerald-500/10 px-1.5 py-0 text-[10px] font-medium text-emerald-200 hover:bg-emerald-500/20"
+                        >
+                          <ArrowUpRight className="h-2.5 w-2.5" />
+                          <span>Fiche Mob</span>
+                        </button>
+                      )}
+                    </div>
+
+                    {drop.mobSpawnLocationsFr.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1 text-[10px]">
+                        <span className="text-emerald-300/90">↳ Où trouver ce mob :</span>
+                        {drop.mobSpawnLocationsFr.slice(0, 2).map((spLoc, sIdx) => (
+                          <React.Fragment key={`${spLoc}-${sIdx}`}>
+                            {sIdx > 0 && <span className="text-muted-foreground">·</span>}
+                            <WarframeLocationRich text={spLoc} compact />
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    )}
+
                     <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
                       {drop.part && <span className="font-medium text-primary">{drop.part}</span>}
                       {drop.rarity && <span>{drop.rarity}</span>}

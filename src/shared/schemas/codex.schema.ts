@@ -101,10 +101,31 @@ export const CodexDropEntrySchema = z.object({
   part: z.string().nullable(),
   location: z.string().min(1),
   chance: z.number().min(0).max(100),
-  rarity: z.string()
+  rarity: z.string(),
+  mobId: z.string().nullable().default(null),
+  mobNameFr: z.string().nullable().default(null),
+  mobImageUrl: z.string().nullable().default(null),
+  mobSpawnLocationsFr: z.array(z.string()).default([])
 })
 
 export type CodexDropEntry = z.infer<typeof CodexDropEntrySchema>
+
+export const CodexResourceMobSpawnItemSchema = z.object({
+  locationFr: z.string().min(1),
+  spawnChancePct: z.number().min(0).max(100).nullable().default(null)
+})
+
+export const CodexResourceMobDropEntrySchema = z.object({
+  mobId: z.string().nullable().default(null),
+  nameFr: z.string().min(1),
+  nameEn: z.string(),
+  imageUrl: z.string().nullable().default(null),
+  factionLabelFr: z.string().default('Ennemi'),
+  dropChancePct: z.number().min(0).max(100),
+  spawns: z.array(CodexResourceMobSpawnItemSchema).min(1)
+})
+
+export type CodexResourceMobDropEntry = z.infer<typeof CodexResourceMobDropEntrySchema>
 
 export const CodexAcquisitionSourceTypeSchema = z.enum([
   'shop',
@@ -342,6 +363,7 @@ export const CodexItemDetailSchema = z.object({
   vendorInfo: CodexVendorInfoSchema.nullable().default(null),
   arcaneInfo: CodexArcaneInfoSchema.nullable().default(null),
   drops: z.array(CodexDropEntrySchema),
+  resourceMobDrops: z.array(CodexResourceMobDropEntrySchema).default([]),
   acquisitionSources: z.array(CodexAcquisitionSourceSchema).default([]),
   totalBuildCredits: z.number().int().nonnegative().nullable().default(null),
   components: z.array(CodexComponentEntrySchema),

@@ -28,6 +28,7 @@ import type {
   RawWarframe,
   RawWeapon
 } from './codex-raw.schemas'
+import type { CodexMobSpawnResolver } from './CodexMobSpawnResolver'
 
 const DIRECT_CREDITS_WEAPONS = new Set([
   'mk1-bo',
@@ -113,6 +114,22 @@ function dropToSource(drop: CodexDropEntry): CodexAcquisitionSource {
   }
 
   const isRelicDrop = /\brelic\b|\brelique\b/i.test(drop.location)
+  const topMobSpawn = drop.mobSpawnLocationsFr[0]
+  if (topMobSpawn) {
+    const mobDisplay = drop.mobNameFr ?? drop.location
+    return {
+      type: 'drop',
+      labelFr: topMobSpawn,
+      labelEn: topMobSpawn,
+      sublabelFr: [`Sur mob : ${mobDisplay}`, drop.part, drop.rarity].filter(Boolean).join(' · ') || null,
+      sublabelEn: [`Mob: ${drop.location}`, drop.part, drop.rarity].filter(Boolean).join(' · ') || null,
+      chancePct: drop.chance,
+      isGuaranteed: drop.chance >= 100,
+      costCredits: null,
+      partNameFr: drop.part ?? `Mob : ${mobDisplay}`
+    }
+  }
+
   return {
     type: isRelicDrop ? 'relic' : 'drop',
     labelFr: drop.location,
@@ -128,7 +145,8 @@ function dropToSource(drop: CodexDropEntry): CodexAcquisitionSource {
 
 function filterPvEDrops(
   drops: readonly RawDrop[],
-  excludedPartNames?: ReadonlySet<string>
+  excludedPartNames?: ReadonlySet<string>,
+  mobResolver?: CodexMobSpawnResolver | null
 ): CodexDropEntry[] {
   return drops
     .filter((d) => {
@@ -139,14 +157,19 @@ function filterPvEDrops(
     .sort((a, b) => b.chance - a.chance)
     .map((d) => {
       const quest = parseSimarisQuestLocation(d.loc)
-      return {
+      const base: CodexDropEntry = {
         part: d.part ?? null,
         location: quest
           ? `Quête « ${quest.questFr} » (+ Rachat Céphalon Simaris)`
           : d.loc,
         chance: quest ? 100 : d.chance,
-        rarity: quest ? 'Garanti (Quête)' : d.rarity
+        rarity: quest ? 'Garanti (Quête)' : d.rarity,
+        mobId: null,
+        mobNameFr: null,
+        mobImageUrl: null,
+        mobSpawnLocationsFr: []
       }
+      return quest || !mobResolver ? base : mobResolver.enrichDropEntry(base)
     })
 }
 
@@ -184,10 +207,16 @@ function classifyComponentPartKind(comp: RawComponent): string | null {
 export class CodexAcquisitionResolver {
   private readonly resourceById: ReadonlyMap<string, RawResource>
   private readonly craftRecipes: CodexCraftRecipesDatabase
+  private readonly mobResolver: CodexMobSpawnResolver | null
 
-  public constructor(db: CodexRawDatabase, craftRecipes?: CodexCraftRecipesDatabase) {
+  public constructor(
+    db: CodexRawDatabase,
+    craftRecipes?: CodexCraftRecipesDatabase,
+    mobResolver?: CodexMobSpawnResolver | null
+  ) {
     this.resourceById = new Map(db.resources.map((r) => [r.id, r]))
     this.craftRecipes = craftRecipes ?? { warframes: {}, weapons: {} }
+    this.mobResolver = mobResolver ?? null
   }
 
   private buildResourcePartNames(components: readonly RawComponent[]): ReadonlySet<string> {
@@ -225,7 +254,7 @@ export class CodexAcquisitionResolver {
       isResource && linkedResource && linkedResource.drops.length > 0
         ? linkedResource.drops
         : comp.drops
-    const cleanDrops = filterPvEDrops(rawDrops)
+    const cleanDrops = filterPvEDrops(rawDrops, undefined, this.mobResolver)
 
     const dropSources = cleanDrops.slice(0, 4).map(dropToSource)
     const resourcePlanetFallback: CodexAcquisitionSource[] =
@@ -324,7 +353,7 @@ export class CodexAcquisitionResolver {
     acquisitionSources: CodexAcquisitionSource[]
     summaryText: string | null
   } {
-    const drops = filterPvEDrops(item.drops)
+    const drops = filterPvEDrops(item.drops, undefined, this.mobResolver)
     const sources: CodexAcquisitionSource[] = drops.slice(0, 5).map(dropToSource)
     if (sources.length === 0 && item.planets) {
       sources.push({
@@ -342,7 +371,9 @@ export class CodexAcquisitionResolver {
     const top = sources[0]
     const summaryText = top
       ? top.type === 'drop' && drops[0]
-        ? `${drops[0].location} (${drops[0].chance}%)`
+        ? drops[0].mobSpawnLocationsFr[0]
+          ? `${drops[0].mobSpawnLocationsFr[0]} (${drops[0].mobNameFr ?? drops[0].location} · ${drops[0].chance}%)`
+          : `${drops[0].location} (${drops[0].chance}%)`
         : top.labelFr
       : item.planets || null
 
@@ -357,7 +388,7 @@ export class CodexAcquisitionResolver {
     summaryText: string | null
   } {
     const resPartNames = this.buildResourcePartNames(item.components)
-    const drops = filterPvEDrops(item.drops, resPartNames)
+    const drops = filterPvEDrops(item.drops, resPartNames, this.mobResolver)
     const craftRecipe = this.craftRecipes.warframes[item.id]
 
     const special = WARFRAME_SPECIAL_ACQUISITIONS[item.id]
@@ -666,7 +697,7 @@ export class CodexAcquisitionResolver {
     summaryText: string | null
   } {
     const resPartNames = this.buildResourcePartNames(item.components)
-    const drops = filterPvEDrops(item.drops, resPartNames)
+    const drops = filterPvEDrops(item.drops, resPartNames, this.mobResolver)
     const specialSource = this.resolveWeaponSpecialSource(item, drops.length > 0)
     const craftRecipe = this.craftRecipes.weapons[item.id]
 
@@ -738,7 +769,7 @@ export class CodexAcquisitionResolver {
     acquisitionSources: CodexAcquisitionSource[]
     summaryText: string | null
   } {
-    const drops = filterPvEDrops(item.drops)
+    const drops = filterPvEDrops(item.drops, undefined, this.mobResolver)
     const sources: CodexAcquisitionSource[] = drops.slice(0, 5).map(dropToSource)
 
     if (sources.length === 0) {
@@ -797,7 +828,7 @@ export class CodexAcquisitionResolver {
     acquisitionSources: CodexAcquisitionSource[]
     summaryText: string | null
   } {
-    const drops = filterPvEDrops(relic.drops)
+    const drops = filterPvEDrops(relic.drops, undefined, this.mobResolver)
     const sources: CodexAcquisitionSource[] = []
 
     if (relic.vaulted) {
