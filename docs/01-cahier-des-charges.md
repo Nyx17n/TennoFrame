@@ -1190,6 +1190,36 @@ Pour épurer l'interface tout en accélérant les actions fréquentes à la sour
      3. *État Nominal* (Planète illustrée + Nœud Ambre + Type de mission Cyan + Rotation Violette),
      4. *Repli Hors-Ligne* (icône vectorielle `<Globe />` stylisée si la miniature distante n'a pas encore été mise en cache).
 
+### 3.34. Module 34 — Localisation d'Apparition des Mobs sur les Ressources Droppables (Pont Croisé Ressources ↔ Bestiaire Mobs)
+
+1. **Objectif Métier & Fin des Noms d'Ennemis Orphelins sans Lieu** :
+   - Lorsqu'une **Ressource** (ex. *Hexenon, Oxium, Cellule Orokin, Essence d'Acier, Cœur Sentient Intact, Fibres Somatiques, Toroïdes Vega/Calda/Sola, Lamentus, Plaque Ticor, Tellure…*) tombe sur un ou plusieurs **Mobs / Boss**, ne plus jamais afficher uniquement le nom brut de l'ennemi sans préciser **où trouver ce Mob**.
+2. **Résolution Croisée Bidirectionnelle côté Main Process (`CodexMobSpawnResolver` + `CodexRepository`)** :
+   - **Source 1 — Croisement direct avec les `481` fiches du Bestiaire (`codex-mobs-vendors.json`)** :
+     - Indexation en mémoire au chargement par `linkedCodexId` (`linkedCategory === 'resources'`) **et** par nom normalisé FR/EN (incluant la correspondance des variantes d'escouade : *Juno / Narmer Oxium Osprey → Drone Oxium*, *Demolisher Kuva Guardian → Gardien Kuva*, etc.).
+     - Récupère pour chaque Mob correspondant : son `mobId` cliquable (`wf://codex/mobs/<mobId>`), son `nameFr` / `nameEn`, son portrait officiel `imageUrl` (`wf-asset://`), sa faction/rang, son `% de drop` de la ressource, et ses **lieux d'apparition (`spawns` : Planète + Nœud/Mission + condition + `% de spawn`)**.
+   - **Source 2 — Dictionnaire d'Habitats des Familles d'Ennemis Spéciaux** (pour les unités d'événements/modes absentes en tant que fiche isolée du Bestiaire) :
+     - *Amalgames / Aurax Corpus* → `Jupiter - Ganymede / Ropalolyste (Missions Corpus Amalgame)`,
+     - *Démolisseurs (`Demolisher Anti Moa / Bursa / Hyena` vs `Bailiff / Kuva Guardian`)* → `Lua - Apollo (Perturbation Corpus)` ou `Forteresse Kuva - Taveuni (Perturbation Grineer)`,
+     - *Dax de Duviri (`Dax Gladius, Arcus, Malleus, Equitem, Herald`)* → `Duviri - Expérience Duviri / Hypogée (Spirales)`,
+     - *Sentients (`Vomvalyst, Brachiolyst, Ortholyst, Symbilyst, Conculyst`)* → `Terre - Plaines d'Eidolon (Nuit)` / `Proxima du Voile - Anomalie Murex (Escarmouche Railjack)`,
+     - *Raknoïdes Vallée Orbis (`Mite / Scyto / Kyta Raknoid`)* → `Vénus - Vallée Orbis (Port Spatial / Labos d'Enrichissement / Temple du Profit)`,
+     - *Chasseurs Railjack (`Axio, Vorac, Orm, Taro, Gyrix, Ionyx, Exo, Kosma`)* → `Proxima de la Terre / Vénus / Saturne / Voile - Missions Empyrée (Escarmouche Railjack)`,
+     - *Unités Höllvanie 1999 (`Techrot, Scaldra, H-09 Apex`)* → `Höllvanie (1999) - Missions Höllvanie (1999)`,
+     - *Prélat Zéloïde (`Zealoid Prelate`)* → `Deimos - Exequias (Assassinat)`.
+3. **Double Intégration Visuelle Immédiate (`CodexDropsAndCraftSection`, `FoundryResourceList` & `CodexFarmOverlayCard`)** :
+   - **1) Nouvelle Carte Dédiée « Ennemis & Mobs qui lâchent cette ressource (+ Où les trouver) »** sur les fiches Ressources concernées :
+     - Affiche les Mobs triés par meilleur `% de drop` (avec bouton *Afficher plus* au-delà de 8), leur portrait, leur nom FR, un bouton **`↗ Fiche Mob`** vers le Bestiaire, le badge **`% Drop`**, et directement dessous **« Où trouver ce mob : »** rendu avec **`WarframeLocationRich`** (*miniature Planète `14×14 px` + Nœud en Ambre + Type de mission en Cyan + `% Spawn`*).
+   - **2) Enrichissement Inline de toutes les Tables de Drop (`CodexDropEntrySchema`) & Meilleurs Spots Fonderie/Overlay** :
+     - Ajout des champs optionnels validés par `zod` (`mobId`, `mobNameFr`, `mobImageUrl`, `mobSpawnLocationsFr`) sur `CodexDropEntrySchema` : chaque ligne de table de drop correspondant à un Mob affiche automatiquement sous le nom du Mob **`Où le trouver : [🪐 Planète] › [ Mission ]`** (ainsi que dans le *Meilleur spot* du Planificateur de Fonderie et dans le *Codex Farm Overlay `Alt+O`*).
+4. **Mode Compact (`460×660`) & 4 États UI Obligatoires** :
+   - **Mode Compact (`460×660`)** : cartes Mob empilées avec miniature `28×28 px`, bouton `↗ Mob` compact et ligne `Où le trouver` avec planète `12×12 px` sans débordement horizontal.
+   - **4 États UI Obligatoires** :
+     1. *Chargement (`Skeleton`)* lors de l'ouverture de la fiche Ressource,
+     2. *Ressource sans drop sur Mob* (ex. minerai pur ou récompense de boutique : la carte « Ennemis & Mobs » est masquée proprement sans encadré vide parasite),
+     3. *État Nominal* (Mobs avec portrait, `% Drop`, lien 1-clic vers la fiche Bestiaire et lieux d'apparition illustrés Planète + Mission colorée),
+     4. *Repli Hors-Ligne* (icône d'unité vectorielle propre si le portrait `wf-asset://` du Mob n'est pas encore en cache local).
+
 ---
 
 ## 4. Architecture Technique, Contrats IPC & Sécurité
@@ -1286,7 +1316,7 @@ Tous les paramètres d'entrée et toutes les réponses API passent par une valid
 
 ## 5. Plan des Maquettes Excalidraw (`docs/02-tennoframe/` — Synchronisées `v2.10+`)
 
-L'ensemble des **34 planches Excalidraw** dans `docs/02-tennoframe/` documente fidèlement l'architecture de **TennoFrame**, chacune présentant côte à côte la version **Desktop (`1440×900`)**, son adaptation **Compact Overlay (`460×660`)**, et **les 4 états UI obligatoires** (*Chargement / Skeleton*, *Vide*, *Nominal*, *Erreur*) :
+L'ensemble des **35 planches Excalidraw** dans `docs/02-tennoframe/` documente fidèlement l'architecture de **TennoFrame**, chacune présentant côte à côte la version **Desktop (`1440×900`)**, son adaptation **Compact Overlay (`460×660`)**, et **les 4 états UI obligatoires** (*Chargement / Skeleton*, *Vide*, *Nominal*, *Erreur*) :
 
 1. `01-app-shell-navigation.excalidraw` : Fenêtre *Frameless* `v2.6.0`, `TitleTabsBar` (défilement molette + chevrons `‹ / ›` + fermeture clic molette), `ClickThroughBanner` (`👻` `Alt+G` + maintien `0.5s`), `CommandNavBar` (`Ctrl+K`, cloche `🔔`, `PC · Cross · FR ▾`, Zoom, `📌`, `👻`, `🗖`, `⚙`), `BookmarksBar` centrée + `Historique` (`Ctrl+H`), Omnibox, Organisateur d'onglets, bandeau `/w`, `CompactTimersBar`, bouton Discord et `StatusBar v2.6.0`.
 2. `02-market-home-catalog-item.excalidraw` : Accueil Marché (flux d'annonces récentes en direct, `ViewModeToggle` `[⊞|▭|☰] + [S|M|L]`, badges `Min · Moy · Max` Platinum), Catalogue, Favoris, Profil joueur, et **Fiche Item complète** (Ordres Vente/Achat, Comparateur *Set vs Pièces*, Pont bidirectionnel *Codex*, Statistiques 48h/90j + pagination *Afficher plus*).
@@ -1322,6 +1352,7 @@ L'ensemble des **34 planches Excalidraw** dans `docs/02-tennoframe/` documente f
 32. `32-settings-reorganization-v2.excalidraw` *(Module 31 — Refonte Architecturale des Paramètres en 5 Catégories + Sous-Onglets Horizontaux)* : **Vue Desktop `1440×900`** de la nouvelle `SettingsModal` avec rail latéral de **5 catégories claires** (`🧭 Général & Navigation`, `🎨 Apparence`, `🎯 En Jeu & Overlay`, `🏪 Marché & Alertes`, `💾 Système`) + **barre de sous-onglets horizontaux épinglée en haut** éliminant tout scroll long + accordéon repliable pour les pastilles de couleurs personnalisées, **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
 33. `33-notification-sounds-catalog.excalidraw` *(Module 32 — Catalogue de 10 Sons de Notification Thématiques Warframe dans `Paramètres → Marché & Alertes → Audio & Price Sniper`)* : **Vue Desktop `1440×900`** présentant la grille interactive des **10 sonneries** (*Classique, Cloche, Carillon Orokin, Impulsion Céphalon, Transmission Lotus, Terminal POM-2 1999, Éclat de Platine, Résonance Eidolon, Alerte Acolyte, Goutte Zen*) avec écoute immédiate au clic + curseur de volume, **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
 34. `34-codex-planet-mission-visuals.excalidraw` *(Module 33 — Illustrations Officielles des Planètes & Noms des Missions en Couleur au Premier Coup d'Œil)* : **Vue Desktop `1440×900`** illustrant le code chromatique immédiat (`[🪐 Miniature Planète détourée + Nom Bleu Céleste]` › `[ Nœud en Ambre Or ]` · `[ Type de Mission en Cyan ]` · `[ Rotation en Violet ]`) appliqué aux **Ressources, Warframes, Armes, Mods, Arcanes, Reliques, Mobs, Marchands et Planificateur de Fonderie**, **Adaptation Mode Compact `460×660` & `Codex Farm Overlay` en jeu (`Alt+O`)**, et **les 4 états UI obligatoires**.
+35. `35-codex-resource-mob-spawns.excalidraw` *(Module 34 — Localisation d'Apparition des Mobs sur les Ressources Droppables)* : **Vue Desktop `1440×900`** d'une fiche Ressource Codex (*Hexenon / Oxium / Fibres Somatiques*) présentant la nouvelle section **« Ennemis & Mobs qui lâchent cette ressource (+ Où les trouver) »** (portrait du Mob, nom FR, bouton `↗ Fiche Mob`, `% Drop`, et ligne **« Où trouver ce mob »** avec miniature Planète `14×14 px` + Nœud Ambre + Mission Cyan + `% Spawn`) ainsi que l'enrichissement inline des tables de drop, **Adaptation Mode Compact `460×660` & `Overlay Alt+O`**, et **les 4 états UI obligatoires**.
 
 ---
 
