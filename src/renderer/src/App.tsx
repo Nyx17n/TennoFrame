@@ -10,6 +10,7 @@ import { CommandNavBar } from '@/components/shell/CommandNavBar'
 import { DiscordCornerButton } from '@/components/shell/DiscordCornerButton'
 import { OmniboxDialog } from '@/components/shell/OmniboxDialog'
 import { PageTransitionLoader } from '@/components/shell/PageTransitionLoader'
+import { SeasonalThemeLayer } from '@/components/shell/SeasonalThemeLayer'
 import { StartupSplashOverlay } from '@/components/shell/StartupSplashOverlay'
 import { StatusBar } from '@/components/shell/StatusBar'
 import { TitleTabsBar } from '@/components/shell/TitleTabsBar'
@@ -197,6 +198,7 @@ export function App(): React.JSX.Element {
       <SettingsModal />
       <ChangelogModal />
       <SupportTicketModal />
+      <SeasonalThemeLayer />
       <StartupSplashOverlay />
       <WindowResizeHandles />
     </div>

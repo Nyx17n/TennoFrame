@@ -80,6 +80,9 @@ export type CatalogCardSize = z.infer<typeof CatalogCardSizeSchema>
 export const AnimationLevelSchema = z.enum(['full', 'reduced', 'off'])
 export type AnimationLevel = z.infer<typeof AnimationLevelSchema>
 
+export const SeasonalThemeSchema = z.enum(['none', 'christmas', 'halloween', 'easter'])
+export type SeasonalTheme = z.infer<typeof SeasonalThemeSchema>
+
 export const BackgroundGradientStyleSchema = z.enum([
   'none',
   'aurora-top',
@@ -252,6 +255,8 @@ export const UserSettingsSchema = z.object({
     startupAnimationEnabled: z.boolean().default(true),
     animationLevel: AnimationLevelSchema.default('full'),
     respectOsReducedMotion: z.boolean().default(true),
+    seasonalTheme: SeasonalThemeSchema.default('none'),
+    seasonalParticlesEnabled: z.boolean().default(true),
     catalogLayoutMode: CatalogLayoutModeSchema.default('rect'),
     catalogCardSize: CatalogCardSizeSchema.default('md'),
     backgroundGradient: BackgroundGradientSettingsSchema.default({}),

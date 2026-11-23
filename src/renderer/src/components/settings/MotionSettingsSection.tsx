@@ -86,6 +86,24 @@ export function MotionSettingsSection(): React.JSX.Element {
           }
         />
       </label>
+
+      <label className="flex cursor-pointer items-center justify-between gap-3 border-t border-border/60 pt-2.5 text-xs">
+        <div className="space-y-0.5">
+          <span className="flex items-center gap-2">
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+            <span>Particules au clic des thèmes saisonniers (Noël, Halloween, Pâques)</span>
+          </span>
+          <p className="text-[11px] text-muted-foreground">
+            Désactive uniquement les particules d’interaction tout en conservant le décor de fenêtre.
+          </p>
+        </div>
+        <Switch
+          checked={appearance.seasonalParticlesEnabled !== false}
+          onCheckedChange={(checked) =>
+            void updateSettings({ appearance: { seasonalParticlesEnabled: checked } })
+          }
+        />
+      </label>
     </div>
   )
 }

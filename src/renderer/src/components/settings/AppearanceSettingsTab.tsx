@@ -5,12 +5,13 @@ import { ColorSwatchPicker } from '@/components/settings/ColorSwatchPicker'
 import { FontSelectorSection } from '@/components/settings/FontSelectorSection'
 import { GlassModeSection } from '@/components/settings/GlassModeSection'
 import { MotionSettingsSection } from '@/components/settings/MotionSettingsSection'
+import { SeasonalThemesSection } from '@/components/settings/SeasonalThemesSection'
 import { WfLotusEmblemIcon } from '@/components/settings/WarframeSettingsIcons'
 import { ACCENT_SWATCH_GROUPS, BACKGROUND_SWATCH_GROUPS } from '@/lib/color-swatches'
 import { THEME_PRESETS } from '@/lib/theme-engine'
 import { useAppStore } from '@/stores/useAppStore'
 
-export type AppearanceSubTab = 'themes' | 'styles' | 'fonts'
+export type AppearanceSubTab = 'themes' | 'styles' | 'fonts' | 'seasons'
 
 export function AppearanceSettingsTab({
   subTab = 'themes'
@@ -24,6 +25,10 @@ export function AppearanceSettingsTab({
   )
 
   const activePreset = THEME_PRESETS.find((p) => p.id === appearance.preset)
+
+  if (subTab === 'seasons') {
+    return <SeasonalThemesSection />
+  }
 
   if (subTab === 'styles') {
     return (

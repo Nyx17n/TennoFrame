@@ -1243,5 +1243,63 @@ html[data-density='spacious'] .wf-stagger-grid {
   gap: 0.95rem !important;
 }
 
+/* ----------------------------------------------------------------------------
+   MODULE 35 : Décors Saisonniers Indépendants (Noël, Halloween, Pâques)
+   Animations GPU légères désactivées automatiquement si data-motion="off"
+   ---------------------------------------------------------------------------- */
+
+@keyframes wf-seasonal-bulb-pulse {
+  0%,
+  100% {
+    opacity: 0.72;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes wf-seasonal-spider-bob {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(7px);
+  }
+}
+
+@keyframes wf-seasonal-egg-sway {
+  0%,
+  100% {
+    transform: rotate(-2.5deg);
+  }
+  50% {
+    transform: rotate(2.5deg);
+  }
+}
+
+html:not([data-motion='off']) .wf-seasonal-bulb-a {
+  animation: wf-seasonal-bulb-pulse 2.2s ease-in-out infinite;
+}
+
+html:not([data-motion='off']) .wf-seasonal-bulb-b {
+  animation: wf-seasonal-bulb-pulse 2.2s ease-in-out 1.1s infinite;
+}
+
+html:not([data-motion='off']) .wf-seasonal-spider-a {
+  animation: wf-seasonal-spider-bob 4.2s ease-in-out infinite;
+}
+
+html:not([data-motion='off']) .wf-seasonal-spider-b {
+  animation: wf-seasonal-spider-bob 5.4s ease-in-out 1.6s infinite;
+}
+
+html:not([data-motion='off']) .wf-seasonal-egg {
+  transform-box: fill-box;
+  transform-origin: 50% 90%;
+  animation: wf-seasonal-egg-sway 4.6s ease-in-out infinite;
+}
+
+
 
 
