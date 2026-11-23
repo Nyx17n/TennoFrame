@@ -4,7 +4,7 @@
 [![Windows 10/11 x64](https://img.shields.io/badge/Windows-10%20%2F%2011%20(x64)-0078D6?logo=windows)](https://github.com/Nyx17n/TennoFrame/releases/latest)
 [![Discord Community](https://img.shields.io/badge/Discord-Join%20Community-5865F2?logo=discord&logoColor=white)](https://discord.gg/DhGwHPf82n)
 
-> Créé par **Maxime (`Nyxo17`)** — Compagnon bureau gratuit tout-en-un pour **Warframe** (Windows 10 / 11 x64).
+> Créé par **Nyxo17** — Compagnon bureau gratuit tout-en-un pour **Warframe** (Windows 10 / 11 x64).
 
 ---
 
@@ -34,4 +34,4 @@
 - **Digital Extremes Ltd. (Warframe)** : *Digital Extremes Ltd, Warframe and the logo Warframe are registered trademarks. All rights are reserved worldwide. TennoFrame is an unofficial fan-made companion application and has no official link with, nor is it affiliated with, endorsed, or sponsored by Digital Extremes Ltd. All game artwork, item icons, planet illustrations, and universe names are the sole intellectual property of Digital Extremes Ltd.*
 - **Warframe.Market** : Données de marché en direct fournies par l’API publique `warframe.market` (`≤ 3 req/s`). TennoFrame est un client indépendant non affilié à Warframe.Market.
 - **Crédits Open-Source & Communautaires** : Données encyclopédiques [WFCD / warframe-items](https://github.com/WFCD/warframe-items) (MIT), [Official Warframe Wiki](https://wiki.warframe.com) (CC BY-SA 3.0), [WarframeStat.us](https://docs.warframestat.us), polices locales Fontsource (SIL OFL 1.1 / Apache 2.0), Electron, React, Radix UI & Lucide (MIT / ISC).
-- **Logiciel TennoFrame** : © 2026 Maxime (`Nyxo17`) — Tous droits réservés. Ce dépôt public sert exclusivement à la distribution officielle des installateurs signés `SHA-512` et des mises à jour automatiques.
+- **Logiciel TennoFrame** : © 2026 Nyxo17 — Tous droits réservés. Ce dépôt public sert exclusivement à la distribution officielle des installateurs signés `SHA-512` et des mises à jour automatiques.
