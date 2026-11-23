@@ -1220,6 +1220,35 @@ Pour épurer l'interface tout en accélérant les actions fréquentes à la sour
      3. *État Nominal* (Mobs avec portrait, `% Drop`, lien 1-clic vers la fiche Bestiaire et lieux d'apparition illustrés Planète + Mission colorée),
      4. *Repli Hors-Ligne* (icône d'unité vectorielle propre si le portrait `wf-asset://` du Mob n'est pas encore en cache local).
 
+### 3.35. Module 35 — Décors & Thèmes Saisonniers Interactifs Indépendants (« Noël / Tennobaum », « Halloween / Naberus » & « Pâques / Lepus »)
+
+1. **Objectif Métier & Indépendance Totale vis-à-vis de la Transparence et des Couleurs** :
+   - Offrir dans **`Paramètres → Apparence → Saisons & Fêtes`** **3 thèmes événementiels animés et interactifs** qui s'appliquent comme une **surcouche décorative pure (`pointer-events: none`)** totalement découplée de `appearance.preset`, `primaryColor`, `secondaryColor`, `glassEnabled`, `glassStyle` et `showDesktopBehind` :
+     - Le joueur peut ainsi combiner **n'importe quelle palette de couleurs (prédéfinie ou sur mesure)** + **le mode Transparent / Liquid Glass / Styles Factions** + **un décor saisonnier Noël, Halloween ou Pâques** sans aucun blocage ni écrasement.
+2. **Contrat de Configuration (`settings.schema.ts`)** :
+   - Ajout dans `appearance` de :
+     - `seasonalTheme: z.enum(['none', 'christmas', 'halloween', 'easter']).default('none')`,
+     - `seasonalParticlesEnabled: z.boolean().default(true)` *(permet d'activer/désactiver à volonté les particules déclenchées lors des interactions)*.
+3. **Anatomie Visuelle & Particules d'Interaction des 3 Saisons (100 % Vectoriel SVG + Canvas 2D GPU, Zéro Binaire Git, Zéro Emoji OS)** :
+   - **1) Noël — *Tennobaum* (`christmas`)** :
+     - *Contour de fenêtre* : **Guirlandes de sapin illuminées faisant tout le tour des 4 bords de la fenêtre** (haut, droite, bas, gauche — feuillage vectoriel fin `10–12 px` qui ne masque ni les boutons système `— ▢ ✕` ni les onglets, ponctué d'ampoules Rouge, Or Orokin, Vert Émeraude et Bleu Glace au scintillement doux).
+     - *Particules à l'interaction (clic)* : explosion joyeuse de **petits cadeaux enrubannés** (boîtes colorées avec ruban croisé et nœud doré dessinés sur Canvas) accompagnés de **confettis multicolores** tournoyants.
+   - **2) Halloween — *Nuits de Naberus* (`halloween`)** :
+     - *Coins de fenêtre* : **Toiles d'araignée géométriques dans les 4 coins de la fenêtre** (fils d'argent/améthyste semi-transparents compatibles à 100 % avec le fond transparent) accompagnées de **petites araignées suspendues à leur fil de soie** animées d'une oscillation subtile.
+     - *Particules à l'interaction (clic)* : gerbe mystique de **particules violettes & magenta luminescentes** (`#a855f7`, `#d946ef`, `#c084fc` — orbes spectraux et éclats losanges Naberus à halo lumineux).
+   - **3) Pâques — *Printemps de Lepus* (`easter`)** :
+     - *Coins de fenêtre* : **Deux œufs de Pâques richement décorés dans les coins inférieurs gauche et droit** (motifs géométriques pastel & filigranes dorés style Orokin/Lepus posés dans une touffe d'herbe printanière et petites fleurs lumineuses, + fines arabesques florales dans les coins supérieurs).
+     - *Particules à l'interaction (clic)* : envolée printanière de **mini-œufs pastel décorés, pétales de fleurs roses/lavande et étincelles dorées**.
+4. **Performance 120 Hz (`0 % CPU` au repos), Mode Compact (`460×660`) & 4 États UI Obligatoires** :
+   - **Moteur Canvas 2D à réveil événementiel (`SeasonalInteractionCanvas`)** : écouteur passif `window.addEventListener('pointerdown')` ; la boucle `requestAnimationFrame` démarre **uniquement** lors d'un clic (`~800 ms`) et s'arrête intégralement dès que la dernière particule s'éteint (`0 % CPU` au repos, plafond de `64` particules actives simultanées). Rendu en `z-[95] pointer-events-none` pour fonctionner aussi en direct lors des clics dans la modale Paramètres.
+   - **Adaptation Mode Compact (`460×660`)** : réduction automatique (`scale`) de l'épaisseur des guirlandes, toiles et œufs de coin afin de préserver 100 % de la lisibilité par-dessus Warframe.
+   - **Respect de `animationLevel`** : si `animationLevel === 'off'`, le décor statique reste affiché sans oscillation continue et les particules de clic sont mises en sourdine.
+   - **4 États UI Obligatoires** :
+     1. *Désactivé (`none`, défaut)* : aucun nœud DOM/Canvas monté (`null`),
+     2. *Décor statique seul* (`seasonalParticlesEnabled: false` ou `animationLevel: 'off'`),
+     3. *État Nominal Interactif* (Décor de fenêtre + gerbe de particules à chaque interaction, superposé sans conflit sur fond transparent ou couleurs sur mesure + bouton `Tester les particules`),
+     4. *Protection haute fréquence* (recyclage automatique des plus anciennes particules au-delà de `64` en cas de clics rapides répétés).
+
 ---
 
 ## 4. Architecture Technique, Contrats IPC & Sécurité
@@ -1316,7 +1345,7 @@ Tous les paramètres d'entrée et toutes les réponses API passent par une valid
 
 ## 5. Plan des Maquettes Excalidraw (`docs/02-tennoframe/` — Synchronisées `v2.10+`)
 
-L'ensemble des **35 planches Excalidraw** dans `docs/02-tennoframe/` documente fidèlement l'architecture de **TennoFrame**, chacune présentant côte à côte la version **Desktop (`1440×900`)**, son adaptation **Compact Overlay (`460×660`)**, et **les 4 états UI obligatoires** (*Chargement / Skeleton*, *Vide*, *Nominal*, *Erreur*) :
+L'ensemble des **36 planches Excalidraw** dans `docs/02-tennoframe/` documente fidèlement l'architecture de **TennoFrame**, chacune présentant côte à côte la version **Desktop (`1440×900`)**, son adaptation **Compact Overlay (`460×660`)**, et **les 4 états UI obligatoires** (*Chargement / Skeleton*, *Vide*, *Nominal*, *Erreur*) :
 
 1. `01-app-shell-navigation.excalidraw` : Fenêtre *Frameless* `v2.6.0`, `TitleTabsBar` (défilement molette + chevrons `‹ / ›` + fermeture clic molette), `ClickThroughBanner` (`👻` `Alt+G` + maintien `0.5s`), `CommandNavBar` (`Ctrl+K`, cloche `🔔`, `PC · Cross · FR ▾`, Zoom, `📌`, `👻`, `🗖`, `⚙`), `BookmarksBar` centrée + `Historique` (`Ctrl+H`), Omnibox, Organisateur d'onglets, bandeau `/w`, `CompactTimersBar`, bouton Discord et `StatusBar v2.6.0`.
 2. `02-market-home-catalog-item.excalidraw` : Accueil Marché (flux d'annonces récentes en direct, `ViewModeToggle` `[⊞|▭|☰] + [S|M|L]`, badges `Min · Moy · Max` Platinum), Catalogue, Favoris, Profil joueur, et **Fiche Item complète** (Ordres Vente/Achat, Comparateur *Set vs Pièces*, Pont bidirectionnel *Codex*, Statistiques 48h/90j + pagination *Afficher plus*).
@@ -1353,6 +1382,7 @@ L'ensemble des **35 planches Excalidraw** dans `docs/02-tennoframe/` documente f
 33. `33-notification-sounds-catalog.excalidraw` *(Module 32 — Catalogue de 10 Sons de Notification Thématiques Warframe dans `Paramètres → Marché & Alertes → Audio & Price Sniper`)* : **Vue Desktop `1440×900`** présentant la grille interactive des **10 sonneries** (*Classique, Cloche, Carillon Orokin, Impulsion Céphalon, Transmission Lotus, Terminal POM-2 1999, Éclat de Platine, Résonance Eidolon, Alerte Acolyte, Goutte Zen*) avec écoute immédiate au clic + curseur de volume, **Adaptation Mode Compact `460×660`** et **les 4 états UI obligatoires**.
 34. `34-codex-planet-mission-visuals.excalidraw` *(Module 33 — Illustrations Officielles des Planètes & Noms des Missions en Couleur au Premier Coup d'Œil)* : **Vue Desktop `1440×900`** illustrant le code chromatique immédiat (`[🪐 Miniature Planète détourée + Nom Bleu Céleste]` › `[ Nœud en Ambre Or ]` · `[ Type de Mission en Cyan ]` · `[ Rotation en Violet ]`) appliqué aux **Ressources, Warframes, Armes, Mods, Arcanes, Reliques, Mobs, Marchands et Planificateur de Fonderie**, **Adaptation Mode Compact `460×660` & `Codex Farm Overlay` en jeu (`Alt+O`)**, et **les 4 états UI obligatoires**.
 35. `35-codex-resource-mob-spawns.excalidraw` *(Module 34 — Localisation d'Apparition des Mobs sur les Ressources Droppables)* : **Vue Desktop `1440×900`** d'une fiche Ressource Codex (*Hexenon / Oxium / Fibres Somatiques*) présentant la nouvelle section **« Ennemis & Mobs qui lâchent cette ressource (+ Où les trouver) »** (portrait du Mob, nom FR, bouton `↗ Fiche Mob`, `% Drop`, et ligne **« Où trouver ce mob »** avec miniature Planète `14×14 px` + Nœud Ambre + Mission Cyan + `% Spawn`) ainsi que l'enrichissement inline des tables de drop, **Adaptation Mode Compact `460×660` & `Overlay Alt+O`**, et **les 4 états UI obligatoires**.
+36. `36-seasonal-festive-overlays.excalidraw` *(Module 35 — Décors & Thèmes Saisonniers Interactifs « Noël », « Halloween » & « Pâques »)* : **Vue Desktop `1440×900`** du sous-onglet `Paramètres → Apparence → Saisons & Fêtes` (100 % compatible Transparence & Couleurs personnalisées) et aperçu des **3 habillages de fenêtre + particules au clic** (*Noël : guirlandes sur les 4 bords + cadeaux & confettis*, *Halloween : toiles d'araignée & araignées dans les coins + particules violettes*, *Pâques : deux œufs décorés dans les coins + pétales, mini-œufs & étincelles*), **Adaptation Mode Compact `460×660`**, et **les 4 états UI obligatoires**.
 
 ---
 
