@@ -1,92 +1,37 @@
 # TennoFrame — Warframe Companion, Trading Browser & Codex
 
-[![Dernière Release](https://img.shields.io/github/v/release/Nyx17n/TennoFrame?color=26b9d1&label=Release&logo=github)](https://github.com/Nyx17n/TennoFrame/releases/latest)
+[![Latest Release](https://img.shields.io/github/v/release/Nyx17n/TennoFrame?color=26b9d1&label=Release&logo=github)](https://github.com/Nyx17n/TennoFrame/releases/latest)
 [![Windows 10/11 x64](https://img.shields.io/badge/Windows-10%20%2F%2011%20(x64)-0078D6?logo=windows)](https://github.com/Nyx17n/TennoFrame/releases/latest)
-[![Serveur Discord](https://img.shields.io/badge/Discord-Rejoindre%20la%20communaut%C3%A9-5865F2?logo=discord&logoColor=white)](https://discord.gg/DhGwHPf82n)
-[![Licence MIT](https://img.shields.io/badge/Licence-MIT-22c55e)](https://github.com/Nyx17n/TennoFrame)
+[![Discord Community](https://img.shields.io/badge/Discord-Join%20Community-5865F2?logo=discord&logoColor=white)](https://discord.gg/DhGwHPf82n)
 
-> Conçu par **Maxime (`Nyxo17`)** — Architecture **Electron 37 · Node.js · React 19 · `shadcn/ui` · TypeScript strict (`strict: true`) · Validation `zod`**.
-
-**TennoFrame v2** (`v2.20.0`) est un compagnon bureau tout-en-un pour **Warframe** traduit dans les **15 langues officielles de Warframe**, combinant un navigateur de trading multi-onglets connecté à **Warframe Market** (avec onglets horizontaux ou barre latérale verticale style *Arc/Zen*, barre de raccourcis positionnable en haut/gauche/droite, page *Speed Dial*, connexion compte automatique, mise en vente, recherche cumulative à pastilles & messages `/w` multilingues), un **Hub Worldstate temps réel** (incluant le **Guide des Cadeaux 1999 — L’Hexagone**, les règles d’alertes sur mesure, **10 sonneries thématiques Warframe** et les minuteurs épinglés), une **Encyclopédie de Farm, Arcanes, Bestiaire des Mobs, Annuaire des Marchands & Helminth** hors-ligne complète en FR/EN (avec **miniatures officielles des 27 planètes/régions, mise en couleur immédiate des missions et localisation exacte des Mobs sur les ressources**), une suite **Build Studio, Fonderie, Scanner de Profits, Comptabilité Platines & Riven Grader**, **6 Styles d’Interface Visuels Warframe + Thèmes Saisonniers interactifs (*Noël, Halloween, Pâques*) + 12 Polices d’Écriture hors-ligne + Densité & Forme des coins**, un **Support In-App avec captures d’écran sécurisées relié directement à Discord** et un **Système d’Extensions modulaires** incluant le **Codex Farm Overlay en jeu (`Alt+O`)**.
+> Créé par **Maxime (`Nyxo17`)** — Compagnon bureau gratuit tout-en-un pour **Warframe** (Windows 10 / 11 x64).
 
 ---
 
-## Téléchargement & Communauté
+## 📥 Téléchargement & Mises à jour automatiques
 
-- **Installateur Windows (`.exe`)** : Télécharge la dernière version depuis **[GitHub Releases](https://github.com/Nyx17n/TennoFrame/releases/latest)** *(les mises à jour suivantes sont téléchargées et proposées automatiquement au lancement grâce à l'auto-updater intégré avec vérification SHA-512)*.
-- **Serveur Discord Officiel** : Rejoins la communauté et reçois automatiquement les annonces de patch notes sur **[discord.gg/DhGwHPf82n](https://discord.gg/DhGwHPf82n)**.
-
----
-
-## Fonctionnalités Clés
-
-1. **Navigateur de Trading Multi-Onglets, Barre de Raccourcis & Historique**
-   - Onglets dynamiques réordonnables par glisser-déposer, épinglables, indicateur fluide de transition de page et navigation *Précédent / Suivant* indépendante par onglet.
-   - **Barre d’adresse `wf://` pleine largeur (`Ctrl+K`)** : recherche instantanée FR/EN dans les 3 900+ items du Marché, les 3 810 fiches du Codex, ou ouverture directe d’une URL `https://warframe.market/items/...` collée.
-   - **Barre de raccourcis centrée** (*Marché · Favoris · Panier · Ordres récents · Codex · Ducanator · Contrats Mod Riven*) + **Historique de navigation complet (`wf://history`, `Ctrl+H`)** aligné à droite (masquée automatiquement sur le Hub Temps Réel).
-   - **Mode Compact Overlay (`460×660`, `Alt+M`)** + *Always-on-Top* (`Alt+P`) avec **souris traversante automatique en plein jeu (`Alt+G`)** + **Aero Snap natif 120 Hz multi-écrans** (bords, 4 coins, détachement Windows 11, double-clic & `F11`) + bascule rapide (`Alt+Shift+W`) + contrôle du zoom `[ − | 100% | + ]`.
-
-2. **Marché Warframe Market Temps Réel, Compte Vendeur & Outils Avancés**
-   - **Compte Warframe Market optionnel & Mise en vente (`wf://wfm-account`)** : connexion 100 % automatique via la fenêtre navigateur intégrée durcie (aucun mot de passe saisi dans l’app, aucun cookie à copier, session chiffrée via DPAPI Windows `safeStorage`) avec statut temps réel (*En jeu · En ligne · Invisible*), gestion complète de tes ventes/achats, bouton `✓ Vendu -1` et modale intelligente « Mettre un item en vente » avec aide au prix en direct.
-   - **Barre de recherche cumulative à pastilles (`Tokenized Filter Bar`)** : croise librement plusieurs pastilles (`[📦 Item] + [👤 Vendeur] + [💎 ≤ Xp]`) et consulte des **profils joueurs publics enrichis** (KPIs, ventes, achats et avis vérifiés).
-   - **Menus contextuels rapides au clic droit** : sur les onglets, sur tous les items du Marché (*Favoris, Nouvel onglet, Panier, Snipe, Codex, Wiki Officiel*) et sur les entrées du Codex (*Afficher en Overlay Farm* lorsque l’extension est activée).
-   - Ordres d’achat/vente en direct, filtres statut/rang/réputation, flux complet des **annonces les plus récentes** dès l’accueil Marché et barre **`/w` Whisper** copiée en 1 clic dans les **15 langues de Warframe (`★ EN` recommandé)**.
-   - **Badges de prix temps réel (`Min · Moy · Max` Platines)** avec filtrage anti-outliers affichés automatiquement sur les cartes du Marché, Favoris, Panier, Ordres récents et les items échangeables du Codex.
-   - **Comparateur automatique Set Complet vs Pièces Détachées** calculé en arrière-plan sans bloquer l’affichage.
-   - **Panier & Trade Bundler** (détection des vendeurs possédant plusieurs pièces de ta liste), **Ducanator** (meilleurs ratios Ducats / Platinum), **Contrats Mod Riven**, **Favoris** et **Price Sniper** (surveillance sonore & notifications en arrière-plan dans le *System Tray*).
-
-3. **Hub Worldstate Temps Réel, Règles d’Alertes sur Mesure & Minuteurs**
-   - **Cycles Planétaires & Mises à prix** (Terre, Cetus, Vallée Orbis, Puy de Cambion, Zariman) + **Bandeau de Minuteurs épinglés** (jusqu’à 6 cycles/rotations visibles en permanence en Mode Compact ou Desktop).
-   - **Règles d’alertes Worldstate personnalisées (9 sources)** avec bouton de test sur le Worldstate actuel, anti-spam par occurrence et historique de session.
-   - **Fissures du Néant** (Normales, Route de l’Acier, Tempêtes du Néant), **Sortie**, **Chasse à l’Archonte** & **Arbitrage** (enrichi des prix Platinum des Mods d’Essence Vitus).
-   - **Invasions**, **Honneurs de la Route de l’Acier (Teshin)** & **Ondes Nocturnes**.
-   - **Circuit de Duviri** (Warframes Normales + Adaptateurs Genesis Incarnon avec miniatures).
-   - **Baro Ki’Teer** (inventaire enrichi en Platinum ou aperçu des classiques hors visite) & **Résurgence Prime (Varzia)**.
-   - **Actualités, Événements & Offre du jour de Darvo**.
-   - **Guide des Cadeaux 1999 — L’Hexagone (`DIRECTGIFTZ`)** : portraits officiels des 6 membres (*Arthur, Eleanor, Lettie, Amir, Aoi, Quincy*), photos de tous les cadeaux, traduction FR/EN, coût Höllars, Chimie (`❤️`) et checklist quotidienne auto-reset à `00:00 UTC`.
-
-4. **Codex FR/EN Exhaustif (3 810 Fiches), Bestiaire Mobs, Marchands, Overlay Farm en Jeu & Helminth**
-   - **Ressources (365)**, **Warframes (122)**, **Armes (607)**, **Mods (1 402)**, **Reliques (799)**, **Mobs (481)** et **Marchands (33 — 3 228 articles vendus)**.
-   - **Bestiaire `👾 Mobs` & Annuaire `🏪 Marchands`** : localisations d’apparition des ennemis avec **`% de spawn` + barre colorée dessous**, tables complètes de butin (**`% de drop` + barre colorée dessous**), portraits officiels, emplacements exacts des marchands, devises et catalogues complets filtrables.
-   - **Sources d’obtention & Recettes Fonderie complètes** : Boutique en jeu Warframe (Crédits), Quêtes traduites en français (+ rachat Céphalon Simaris), Laboratoires de Dojo de Clan, Circuit Normal de Duviri, Syndicats, Némésis (*Kuva*, *Principe*, *Coda*), Baro Ki’Teer, Soute Prime, matériaux de craft Fonderie détaillés et tables de drop triées par **meilleure probabilité (`%`)**.
-   - **Extension `Codex Farm Overlay` en jeu (`Alt+O`)** : fenêtre transparente *Always-on-Top* avec souris traversante (`👻` Click-Through + déverrouillage `0,5 s`), sélection granulaire d’un set complet, des **ressources de craft Fonderie**, d’un Mob, d’une offre Marchand ou d’un objet précis, gérée depuis **`Paramètres → Extensions`**.
-   - **Infirmerie Helminth** : compétences subsumables par Warframe (filtre *★ Méta S-Tier*), **6 Sécrétions & Bile** et compétences natives.
-
-5. **Personnalisation Visuelle Avancée, Styles d’Interface, Notifications & Animations**
-   - **3 Styles d’Interface & Transparence Bureau (`Paramètres → Apparence`)** : **Liquid Glass** (verre dépoli spéculaire), **Transparence Simple** (alpha épuré) et **Style Médiéval** (*Grimoire de Duviri*, doubles bordures fer forgé & or vieilli, typographie Serif noble, Parchemin de Quête en Overlay Farm et 3 palettes rapides), avec interrupteur indépendant **« Afficher le bureau en arrière-plan »** (40 %–95 % ou fond 100 % opaque).
-   - **Catalogue de 12 Polices d’Écriture Hors-Ligne (`Paramètres → Apparence`)** : *Auto*, *Segoe UI*, *Inter*, *Roboto*, *Poppins*, *Montserrat*, *Rajdhani (Sci-Fi)*, *Orbitron*, *Cinzel & Palatino (Médiéval)*, *Georgia*, *JetBrains Mono* et *Comic Sans / Neue* (`.woff2` embarquées localement, CSP `font-src 'self'`, chiffres Platinum alignés en `tabular-nums`).
-   - **Support & Signalement de Bug In-App vers Discord (`💬 Support / Bug`)** : envoi direct depuis TennoFrame vers Discord via un relais sécurisé Cloudflare Worker gratuit (zéro Webhook Discord exposé dans le client, anti-spam IP et diagnostic technique anonyme optionnel).
-   - **3 modes d’affichage** (*Grille Carrée*, *Grille Rectangulaire*, *Liste pleine largeur*) et **3 tailles de cartes (`S` / `M` / `L`)** avec images adaptatives sur l’ensemble des catalogues et outils, couplés au chargement progressif **« Afficher plus »** sans rechargement de page.
-   - **20 thèmes visuels intégrés** (*Sombre*, *Clair*, *Full Black OLED `#000`*, *Full White `#FFF`* + 16 déclinaisons chromatiques) **+ 8 styles de dégradés de fond d’écran Sci-Fi** (intensité, angle et teintes personnalisables) **+ 76 couleurs prédéfinies indépendantes** (28 fonds & 48 accents).
-   - **Notifications in-app empilées & Centre de notifications (`🔔`)** : 5 styles visuels, pause du minuteur au survol, fusion anti-spam et historique de session.
-   - **Animations fluides GPU désactivables** : sélecteur **Complètes / Réduites / Désactivées** dans les Paramètres + respect automatique du réglage Windows, et ouverture automatique des **« Notes de Patch »** après mise à jour.
+- **Installateur officiel Windows (`.exe`)** : **[Télécharger la dernière version sur GitHub Releases](https://github.com/Nyx17n/TennoFrame/releases/latest)**
+- **Auto-Updater intégré (`SHA-512`)** : une fois installé, TennoFrame vérifie et propose automatiquement les nouvelles mises à jour dès le lancement.
+- **Serveur Discord officiel** : **[discord.gg/DhGwHPf82n](https://discord.gg/DhGwHPf82n)** (support, suggestions et notes de mise à jour).
 
 ---
 
-## Sécurité, Architecture Pro & CI/CD
+## ✨ Fonctionnalités Principales
 
-- **Zéro serveur HTTP local** : aucune écoute TCP sur `127.0.0.1` — 100 % des échanges passent par l’IPC Electron typé (`contextBridge`).
-- **Durcissement Electron strict** : `sandbox: true`, `contextIsolation: true`, `nodeIntegration: false`, `webSecurity: true`, CSP stricte (`connect-src 'none'` côté Renderer), TLS/HTTPS strict vérifié par l’OS et liste blanche de domaines externes.
-- **Validation Runtime `zod`** sur toutes les réponses d’APIs tierces, les fichiers JSON et les canaux IPC.
-- **Pipeline GitHub Actions automatisée** : vérification TypeScript stricte à chaque commit, compilation de l’installateur NSIS + `latest.yml` SHA-512 sur tag `v*.*.*`, et publication automatique des patch notes sur GitHub Releases et Discord.
-- **Conformité CGU Digital Extremes** : uniquement des APIs publiques et la copie presse-papiers initiée par le joueur (aucune lecture mémoire ni macro clavier/souris).
+1. **Navigateur de Trading Warframe Market Multi-Onglets**
+   - Recherche instantanée dans les **15 langues officielles de Warframe**, filtres croisés à pastilles, comparateur *Set vs Pièces*, **Panier & Trade Bundler**, **Ducanator**, **Scanner de Profits**, **Comptabilité Platines**, **Riven Grader** et gestion complète de compte vendeur.
+2. **Hub Worldstate Temps Réel & Alertes Sonores**
+   - Cycles planétaires, Fissures, Sortie/Archonte, Arbitrage, Baro Ki’Teer, Circuit Duviri, Guide des Cadeaux **1999 (L’Hexagone)**, minuteurs compacts épinglés et **10 sonneries synthétisées thématiques**.
+3. **Encyclopédie Codex Hors-Ligne Complète & Overlay Farm en Jeu (`Alt+O`)**
+   - Ressources, Warframes, Armes, Mods, Arcanes, Reliques, **Bestiaire des Mobs** (avec lieux d’apparition et probabilités), **Marchands**, **Infirmerie Helminth**, **Studio de Builds** et **Planificateur de Fonderie**.
+4. **Personnalisation Visuelle & Conformité Digital Extremes**
+   - **Liquid Glass**, thèmes saisonniers désactivables, 20 thèmes chromatiques, 12 polices hors-ligne, Mode Compact `460×660` et **100 % conforme aux règles officielles de Digital Extremes** (aucune lecture mémoire, aucune injection DLL ni macro en jeu).
 
 ---
 
-## Commandes de Développement & Packaging
+## ⚖️ Mentions Légales, Marques Déposées & Crédits
 
-```powershell
-# Installer les dépendances
-npm install
-
-# Lancer TennoFrame en mode développement (Hot-Reload)
-npm.cmd run dev
-
-# Vérification TypeScript stricte + Build de production (out/)
-npm run build
-
-# Générer localement l'installateur Windows NSIS dans release/ (non suivi par Git)
-npm run dist:win
-```
-
-> **Archive historique v1** : le prototype initial `v1.6.2` de Maxime est conservé intact en lecture seule sur la branche protégée `old-main`.
+- **Digital Extremes Ltd. (Warframe)** : *Digital Extremes Ltd, Warframe and the logo Warframe are registered trademarks. All rights are reserved worldwide. TennoFrame is an unofficial fan-made companion application and has no official link with, nor is it affiliated with, endorsed, or sponsored by Digital Extremes Ltd. All game artwork, item icons, planet illustrations, and universe names are the sole intellectual property of Digital Extremes Ltd.*
+- **Warframe.Market** : Données de marché en direct fournies par l’API publique `warframe.market` (`≤ 3 req/s`). TennoFrame est un client indépendant non affilié à Warframe.Market.
+- **Crédits Open-Source & Communautaires** : Données encyclopédiques [WFCD / warframe-items](https://github.com/WFCD/warframe-items) (MIT), [Official Warframe Wiki](https://wiki.warframe.com) (CC BY-SA 3.0), [WarframeStat.us](https://docs.warframestat.us), polices locales Fontsource (SIL OFL 1.1 / Apache 2.0), Electron, React, Radix UI & Lucide (MIT / ISC).
+- **Logiciel TennoFrame** : © 2026 Maxime (`Nyxo17`) — Tous droits réservés. Ce dépôt public sert exclusivement à la distribution officielle des installateurs signés `SHA-512` et des mises à jour automatiques.
