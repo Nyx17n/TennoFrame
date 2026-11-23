@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAtIso": "2026-11-23T19:07:26.185Z",
+  "updatedAtIso": "2026-11-23T19:16:02.179Z",
   "entries": [
     {
       "id": "CQ2T-6CZ6",
@@ -9,7 +9,15 @@
       "userHash": "aa4bc28a7c87255aa007fd36373a1f53190579e057548d7c94bbfed123ff883e",
       "createdAt": 1795454617,
       "expiresAt": null
+    },
+    {
+      "id": "YPWL-8XED",
+      "codeHash": "f848d0bf2e1d6ec4994344a8f5fdf88d3f333a3b80b35d21abbdc48f18518cd8",
+      "role": "tester",
+      "userHash": null,
+      "createdAt": 1795461362,
+      "expiresAt": null
     }
   ],
-  "signatureEd25519": "5w8Eu2AWH9eBq38/uFtk3ygTdlETJqGSo/V3KRG2Dcb4xF6laYaZ/SuQ62u94ZnWwzYEOZ162wDC+6lc91TEAA=="
+  "signatureEd25519": "R9pKV4zwkFhDdNsaPXdzNhpA53wwMy4/DRmLRuVAtJ3DNAf14H0WzxWQlQtKcGXsWjdExzzfTq61/P2D54RTAw=="
 }
