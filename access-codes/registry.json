@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "updatedAtIso": "2026-11-23T16:40:02.044Z",
+  "updatedAtIso": "2026-11-23T17:23:37.554Z",
   "entries": [
     {
-      "id": "SKR5-NUZA",
-      "codeHash": "7a6323eb4c7cd8a19ce9b55e8a366857271a1137e2b01991df62ca27cb739aef",
+      "id": "CQ2T-6CZ6",
+      "codeHash": "03d11684ed4aae03c5979a901864c11d24bee2cc54521c9e9d4dc38ba91d3314",
       "role": "admin",
-      "userHash": null,
-      "createdAt": 1795452002,
+      "userHash": "aa4bc28a7c87255aa007fd36373a1f53190579e057548d7c94bbfed123ff883e",
+      "createdAt": 1795454617,
       "expiresAt": null
     }
   ],
-  "signatureEd25519": "yxGL6Kz1f4txSO51LIMhse+MMCd9eFQNQU7P/vMKjNWl16pbbvw87TqcklhK31H9xKlzEU5i7MD52sPOcK3gBg=="
+  "signatureEd25519": "5w8Eu2AWH9eBq38/uFtk3ygTdlETJqGSo/V3KRG2Dcb4xF6laYaZ/SuQ62u94ZnWwzYEOZ162wDC+6lc91TEAA=="
 }
