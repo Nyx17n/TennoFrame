@@ -97,7 +97,7 @@ jobs:
                   { name: "📥 Windows Installer (.exe)", value: "[Download TennoFrame-Setup-" + v + ".exe](" + installerUrl + ")", inline: true },
                   { name: "📋 GitHub Release", value: "[View Release v" + v + "](" + releaseUrl + ")", inline: true }
                 ],
-                footer: { text: "TennoFrame by Maxime (Nyxo17) · " + date },
+                footer: { text: "TennoFrame by Nyxo17 · " + date },
                 timestamp: new Date().toISOString()
               }]
             };
