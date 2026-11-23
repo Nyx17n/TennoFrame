@@ -72,7 +72,8 @@ const SETTINGS_CATEGORIES: readonly CategoryDef[] = [
     subTabs: [
       { id: 'themes', labelFr: 'Thèmes & Couleurs', labelEn: 'Themes & Colors', Icon: WfLotusEmblemIcon },
       { id: 'styles', labelFr: 'Styles Factions & Verre', labelEn: 'Faction Styles & Glass', Icon: WfAyaCrystalIcon },
-      { id: 'fonts', labelFr: 'Polices & Animations', labelEn: 'Fonts & Motion', Icon: WfTennobetIcon }
+      { id: 'fonts', labelFr: 'Polices & Animations', labelEn: 'Fonts & Motion', Icon: WfTennobetIcon },
+      { id: 'seasons', labelFr: 'Saisons & Fêtes', labelEn: 'Seasonal Themes', Icon: WfNavigationStarIcon }
     ]
   },
   {

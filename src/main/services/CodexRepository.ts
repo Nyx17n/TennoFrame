@@ -24,6 +24,7 @@ import type {
 } from '@shared/schemas/pro-tools.schema'
 import type { MarketApiService } from './MarketApiService'
 import { CodexAcquisitionResolver } from './CodexAcquisitionResolver'
+import { CodexMobSpawnResolver } from './CodexMobSpawnResolver'
 import {
   CodexArcanesDatabaseSchema,
   CodexCraftRecipesDatabaseSchema,
@@ -81,6 +82,7 @@ export class CodexRepository {
   private mobsVendors: CodexMobsVendorsDatabase | null = null
   private arcanesDb: CodexArcanesDatabase = { arcanes: [] }
   private resolver: CodexAcquisitionResolver | null = null
+  private mobSpawnResolver: CodexMobSpawnResolver | null = null
   private loadingPromise: Promise<CodexRawDatabase> | null = null
   private summariesByCat: Record<CodexCategory, CodexSummaryCard[]> | null = null
   private buildCatalogCache: BuildCatalogPayload | null = null
@@ -116,11 +118,13 @@ export class CodexRepository {
         arcanesDb = CodexArcanesDatabaseSchema.parse(JSON.parse(rawArc))
       }
 
-      const resolver = new CodexAcquisitionResolver(parsed, craftRecipes)
+      const mobSpawnResolver = new CodexMobSpawnResolver(mobsVendors.mobs)
+      const resolver = new CodexAcquisitionResolver(parsed, craftRecipes, mobSpawnResolver)
       this.db = parsed
       this.craftRecipes = craftRecipes
       this.mobsVendors = mobsVendors
       this.arcanesDb = arcanesDb
+      this.mobSpawnResolver = mobSpawnResolver
       this.resolver = resolver
       this.summariesByCat = this.buildSummaries(parsed, resolver, mobsVendors, arcanesDb)
       return parsed
@@ -574,6 +578,8 @@ export class CodexRepository {
         vendorInfo: null,
         arcaneInfo: null,
         drops: resolved.drops,
+        resourceMobDrops:
+          this.mobSpawnResolver?.resolveResourceMobDrops(item.id, resolved.drops) ?? [],
         acquisitionSources: resolved.acquisitionSources,
         totalBuildCredits: null,
         components: [],
@@ -626,6 +632,7 @@ export class CodexRepository {
         vendorInfo: null,
         arcaneInfo: null,
         drops: resolved.drops,
+        resourceMobDrops: [],
         acquisitionSources: resolved.acquisitionSources,
         totalBuildCredits: resolved.totalBuildCredits,
         components: resolved.components,
@@ -677,6 +684,7 @@ export class CodexRepository {
         vendorInfo: null,
         arcaneInfo: null,
         drops: resolved.drops,
+        resourceMobDrops: [],
         acquisitionSources: resolved.acquisitionSources,
         totalBuildCredits: resolved.totalBuildCredits,
         components: resolved.components,
@@ -720,6 +728,7 @@ export class CodexRepository {
         vendorInfo: null,
         arcaneInfo: null,
         drops: resolved.drops,
+        resourceMobDrops: [],
         acquisitionSources: resolved.acquisitionSources,
         totalBuildCredits: null,
         components: [],
@@ -797,8 +806,13 @@ export class CodexRepository {
           part: d.typeLabelFr,
           location: d.nameFr,
           chance: d.chancePct,
-          rarity: d.rarity
+          rarity: d.rarity,
+          mobId: null,
+          mobNameFr: null,
+          mobImageUrl: null,
+          mobSpawnLocationsFr: []
         })),
+        resourceMobDrops: [],
         acquisitionSources: mob.spawns.slice(0, 4).map((s, idx) => ({
           type: 'drop' as const,
           labelFr: s.locationFr,
@@ -871,6 +885,7 @@ export class CodexRepository {
         },
         arcaneInfo: null,
         drops: [],
+        resourceMobDrops: [],
         acquisitionSources: [
           {
             type: 'syndicate',
@@ -966,12 +981,20 @@ export class CodexRepository {
           levelStatsFr: arc.levelStatsFr,
           levelStatsEn: arc.levelStatsEn
         },
-        drops: arc.drops.map((d) => ({
-          part: null,
-          location: d.location,
-          chance: d.chancePct,
-          rarity: d.rarity
-        })),
+        drops: arc.drops.map((d) => {
+          const baseDrop = {
+            part: null,
+            location: d.location,
+            chance: d.chancePct,
+            rarity: d.rarity,
+            mobId: null,
+            mobNameFr: null,
+            mobImageUrl: null,
+            mobSpawnLocationsFr: []
+          }
+          return this.mobSpawnResolver ? this.mobSpawnResolver.enrichDropEntry(baseDrop) : baseDrop
+        }),
+        resourceMobDrops: [],
         acquisitionSources: sources,
         totalBuildCredits: null,
         components: [],
@@ -1016,6 +1039,7 @@ export class CodexRepository {
       vendorInfo: null,
       arcaneInfo: null,
       drops: resolved.drops,
+      resourceMobDrops: [],
       acquisitionSources: resolved.acquisitionSources,
       totalBuildCredits: null,
       components: [],

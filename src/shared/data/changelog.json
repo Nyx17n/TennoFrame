@@ -1,5 +1,15 @@
 [
   {
+    "version": "2.20.0",
+    "date": "November 2026",
+    "title": "Festive Seasonal Overlays (Christmas, Halloween & Easter) & Mob Spawn Locations for Resources",
+    "badge": "New in v2.20.0",
+    "highlights": [
+      "New **Independent Seasonal Themes & Click Particles** (`Settings → Appearance → Seasonal Themes`): dress up TennoFrame with **Christmas (Tennobaum)** (glowing pine garlands around all 4 window edges + wrapped gift & confetti bursts on click), **Halloween (Naberus)** (translucent corner cobwebs with hanging spiders + glowing violet particles on click), or **Easter (Lepus Spring)** (two decorated pastel & gold eggs in the corners + blossoms, mini-eggs & golden sparkles on click) — **100% compatible with Liquid Glass transparency and custom colors**, with a dedicated **ON / OFF** toggle to disable click particles anytime (`0%` idle CPU).",
+      "Cross-Linked **Mob Spawn Locations for Mob-Dropped Resources** (`wf://codex/resources/...`, `wf://foundry`, and `Alt+O` Farm Overlay): resources dropped by enemies (*Hexenon, Oxium, Orokin Cell, Steel Essence, Intact Sentient Core, Toroids, Somatic Fibers, Lamentus, Ticor Plate, Tellurium…*) now feature a dedicated **Enemies & Mobs Dropping This Resource** card with mob portraits, one-click **`↗ Mob Sheet`** links, drop rates, and exact **Planet Cutout + Color-Coded Mission** spawn locations — plus inline *Where to find this mob* rows across all drop tables."
+    ]
+  },
+  {
     "version": "2.19.0",
     "date": "November 2026",
     "title": "Star Chart Planet Cutouts & Color-Coded Mission Nodes Across Codex, Foundry & Farm Overlay",
