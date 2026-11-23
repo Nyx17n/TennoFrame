@@ -11,12 +11,12 @@ on:
         description: 'Release headline'
         required: true
         type: string
+      badge:
+        description: 'Release badge label'
+        required: false
+        type: string
       date:
         description: 'Formatted release date'
-        required: true
-        type: string
-      description:
-        description: 'Markdown bullet summary'
         required: true
         type: string
 
@@ -24,58 +24,84 @@ jobs:
   announce:
     runs-on: ubuntu-latest
     steps:
-      - name: Post Release Embed to Official Discord
+      - name: Fetch Public Release Body & Post Embed to Official Discord
         env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           DISCORD_PING_ROLE_ID: ${{ secrets.DISCORD_PING_ROLE_ID || vars.DISCORD_PING_ROLE_ID }}
           INPUT_VERSION: ${{ inputs.version }}
           INPUT_TITLE: ${{ inputs.title }}
+          INPUT_BADGE: ${{ inputs.badge }}
           INPUT_DATE: ${{ inputs.date }}
-          INPUT_DESC: ${{ inputs.description }}
         run: |
           node -e '
-          const rawUrl = (process.env.DISCORD_WEBHOOK_URL || "").trim();
-          if (!rawUrl) { console.log("No DISCORD_WEBHOOK_URL configured."); process.exit(0); }
-          const u = new URL(rawUrl);
-          u.searchParams.set("wait", "true");
-          const v = process.env.INPUT_VERSION;
-          const title = process.env.INPUT_TITLE;
-          const date = process.env.INPUT_DATE;
-          const desc = process.env.INPUT_DESC;
-          const rawRole = (process.env.DISCORD_PING_ROLE_ID || "").trim();
-          let content;
-          let allowed = { parse: [] };
-          if (rawRole === "@everyone" || rawRole === "@here") {
-            content = rawRole + " New **TennoFrame** update is now live!";
-            allowed = { parse: ["everyone"] };
-          } else {
-            const m = /^(?:<@&)?(\d{15,24})>?$/.exec(rawRole);
-            if (m) {
-              content = "<@&" + m[1] + "> New **TennoFrame** update is now live!";
-              allowed = { parse: [], roles: [m[1]] };
-            }
-          }
-          const releaseUrl = "https://github.com/Nyx17n/TennoFrame/releases/tag/v" + v;
-          const installerUrl = "https://github.com/Nyx17n/TennoFrame/releases/download/v" + v + "/TennoFrame-Setup-" + v + ".exe";
-          const payload = {
-            username: "TennoFrame — Patch Notes",
-            avatar_url: "https://raw.githubusercontent.com/Nyx17n/TennoFrame/main/src/renderer/public/images/logo.png",
-            ...(content ? { content } : {}),
-            allowed_mentions: allowed,
-            embeds: [{
-              title: "🚀 TennoFrame v" + v + " — " + title,
-              url: releaseUrl,
-              color: 0x26b9d1,
-              description: desc,
-              fields: [
-                { name: "📥 Windows Installer (.exe)", value: "[Download TennoFrame-Setup-" + v + ".exe](" + installerUrl + ")", inline: true },
-                { name: "📋 GitHub Release", value: "[View Release v" + v + "](" + releaseUrl + ")", inline: true }
-              ],
-              footer: { text: "TennoFrame by Maxime (Nyxo17) · " + date },
-              timestamp: new Date().toISOString()
-            }]
-          };
           (async () => {
+            const rawUrl = (process.env.DISCORD_WEBHOOK_URL || "").trim();
+            if (!rawUrl) { console.log("No DISCORD_WEBHOOK_URL configured."); process.exit(0); }
+            const u = new URL(rawUrl);
+            u.searchParams.set("wait", "true");
+            const v = process.env.INPUT_VERSION;
+            const title = process.env.INPUT_TITLE;
+            const badge = process.env.INPUT_BADGE || ("Official Release v" + v);
+            const date = process.env.INPUT_DATE;
+
+            const relRes = await fetch("https://api.github.com/repos/Nyx17n/TennoFrame/releases/tags/v" + v, {
+              headers: { Authorization: "Bearer " + process.env.GH_TOKEN, Accept: "application/vnd.github+json", "User-Agent": "TennoFrame-Announcer" }
+            });
+            let bullets = "• Version v" + v + " is now available via the Windows installer and built-in auto-updater.";
+            if (relRes.ok) {
+              const relJson = await relRes.json();
+              const rawBody = String(relJson.body || "");
+              const extracted = rawBody
+                .split(/\r?\n/)
+                .filter((line) => line.startsWith("- ") && !line.includes("Windows Installer (x64)") && !line.includes("Official Discord Server"))
+                .map((line) => "• " + line.slice(2))
+                .join("\n");
+              if (extracted) bullets = extracted;
+            }
+
+            const desc = [
+              "**" + badge + "**",
+              "",
+              bullets,
+              "",
+              "> *If TennoFrame is already installed on your PC, this update will be downloaded automatically on launch.*"
+            ].join("\n").slice(0, 3950);
+
+            const rawRole = (process.env.DISCORD_PING_ROLE_ID || "").trim();
+            let content;
+            let allowed = { parse: [] };
+            if (rawRole === "@everyone" || rawRole === "@here") {
+              content = rawRole + " New **TennoFrame** update is now live!";
+              allowed = { parse: ["everyone"] };
+            } else {
+              const m = /^(?:<@&)?(\d{15,24})>?$/.exec(rawRole);
+              if (m) {
+                content = "<@&" + m[1] + "> New **TennoFrame** update is now live!";
+                allowed = { parse: [], roles: [m[1]] };
+              }
+            }
+            const releaseUrl = "https://github.com/Nyx17n/TennoFrame/releases/tag/v" + v;
+            const installerUrl = "https://github.com/Nyx17n/TennoFrame/releases/download/v" + v + "/TennoFrame-Setup-" + v + ".exe";
+            const payload = {
+              username: "TennoFrame — Patch Notes",
+              avatar_url: "https://raw.githubusercontent.com/Nyx17n/TennoFrame/main/src/renderer/public/images/logo.png",
+              ...(content ? { content } : {}),
+              allowed_mentions: allowed,
+              embeds: [{
+                title: "🚀 TennoFrame v" + v + " — " + title,
+                url: releaseUrl,
+                color: 0x26b9d1,
+                description: desc,
+                fields: [
+                  { name: "📥 Windows Installer (.exe)", value: "[Download TennoFrame-Setup-" + v + ".exe](" + installerUrl + ")", inline: true },
+                  { name: "📋 GitHub Release", value: "[View Release v" + v + "](" + releaseUrl + ")", inline: true }
+                ],
+                footer: { text: "TennoFrame by Maxime (Nyxo17) · " + date },
+                timestamp: new Date().toISOString()
+              }]
+            };
+
             let res = await fetch(u.toString(), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
             if (!res.ok) {
               const txt = await res.text();
@@ -83,6 +109,7 @@ jobs:
                 res = await fetch(u.toString(), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...payload, thread_name: ("TennoFrame v" + v + " — " + title).slice(0, 100) }) });
               }
             }
-            if (!res.ok) { process.exit(1); }
+            if (!res.ok) { console.error("Discord HTTP", res.status); process.exit(1); }
+            console.log("Discord announcement posted successfully!");
           })();
           '
