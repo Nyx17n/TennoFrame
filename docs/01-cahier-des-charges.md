@@ -1225,10 +1225,10 @@ Pour épurer l'interface tout en accélérant les actions fréquentes à la sour
 1. **Objectif Métier & Indépendance Totale vis-à-vis de la Transparence et des Couleurs** :
    - Offrir dans **`Paramètres → Apparence → Saisons & Fêtes`** **3 thèmes événementiels animés et interactifs** qui s'appliquent comme une **surcouche décorative pure (`pointer-events: none`)** totalement découplée de `appearance.preset`, `primaryColor`, `secondaryColor`, `glassEnabled`, `glassStyle` et `showDesktopBehind` :
      - Le joueur peut ainsi combiner **n'importe quelle palette de couleurs (prédéfinie ou sur mesure)** + **le mode Transparent / Liquid Glass / Styles Factions** + **un décor saisonnier Noël, Halloween ou Pâques** sans aucun blocage ni écrasement.
-2. **Contrat de Configuration (`settings.schema.ts`)** :
+2. **Contrat de Configuration (`settings.schema.ts`) & Désactivation Indépendante des Particules** :
    - Ajout dans `appearance` de :
      - `seasonalTheme: z.enum(['none', 'christmas', 'halloween', 'easter']).default('none')`,
-     - `seasonalParticlesEnabled: z.boolean().default(true)` *(permet d'activer/désactiver à volonté les particules déclenchées lors des interactions)*.
+     - `seasonalParticlesEnabled: z.boolean().default(true)` — **interrupteur dédié ON / OFF** exposé directement dans **`Paramètres → Apparence → Saisons & Fêtes`** **ET** rappelé dans **`Polices & Animations` (`MotionSettingsSection`)** : lorsqu'il est sur **OFF**, le décor de fenêtre (guirlandes de Noël, toiles & araignées d'Halloween ou œufs de Pâques) reste affiché, mais **aucune particule n'apparaît lors des clics** (et le `<canvas>` d'interaction est intégralement démonté pour `0` écouteur actif).
 3. **Anatomie Visuelle & Particules d'Interaction des 3 Saisons (100 % Vectoriel SVG + Canvas 2D GPU, Zéro Binaire Git, Zéro Emoji OS)** :
    - **1) Noël — *Tennobaum* (`christmas`)** :
      - *Contour de fenêtre* : **Guirlandes de sapin illuminées faisant tout le tour des 4 bords de la fenêtre** (haut, droite, bas, gauche — feuillage vectoriel fin `10–12 px` qui ne masque ni les boutons système `— ▢ ✕` ni les onglets, ponctué d'ampoules Rouge, Or Orokin, Vert Émeraude et Bleu Glace au scintillement doux).
