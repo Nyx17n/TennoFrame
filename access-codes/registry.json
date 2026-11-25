@@ -1,15 +1,7 @@
 {
   "schemaVersion": 1,
-  "updatedAtIso": "2026-11-25T16:21:11.797Z",
+  "updatedAtIso": "2026-11-25T21:59:48.326Z",
   "entries": [
-    {
-      "id": "5JFC-3V4Y",
-      "codeHash": "95a3fa3c127a8a2a00c5dc9c2e978d50831a050921f3060f44ca2a17470714f9",
-      "role": "dev",
-      "userHash": null,
-      "createdAt": 1795623671,
-      "expiresAt": null
-    },
     {
       "id": "CQ2T-6CZ6",
       "codeHash": "03d11684ed4aae03c5979a901864c11d24bee2cc54521c9e9d4dc38ba91d3314",
@@ -35,5 +27,5 @@
       "expiresAt": null
     }
   ],
-  "signatureEd25519": "v9Zmpn2izAwKIEXiBLeh53pN4uw2zFPbq+fH+8tyJ9uB19p34AM+PbowViln1TUqwupfvBBhjmB1vzzqxpvZCg=="
+  "signatureEd25519": "nsbSI4KtXVoNICPZjm3QGY5u9J1OdjlFEafeliOmIxDrRo7EEVIW513EZjvTG43lEq7ik3FmcM+c9PlVUDLFCw=="
 }
